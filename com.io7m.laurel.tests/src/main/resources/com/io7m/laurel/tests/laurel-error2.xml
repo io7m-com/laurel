@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<i:ImageSet xmlns:i="urn:com.io7m.laurel:image-set:1">
+  <i:Captions/>
+  <i:Images>
+    <i:Image ID="4ae1aee8-a187-4426-806d-570d59bc311e"
+             FileName="x.png">
+      <i:CaptionReference Caption="132582a4-a33a-4a78-9f80-e9e963291ff4"/>
+    </i:Image>
+  </i:Images>
+</i:ImageSet>
