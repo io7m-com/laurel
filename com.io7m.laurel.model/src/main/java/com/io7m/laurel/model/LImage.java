@@ -17,6 +17,7 @@
 
 package com.io7m.laurel.model;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,6 +33,7 @@ public record LImage(
   LImageID imageID,
   String fileName,
   List<LImageCaptionID> captions)
+  implements Comparable<LImage>
 {
   /**
    * An image.
@@ -46,5 +48,14 @@ public record LImage(
     Objects.requireNonNull(imageID, "imageID");
     Objects.requireNonNull(fileName, "fileName");
     captions = List.copyOf(captions);
+  }
+
+  @Override
+  public int compareTo(
+    final LImage other)
+  {
+    return Comparator.comparing(LImage::fileName)
+      .thenComparing(LImage::imageID)
+      .compare(this, other);
   }
 }

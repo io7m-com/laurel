@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ImageSet xmlns="urn:com.io7m.laurel:image-set:1">
+  <Captions>
+    <Caption ID="bee6e222-15fe-482f-b292-1467388ef54f" Text="red"/>
+    <Caption ID="0d941a07-fd2f-49c4-843e-d21a0bdb40e2" Text="blue"/>
+    <Caption ID="49cd092e-fdc2-4f72-915e-19b8827bb705" Text="green"/>
+  </Captions>
+  <Images>
+    <Image ID="9c7a39f4-5075-4c19-b009-0bbfe521ccfb" FileName="001.png">
+      <CaptionReference Caption="bee6e222-15fe-482f-b292-1467388ef54f"/>
+    </Image>
+    <Image ID="5e7f42ca-b183-4a82-a464-44cadff32fd6" FileName="000.png">
+      <CaptionReference Caption="bee6e222-15fe-482f-b292-1467388ef54f"/>
+      <CaptionReference Caption="49cd092e-fdc2-4f72-915e-19b8827bb705"/>
+      <CaptionReference Caption="0d941a07-fd2f-49c4-843e-d21a0bdb40e2"/>
+    </Image>
+  </Images>
+</ImageSet>

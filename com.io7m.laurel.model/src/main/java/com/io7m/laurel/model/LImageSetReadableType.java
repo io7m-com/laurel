@@ -17,7 +17,11 @@
 
 package com.io7m.laurel.model;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.SortedMap;
+import java.util.concurrent.Flow;
+import java.util.stream.Collectors;
 
 /**
  * The image set.
@@ -36,4 +40,45 @@ public interface LImageSetReadableType
    */
 
   SortedMap<LImageID, LImage> images();
+
+  /**
+   * @param imageId The image
+   *
+   * @return The captions for the given image
+   */
+
+  default List<LImageCaption> captionsForImage(
+    final LImageID imageId)
+  {
+    final var image = this.images().get(imageId);
+    if (image != null) {
+      return image.captions()
+        .stream()
+        .map(x -> this.captions().get(x))
+        .collect(Collectors.toList());
+    }
+    return List.of();
+  }
+
+  /**
+   * @param caption The caption ID
+   *
+   * @return The number of images to which the caption is assigned
+   */
+
+  long captionAssignmentCount(LImageCaptionID caption);
+
+  /**
+   * @param text The text
+   *
+   * @return The ID of the caption with the given text
+   */
+
+  Optional<LImageCaptionID> captionForText(String text);
+
+  /**
+   * @return A readable stream of events
+   */
+
+  Flow.Publisher<LEventType> events();
 }

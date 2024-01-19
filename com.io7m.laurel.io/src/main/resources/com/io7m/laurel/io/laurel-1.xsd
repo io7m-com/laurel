@@ -4,6 +4,12 @@
             targetNamespace="urn:com.io7m.laurel:image-set:1"
             xmlns:i="urn:com.io7m.laurel:image-set:1">
 
+  <xsd:simpleType name="CaptionTextType">
+    <xsd:restriction base="xsd:string">
+      <xsd:pattern value="[a-z0-9A-Z_-][a-z0-9A-Z_ \-']*"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+
   <xsd:simpleType name="IDType">
     <xsd:restriction base="xsd:string">
       <xsd:pattern value="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/>
@@ -17,7 +23,7 @@
                      type="i:IDType"/>
       <xsd:attribute name="Text"
                      use="required"
-                     type="xsd:string"/>
+                     type="i:CaptionTextType"/>
     </xsd:complexType>
   </xsd:element>
 

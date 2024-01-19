@@ -24,14 +24,26 @@ package com.io7m.laurel.model;
 public interface LImageSetCommandType
 {
   /**
-   * Execute (or redo) the command.
+   * @return A humanly-readable description of the command
    */
 
-  void execute();
+  String description();
+
+  /**
+   * Execute (or redo) the command.
+   *
+   * @throws LImageSetCommandException On errors
+   */
+
+  void execute()
+    throws LImageSetCommandException;
 
   /**
    * Undo the command.
+   *
+   * @throws LImageSetCommandException On errors
    */
 
-  void undo();
+  void undo()
+    throws LImageSetCommandException;
 }

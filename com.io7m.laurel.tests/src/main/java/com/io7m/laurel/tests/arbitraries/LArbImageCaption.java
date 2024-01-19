@@ -29,7 +29,9 @@ public final class LArbImageCaption extends LArbAbstract<LImageCaption>
     super(LImageCaption.class, () -> {
       return Combinators.combine(
         Arbitraries.defaultFor(LImageCaptionID.class),
-        Arbitraries.strings().alpha()
+        Arbitraries.strings()
+          .alpha()
+          .ofMinLength(1)
       ).as(LImageCaption::new);
     });
   }

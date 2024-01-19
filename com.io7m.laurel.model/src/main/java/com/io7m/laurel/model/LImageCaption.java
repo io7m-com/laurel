@@ -18,7 +18,9 @@
 package com.io7m.laurel.model;
 
 
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * A caption.
@@ -30,7 +32,15 @@ import java.util.Objects;
 public record LImageCaption(
   LImageCaptionID id,
   String text)
+  implements Comparable<LImageCaption>
 {
+  /**
+   * The pattern that defines a valid caption.
+   */
+
+  public static final Pattern VALID_CAPTION =
+    Pattern.compile("[a-z0-9A-Z_-][a-z0-9A-Z_ \\-']*");
+
   /**
    * A caption.
    *
@@ -43,5 +53,20 @@ public record LImageCaption(
     Objects.requireNonNull(id, "id");
     Objects.requireNonNull(text, "text");
     text = text.trim();
+
+    if (!VALID_CAPTION.matcher(text).matches()) {
+      throw new IllegalArgumentException(
+        "Caption must match %s".formatted(VALID_CAPTION)
+      );
+    }
+  }
+
+  @Override
+  public int compareTo(
+    final LImageCaption other)
+  {
+    return Comparator.comparing(LImageCaption::text)
+      .thenComparing(LImageCaption::id)
+      .compare(this, other);
   }
 }

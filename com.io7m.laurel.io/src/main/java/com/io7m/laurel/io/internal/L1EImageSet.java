@@ -23,6 +23,7 @@ import com.io7m.blackthorne.core.BTElementParsingContextType;
 import com.io7m.blackthorne.core.BTQualifiedName;
 import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LImageCaption;
+import com.io7m.laurel.model.LImageSetCommandException;
 import com.io7m.laurel.model.LImageSetType;
 import com.io7m.laurel.model.LImageSets;
 
@@ -67,18 +68,21 @@ public final class L1EImageSet
   public void onChildValueProduced(
     final BTElementParsingContextType context,
     final Object result)
+    throws LImageSetCommandException
   {
     switch (result) {
       case final List xs when !xs.isEmpty() -> {
         switch (xs.get(0)) {
           case final LImage ignored0 -> {
             for (final var x : xs) {
-              this.imageSet.putImage((LImage) x);
+              this.imageSet.imageUpdate((LImage) x)
+                .execute();
             }
           }
           case final LImageCaption ignored1 -> {
             for (final var x : xs) {
-              this.imageSet.putCaption((LImageCaption) x);
+              this.imageSet.captionUpdate((LImageCaption) x)
+                .execute();
             }
           }
           default -> {

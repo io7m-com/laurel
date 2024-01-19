@@ -47,7 +47,7 @@ public final class LArbImageSet extends LArbAbstract<LImageSetType>
         final var imageSet = LImageSets.empty();
 
         for (final var caption : captions) {
-          imageSet.putCaption(caption);
+          imageSet.captionUpdate(caption);
         }
 
         for (final var imageId : images) {
@@ -57,7 +57,7 @@ public final class LArbImageSet extends LArbAbstract<LImageSetType>
               imageCaps.add(caption.id());
             }
           }
-          imageSet.putImage(
+          imageSet.imageUpdate(
             new LImage(imageId, imageId + ".png", imageCaps)
           );
         }

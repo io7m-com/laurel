@@ -34,7 +34,9 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -90,13 +92,20 @@ public final class LSerializer implements LSerializerType
 
       final var transformer = TransformerFactory.newInstance().newTransformer();
       transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
       final var result =
         new StreamResult(this.stream);
       final var source =
         new StreamSource(new ByteArrayInputStream(outputBuffer.toByteArray()));
+
+      this.stream.write("""
+<?xml version="1.0" encoding="UTF-8"?>
+
+      """.getBytes(StandardCharsets.UTF_8));
+
       transformer.transform(source, result);
-    } catch (final XMLStreamException | TransformerException e) {
+    } catch (final XMLStreamException | TransformerException | IOException e) {
       throw new SerializationException(e.getMessage(), e);
     }
   }

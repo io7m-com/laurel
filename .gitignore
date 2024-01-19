@@ -1,4 +1,5 @@
 *.iml
 .idea
+.run
 pom.xml.versionsBackup
 target
