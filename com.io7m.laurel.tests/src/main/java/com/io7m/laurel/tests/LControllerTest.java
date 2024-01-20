@@ -17,12 +17,9 @@
 
 package com.io7m.laurel.tests;
 
-import com.io7m.jattribute.core.Attributes;
 import com.io7m.laurel.gui.internal.LController;
-import com.io7m.laurel.gui.internal.LImageSetSaved;
-import com.io7m.laurel.gui.internal.LImageSetStateNone;
-import com.io7m.laurel.gui.internal.LImageSetUnsaved;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
+import com.io7m.laurel.gui.internal.model.LModelFileStatusType;
 import com.io7m.seltzer.api.SStructuredErrorType;
 import javafx.application.Platform;
 import org.junit.jupiter.api.AfterEach;
@@ -56,7 +53,7 @@ public final class LControllerTest
   public void setup()
   {
     this.controller =
-      new LController(Attributes.create(ex -> {}));
+      new LController();
     this.errors =
       new ArrayList<>();
     this.controller.errors()
@@ -96,15 +93,15 @@ public final class LControllerTest
       copyTo(directory, "laurel-example-0.xml");
 
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.open(file).get(5L, TimeUnit.SECONDS);
 
     assertInstanceOf(
-      LImageSetSaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Saved.class,
+      this.controller.fileStatus().getValue()
     );
   }
 
@@ -117,8 +114,8 @@ public final class LControllerTest
       copyTo(directory, "laurel-error1.xml");
 
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
 
     assertThrows(Exception.class, () -> {
@@ -126,8 +123,8 @@ public final class LControllerTest
     });
 
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
   }
 
@@ -137,8 +134,8 @@ public final class LControllerTest
     throws Exception
   {
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
 
     assertThrows(Exception.class, () -> {
@@ -147,8 +144,8 @@ public final class LControllerTest
     });
 
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
   }
 
@@ -161,29 +158,29 @@ public final class LControllerTest
       copyTo(directory, "laurel-example-0.xml");
 
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.open(file).get(5L, TimeUnit.SECONDS);
 
     assertInstanceOf(
-      LImageSetSaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Saved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.captionNew("hello");
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.save().get(5L, TimeUnit.SECONDS);
 
     assertInstanceOf(
-      LImageSetSaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Saved.class,
+      this.controller.fileStatus().getValue()
     );
   }
 
@@ -196,29 +193,29 @@ public final class LControllerTest
       copyTo(directory, "laurel-example-0.xml");
 
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
 
-    this.controller.newSet(file).get(5L, TimeUnit.SECONDS);
+    this.controller.newSet(file);
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.captionNew("hello");
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.save().get(5L, TimeUnit.SECONDS);
 
     assertInstanceOf(
-      LImageSetSaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Saved.class,
+      this.controller.fileStatus().getValue()
     );
   }
 
@@ -231,43 +228,43 @@ public final class LControllerTest
       copyTo(directory, "laurel-example-0.xml");
 
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
 
-    this.controller.newSet(file).get(5L, TimeUnit.SECONDS);
+    this.controller.newSet(file);
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.captionNew("hello");
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.undo();
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.redo();
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.save().get(5L, TimeUnit.SECONDS);
 
     assertInstanceOf(
-      LImageSetSaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Saved.class,
+      this.controller.fileStatus().getValue()
     );
   }
 
@@ -282,43 +279,43 @@ public final class LControllerTest
       copyTo(directory, "001.png");
 
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
 
-    this.controller.newSet(file).get(5L, TimeUnit.SECONDS);
+    this.controller.newSet(file);
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.imagesAdd(List.of(imageFile)).get(5L, TimeUnit.SECONDS);
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.undo();
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.redo();
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.save().get(5L, TimeUnit.SECONDS);
 
     assertInstanceOf(
-      LImageSetSaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Saved.class,
+      this.controller.fileStatus().getValue()
     );
   }
 
@@ -328,22 +325,22 @@ public final class LControllerTest
     throws Exception
   {
     assertInstanceOf(
-      LImageSetStateNone.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.None.class,
+      this.controller.fileStatus().getValue()
     );
 
-    this.controller.newSet(directory).get(5L, TimeUnit.SECONDS);
+    this.controller.newSet(directory);
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     this.controller.captionNew("hello");
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
 
     assertThrows(Exception.class, () -> {
@@ -351,8 +348,8 @@ public final class LControllerTest
     });
 
     assertInstanceOf(
-      LImageSetUnsaved.class,
-      this.controller.imageSetState().get()
+      LModelFileStatusType.Unsaved.class,
+      this.controller.fileStatus().getValue()
     );
   }
 

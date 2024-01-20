@@ -21,22 +21,27 @@ import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
-import com.io7m.laurel.model.LImageSetType;
-import com.io7m.laurel.model.LImageSets;
+import com.io7m.laurel.model.LImageSet;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Combinators;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
-public final class LArbImageSet extends LArbAbstract<LImageSetType>
+public final class LArbImageSet extends LArbAbstract<LImageSet>
 {
   public LArbImageSet()
   {
-    super(LImageSetType.class, () -> {
+    super(LImageSet.class, () -> {
       return Combinators.combine(
         Arbitraries.defaultFor(LImageID.class),
         Arbitraries.defaultFor(LImageCaption.class)
-          .list()
+          .set()
           .ofMinSize(1)
           .ofMaxSize(100),
         Arbitraries.defaultFor(LImageID.class)
@@ -44,25 +49,39 @@ public final class LArbImageSet extends LArbAbstract<LImageSetType>
           .ofMinSize(1)
           .ofMaxSize(10)
       ).as((id, captions, images) -> {
-        final var imageSet = LImageSets.empty();
 
-        for (final var caption : captions) {
-          imageSet.captionUpdate(caption);
-        }
-
+        final var imagesConstructed = new ArrayList<LImage>();
         for (final var imageId : images) {
-          final var imageCaps = new ArrayList<LImageCaptionID>();
+          final var imageCaps = new TreeSet<LImageCaptionID>();
           for (final var caption : captions) {
             if (Math.random() < 0.125) {
               imageCaps.add(caption.id());
             }
           }
-          imageSet.imageUpdate(
-            new LImage(imageId, imageId + ".png", imageCaps)
-          );
+          imagesConstructed.add(new LImage(imageId, imageId + ".png", imageCaps));
         }
-        return imageSet;
+
+        return new LImageSet(
+          new TreeMap<>(captionMap(captions)),
+          new TreeMap<>(imageMap(imagesConstructed))
+        );
       });
     });
+  }
+
+  private static Map<LImageCaptionID, LImageCaption> captionMap(
+    final Collection<LImageCaption> captions)
+  {
+    return captions.stream()
+      .map(x -> Map.entry(x.id(), x))
+      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+  }
+
+  private static Map<LImageID, LImage> imageMap(
+    final Collection<LImage> images)
+  {
+    return images.stream()
+      .map(x -> Map.entry(x.imageID(), x))
+      .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 }

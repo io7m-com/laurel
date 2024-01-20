@@ -15,35 +15,34 @@
  */
 
 
-package com.io7m.laurel.gui.internal;
+package com.io7m.laurel.gui.internal.model;
 
-import com.io7m.laurel.model.LImageSetType;
+import com.io7m.laurel.model.LImageID;
 
 import java.nio.file.Path;
 import java.util.Objects;
 
 /**
- * An image set is open and is up-to-date with the saved contents.
+ * A request to create an image.
  *
- * @param file     The file
- * @param imageSet The image set
+ * @param imageID The image ID
+ * @param file    The image file
  */
 
-public record LImageSetSaved(
-  Path file,
-  LImageSetType imageSet)
-  implements LImageSetStateWithFileType
+public record LMImageCreate(
+  LImageID imageID,
+  Path file)
 {
   /**
-   * An image set is open and is up-to-date with the saved contents.
+   * A request to create an image.
    *
-   * @param file     The file
-   * @param imageSet The image set
+   * @param imageID The image ID
+   * @param file    The image file
    */
 
-  public LImageSetSaved
+  public LMImageCreate
   {
+    Objects.requireNonNull(imageID, "imageID");
     Objects.requireNonNull(file, "file");
-    Objects.requireNonNull(imageSet, "imageSet");
   }
 }

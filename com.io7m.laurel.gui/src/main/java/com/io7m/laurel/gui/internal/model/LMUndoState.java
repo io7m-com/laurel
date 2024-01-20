@@ -15,9 +15,7 @@
  */
 
 
-package com.io7m.laurel.gui.internal;
-
-import com.io7m.laurel.model.LImageSetCommandType;
+package com.io7m.laurel.gui.internal.model;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -29,9 +27,9 @@ import java.util.List;
  * @param redoStack The redo stack
  */
 
-public record LUndoState(
-  List<LImageSetCommandType> undoStack,
-  List<LImageSetCommandType> redoStack)
+public record LMUndoState(
+  List<LModelOpType> undoStack,
+  List<LModelOpType> redoStack)
 {
   /**
    * The undo state.
@@ -40,7 +38,7 @@ public record LUndoState(
    * @param redoStack The redo stack
    */
 
-  public LUndoState
+  public LMUndoState
   {
     undoStack = List.copyOf(undoStack);
     redoStack = List.copyOf(redoStack);
@@ -50,9 +48,9 @@ public record LUndoState(
    * @return An empty undo state
    */
 
-  public static LUndoState empty()
+  public static LMUndoState empty()
   {
-    return new LUndoState(List.of(), List.of());
+    return new LMUndoState(List.of(), List.of());
   }
 
   /**
@@ -63,14 +61,18 @@ public record LUndoState(
    * @return The new state
    */
 
-  public LUndoState add(
-    final LImageSetCommandType command)
+  public LMUndoState add(
+    final LModelOpType command)
   {
     final var undoStackNew =
       new LinkedList<>(this.undoStack);
 
     undoStackNew.addFirst(command);
-    return new LUndoState(
+    if (undoStackNew.size() >= 10) {
+      undoStackNew.removeLast();
+    }
+
+    return new LMUndoState(
       undoStackNew,
       this.redoStack
     );

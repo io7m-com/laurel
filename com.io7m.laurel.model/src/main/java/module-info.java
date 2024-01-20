@@ -23,7 +23,7 @@ module com.io7m.laurel.model
   requires static org.osgi.annotation.bundle;
   requires static org.osgi.annotation.versioning;
 
-  requires org.apache.commons.collections4;
+  requires com.io7m.jaffirm.core;
 
   exports com.io7m.laurel.model;
 }

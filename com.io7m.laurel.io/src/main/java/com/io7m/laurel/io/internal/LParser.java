@@ -25,7 +25,7 @@ import com.io7m.blackthorne.core.BTParseError;
 import com.io7m.blackthorne.core.BTPreserveLexical;
 import com.io7m.blackthorne.jxe.BlackthorneJXE;
 import com.io7m.laurel.io.LSchemas;
-import com.io7m.laurel.model.LImageSetType;
+import com.io7m.laurel.model.LImageSet;
 import com.io7m.laurel.reader.api.LParserType;
 
 import java.io.IOException;
@@ -77,7 +77,7 @@ public final class LParser
   }
 
   @Override
-  public LImageSetType execute()
+  public LImageSet execute()
     throws ParsingException
   {
     try {

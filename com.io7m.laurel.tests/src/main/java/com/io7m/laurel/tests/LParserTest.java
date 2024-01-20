@@ -21,7 +21,7 @@ import com.io7m.anethum.api.ParsingException;
 
 import com.io7m.laurel.io.LParsers;
 import com.io7m.laurel.io.LSerializers;
-import com.io7m.laurel.model.LImageSetType;
+import com.io7m.laurel.model.LImageSet;
 import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import org.junit.jupiter.api.Test;
@@ -51,10 +51,10 @@ public final class LParserTest
 
   @Property
   public void testIdentity(
-    final @ForAll LImageSetType m0)
+    final @ForAll LImageSet m0)
     throws Exception
   {
-    final LImageSetType m1;
+    final LImageSet m1;
     try (var s0 = new ByteArrayOutputStream()) {
       SERIALIZERS.serialize(URI.create("urn:0"), s0, m0);
       m1 = PARSERS.parse(

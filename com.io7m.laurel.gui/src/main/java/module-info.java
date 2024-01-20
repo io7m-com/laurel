@@ -30,6 +30,7 @@ open module com.io7m.laurel.gui
 
   requires com.io7m.anethum.api;
   requires com.io7m.jade.api;
+  requires com.io7m.jaffirm.core;
   requires com.io7m.jattribute.core;
   requires com.io7m.junreachable.core;
   requires com.io7m.jwheatsheaf.api;
@@ -42,6 +43,7 @@ open module com.io7m.laurel.gui
   requires javafx.base;
   requires javafx.controls;
   requires javafx.fxml;
+  requires org.jgrapht.core;
   requires org.slf4j;
 
   exports com.io7m.laurel.gui;
@@ -50,4 +52,5 @@ open module com.io7m.laurel.gui
     to com.io7m.laurel.tests;
   exports com.io7m.laurel.gui.internal.errors
     to com.io7m.laurel.tests;
+  exports com.io7m.laurel.gui.internal.model to com.io7m.laurel.tests;
 }

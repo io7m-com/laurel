@@ -23,12 +23,13 @@ import com.io7m.blackthorne.core.BTElementParsingContextType;
 import com.io7m.blackthorne.core.BTQualifiedName;
 import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LImageCaption;
-import com.io7m.laurel.model.LImageSetCommandException;
-import com.io7m.laurel.model.LImageSetType;
-import com.io7m.laurel.model.LImageSets;
+import com.io7m.laurel.model.LImageCaptionID;
+import com.io7m.laurel.model.LImageID;
+import com.io7m.laurel.model.LImageSet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static com.io7m.laurel.io.internal.LNames.qName;
 
@@ -37,9 +38,10 @@ import static com.io7m.laurel.io.internal.LNames.qName;
  */
 
 public final class L1EImageSet
-  implements BTElementHandlerType<Object, LImageSetType>
+  implements BTElementHandlerType<Object, LImageSet>
 {
-  private final LImageSetType imageSet;
+  private final TreeMap<LImageID, LImage> images;
+  private final TreeMap<LImageCaptionID, LImageCaption> captions;
 
   /**
    * An element handler.
@@ -50,7 +52,8 @@ public final class L1EImageSet
   public L1EImageSet(
     final BTElementParsingContextType context)
   {
-    this.imageSet = LImageSets.empty();
+    this.images = new TreeMap<>();
+    this.captions = new TreeMap<>();
   }
 
   @Override
@@ -68,21 +71,20 @@ public final class L1EImageSet
   public void onChildValueProduced(
     final BTElementParsingContextType context,
     final Object result)
-    throws LImageSetCommandException
   {
     switch (result) {
       case final List xs when !xs.isEmpty() -> {
         switch (xs.get(0)) {
           case final LImage ignored0 -> {
             for (final var x : xs) {
-              this.imageSet.imageUpdate((LImage) x)
-                .execute();
+              final var i = (LImage) x;
+              this.images.put(i.imageID(), i);
             }
           }
           case final LImageCaption ignored1 -> {
             for (final var x : xs) {
-              this.imageSet.captionUpdate((LImageCaption) x)
-                .execute();
+              final var c = (LImageCaption) x;
+              this.captions.put(c.id(), c);
             }
           }
           default -> {
@@ -104,9 +106,12 @@ public final class L1EImageSet
   }
 
   @Override
-  public LImageSetType onElementFinished(
+  public LImageSet onElementFinished(
     final BTElementParsingContextType context)
   {
-    return this.imageSet;
+    return new LImageSet(
+      this.captions,
+      this.images
+    );
   }
 }

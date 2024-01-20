@@ -19,33 +19,34 @@ package com.io7m.laurel.gui.internal;
 
 import com.io7m.anethum.api.ParseStatusType;
 import com.io7m.anethum.api.ParsingException;
-import com.io7m.jattribute.core.AttributeReadableType;
-import com.io7m.jattribute.core.AttributeType;
-import com.io7m.jattribute.core.Attributes;
+import com.io7m.jaffirm.core.Preconditions;
+import com.io7m.laurel.gui.internal.model.LMCaption;
+import com.io7m.laurel.gui.internal.model.LMImage;
+import com.io7m.laurel.gui.internal.model.LMImageCreate;
+import com.io7m.laurel.gui.internal.model.LMUndoState;
+import com.io7m.laurel.gui.internal.model.LModel;
+import com.io7m.laurel.gui.internal.model.LModelFileStatusType;
+import com.io7m.laurel.gui.internal.model.LModelOpCaptionCreate;
+import com.io7m.laurel.gui.internal.model.LModelOpCaptionDelete;
+import com.io7m.laurel.gui.internal.model.LModelOpCaptionsAssign;
+import com.io7m.laurel.gui.internal.model.LModelOpCaptionsUnassign;
+import com.io7m.laurel.gui.internal.model.LModelOpException;
+import com.io7m.laurel.gui.internal.model.LModelOpImagesCreate;
+import com.io7m.laurel.gui.internal.model.LModelOpType;
+import com.io7m.laurel.gui.internal.model.LModelType;
 import com.io7m.laurel.io.LExportRequest;
 import com.io7m.laurel.io.LExporters;
 import com.io7m.laurel.io.LParsers;
 import com.io7m.laurel.io.LSerializers;
-import com.io7m.laurel.model.LCaptionDeleted;
-import com.io7m.laurel.model.LCaptionUpdated;
-import com.io7m.laurel.model.LEventType;
-import com.io7m.laurel.model.LImage;
-import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
-import com.io7m.laurel.model.LImageRemoved;
-import com.io7m.laurel.model.LImageSetCommandException;
-import com.io7m.laurel.model.LImageSetCommandType;
-import com.io7m.laurel.model.LImageSetType;
-import com.io7m.laurel.model.LImageSets;
-import com.io7m.laurel.model.LImageUpdated;
+import com.io7m.laurel.model.LImageSet;
 import com.io7m.seltzer.api.SStructuredError;
 import com.io7m.seltzer.api.SStructuredErrorType;
 import javafx.application.Platform;
-import javafx.beans.Observable;
+import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,199 +62,62 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
-
-import static com.io7m.laurel.gui.internal.LImageSetStateNone.NO_IMAGE_SET;
+import java.util.stream.Collectors;
 
 /**
  * The controller.
  */
 
-public final class LController
-  implements LControllerType
+public final class LController implements LControllerType
 {
   private static final Logger LOG =
     LoggerFactory.getLogger(LController.class);
+
   private static final LSerializers SERIALIZERS =
     new LSerializers();
   private static final LParsers PARSERS =
     new LParsers();
 
-  private final AttributeType<Boolean> busy;
+  private final SimpleBooleanProperty busy;
   private final SubmissionPublisher<SStructuredErrorType<String>> errors;
   private final ConcurrentHashMap<String, String> attributes;
-  private final AttributeType<LImageSetStateType> imageSetState;
-  private final ObservableList<LImage> imageList;
-  private final SortedList<LImage> imageListReadable;
-  private final ObservableList<LImageCaption> captionListAssigned;
-  private final ObservableList<LImageCaption> captionListAssignedReadable;
-  private final ObservableList<LImageCaption> captionListAvailable;
-  private final AttributeType<LUndoState> undoState;
-  private final AttributeType<Optional<LImageID>> imageSelected;
-  private final SortedList<LImageCaption> captionListAvailableSorted;
+  private final LModel model;
+  private final SimpleObjectProperty<LMUndoState> undoState;
 
   /**
    * Construct a controller.
-   *
-   * @param inAttributes The attributes
    */
 
-  public LController(
-    final Attributes inAttributes)
+  public LController()
   {
-    this.imageSetState =
-      inAttributes.create(NO_IMAGE_SET);
+    this.model =
+      new LModel();
     this.busy =
-      inAttributes.create(Boolean.FALSE);
-    this.undoState =
-      inAttributes.create(LUndoState.empty());
+      new SimpleBooleanProperty(false);
 
     this.errors =
       new SubmissionPublisher<>();
     this.attributes =
       new ConcurrentHashMap<>();
-
-    this.imageSelected =
-      inAttributes.create(Optional.empty());
-    this.imageList =
-      FXCollections.observableArrayList(param -> {
-        return new Observable[]{
-          new SimpleObjectProperty<>(param),
-        };
-      });
-    this.imageListReadable =
-      new SortedList<>(this.imageList);
-
-    this.captionListAssigned =
-      FXCollections.observableArrayList(param -> {
-        return new Observable[]{
-          new SimpleObjectProperty<>(param),
-        };
-      });
-    this.captionListAssignedReadable =
-      FXCollections.unmodifiableObservableList(this.captionListAssigned);
-
-    this.captionListAvailable =
-      FXCollections.observableArrayList();
-    this.captionListAvailableSorted =
-      new SortedList<>(this.captionListAvailable);
-
-    this.imageSelected.subscribe((oldValue, newValue) -> {
-      this.onImageSelected(newValue);
-    });
-  }
-
-  private void updateCaptions()
-  {
-    final LImageSetType imageSet;
-    try {
-      imageSet = this.fileStateOrThrow().imageSet();
-    } catch (final Exception e) {
-      return;
-    }
-
-    final var selectedOpt =
-      this.imageSelected.get();
-
-    if (selectedOpt.isPresent()) {
-      final var imageId =
-        selectedOpt.get();
-      final var captionsAll =
-        new TreeSet<>(imageSet.captions().values());
-
-      final List<LImageCaption> captionsAssigned =
-        this.imageSetState()
-          .get()
-          .imageSet()
-          .captionsForImage(imageId);
-
-      captionsAll.removeAll(captionsAssigned);
-      this.captionListAssigned.setAll(captionsAssigned);
-      this.captionListAvailable.setAll(captionsAll);
-    } else {
-      this.captionListAssigned.clear();
-      this.captionListAvailable.setAll(imageSet.captions().values());
-    }
-  }
-
-  private void updateImages()
-  {
-    final LImageSetType imageSet;
-    try {
-      imageSet = this.fileStateOrThrow().imageSet();
-    } catch (final Exception e) {
-      return;
-    }
-
-    /*
-     * For whatever reason, we can't use setAll() on the image list as this
-     * causes the list view to lose the selection.
-     */
-
-    final var images =
-      imageSet.images();
-    final var toAdd =
-      new TreeSet<>(images.keySet());
-    final var toRemove =
-      new TreeSet<LImage>();
-
-    /*
-     * For all images in the list, an image is to be removed if it doesn't
-     * exist in the current image set. An image is to be added if it exists
-     * in the image set but doesn't exist in the current list.
-     */
-
-    for (final var existing : this.imageList) {
-      if (!images.containsKey(existing.imageID())) {
-        toRemove.add(existing);
-      }
-      toAdd.remove(existing.imageID());
-    }
-
-    this.imageList.removeAll(toRemove);
-    for (final var imageId : toAdd) {
-      this.imageList.add(images.get(imageId));
-    }
-
-    /*
-     * Now the image list reflects the set of images in the current image
-     * set, but the actual values might not be quite up-to-date.
-     */
-
-    for (int index = 0; index < this.imageList.size(); ++index) {
-      this.imageList.set(
-        index,
-        images.get(this.imageList.get(index).imageID()));
-    }
-  }
-
-  private void onImageSelected(
-    final Optional<LImageID> newValue)
-  {
-    Platform.runLater(this::updateCaptions);
+    this.undoState =
+      new SimpleObjectProperty<>(LMUndoState.empty());
   }
 
   @Override
-  public SortedList<LImage> imageListReadable()
+  public ReadOnlyProperty<LMUndoState> undoState()
   {
-    return this.imageListReadable;
+    return this.undoState;
   }
 
   @Override
-  public ObservableList<LImageCaption> captionListAssigned()
+  public LModelType model()
   {
-    return this.captionListAssignedReadable;
-  }
-
-  @Override
-  public SortedList<LImageCaption> captionListAvailable()
-  {
-    return this.captionListAvailableSorted;
+    return this.model;
   }
 
   @Override
@@ -263,49 +127,15 @@ public final class LController
   }
 
   @Override
-  public AttributeReadableType<LUndoState> undoState()
-  {
-    return this.undoState;
-  }
-
-  @Override
-  public AttributeReadableType<Boolean> busy()
+  public ReadOnlyProperty<Boolean> busy()
   {
     return this.busy;
-  }
-
-  @Override
-  public AttributeReadableType<LImageSetStateType> imageSetState()
-  {
-    return this.imageSetState;
-  }
-
-  @Override
-  public boolean isBusy()
-  {
-    return this.busy.get().booleanValue();
   }
 
   @Override
   public String description()
   {
     return "Main controller.";
-  }
-
-  @Override
-  public boolean isSaved()
-  {
-    return switch (this.imageSetState.get()) {
-      case final LImageSetSaved saved -> {
-        yield true;
-      }
-      case final LImageSetStateNone none -> {
-        yield true;
-      }
-      case final LImageSetUnsaved unsaved -> {
-        yield false;
-      }
-    };
   }
 
   @Override
@@ -316,18 +146,23 @@ public final class LController
 
     this.attributes.clear();
     this.attributes.put("File", path.toString());
+    this.busySet(true);
 
     final var tmpFile =
       path.resolveSibling(path.getFileName() + ".tmp");
+    final var imageSet =
+      this.model.createImageSet();
 
     final var future = new CompletableFuture<>();
+    future.whenComplete((o, throwable) -> {
+      Platform.runLater(() -> this.busySet(false));
+    });
+
     Thread.ofVirtual()
       .start(() -> {
         try {
-          this.busy.set(Boolean.TRUE);
+          SERIALIZERS.serializeFile(tmpFile, imageSet);
 
-          final var state = this.imageSetState.get();
-          SERIALIZERS.serializeFile(tmpFile, state.imageSet());
           Files.move(
             tmpFile,
             path,
@@ -336,18 +171,24 @@ public final class LController
           );
 
           LOG.info("Saved: {} -> {}", tmpFile, path);
-          this.imageSetState.set(new LImageSetSaved(path, state.imageSet()));
-          future.complete(null);
+          Platform.runLater(() -> {
+            this.model.fileStatus().set(new LModelFileStatusType.Saved(path));
+            future.complete(null);
+          });
         } catch (final Throwable e) {
           LOG.error("", e);
           this.publishError(e);
           future.completeExceptionally(e);
-        } finally {
-          this.busy.set(Boolean.FALSE);
         }
       });
 
     return future;
+  }
+
+  private void busySet(
+    final boolean newValue)
+  {
+    this.busy.set(newValue);
   }
 
   private void publishError(
@@ -385,35 +226,34 @@ public final class LController
   }
 
   @Override
-  public CompletableFuture<Object> open(
+  public CompletableFuture<?> open(
     final Path path)
   {
     Objects.requireNonNull(path, "path");
 
     this.attributes.clear();
     this.attributes.put("File", path.toString());
+    this.busySet(true);
 
     final var future = new CompletableFuture<>();
+    future.thenRun(() -> {
+      LOG.debug("Open completed.");
+      Platform.runLater(() -> this.busySet(false));
+    });
+
     Thread.ofVirtual()
       .start(() -> {
         try {
-          this.busy.set(Boolean.TRUE);
           LOG.info("Open: {}", path);
-
           final var newImageSet = PARSERS.parseFile(path);
-          this.closeExistingSet();
-          this.imageSetState.set(new LImageSetSaved(path, newImageSet));
-
-          newImageSet.events()
-            .subscribe(new LPerpetualSubscriber<>(this::onImageSetEvent));
-
           Platform.runLater(() -> {
-            this.updateImages();
-            this.updateCaptions();
+            try {
+              this.model.replaceWith(path, newImageSet);
+              future.complete(null);
+            } catch (final LModelOpException e) {
+              future.completeExceptionally(e);
+            }
           });
-
-          this.undoState.set(LUndoState.empty());
-          future.complete(null);
         } catch (final ParsingException e) {
           LOG.error("", e);
           this.publishParseErrors(e.statusValues());
@@ -423,38 +263,10 @@ public final class LController
           LOG.error("", e);
           this.publishError(e);
           future.completeExceptionally(e);
-        } finally {
-          this.busy.set(Boolean.FALSE);
         }
       });
+
     return future;
-  }
-
-  private void onImageSetEvent(
-    final LEventType e)
-  {
-    LOG.debug("Image event: {}", e);
-
-    switch (e) {
-      case final LCaptionDeleted captionDeleted -> {
-        Platform.runLater(this::updateCaptions);
-      }
-      case final LCaptionUpdated captionUpdated -> {
-        Platform.runLater(this::updateCaptions);
-      }
-      case final LImageRemoved imageRemoved -> {
-        Platform.runLater(this::updateImages);
-      }
-      case final LImageUpdated imageUpdated -> {
-        Platform.runLater(this::updateImages);
-      }
-    }
-  }
-
-  private void closeExistingSet()
-  {
-    final var existingImageSet = this.imageSetState.get().imageSet();
-    existingImageSet.close();
   }
 
   private void publishParseErrors(
@@ -478,109 +290,84 @@ public final class LController
   }
 
   @Override
-  public CompletableFuture<Object> newSet(
+  public void newSet(
     final Path file)
   {
     this.attributes.clear();
     this.attributes.put("File", file.toString());
 
-    final var future = new CompletableFuture<>();
-    Thread.ofVirtual()
-      .start(() -> {
-        try {
-          this.busy.set(Boolean.TRUE);
-          this.undoState.set(LUndoState.empty());
-          this.closeExistingSet();
-
-          final var newImageSet = LImageSets.empty();
-          this.imageSetState.set(new LImageSetUnsaved(file, newImageSet));
-
-          newImageSet.events()
-            .subscribe(new LPerpetualSubscriber<>(this::onImageSetEvent));
-
-          Platform.runLater(() -> {
-            this.captionListAssigned.clear();
-            this.captionListAvailable.clear();
-            this.imageList.clear();
-          });
-          future.complete(null);
-        } catch (final Throwable e) {
-          LOG.error("", e);
-          this.publishError(e);
-          future.completeExceptionally(e);
-        } finally {
-          this.busy.set(Boolean.FALSE);
-        }
-      });
-
-    return future;
+    try {
+      this.busySet(true);
+      this.model.clear();
+      this.model.fileStatus().set(new LModelFileStatusType.Unsaved(file));
+    } catch (final Throwable e) {
+      LOG.error("", e);
+      this.publishError(e);
+    } finally {
+      this.busySet(false);
+    }
   }
 
   @Override
   public Optional<Path> imageSelect(
     final Optional<LImageID> imageOpt)
   {
-    this.imageSelected.set(imageOpt);
-
-    return imageOpt.flatMap(imageID -> {
-      final var file = this.fileStateOrThrow().file();
-      return Optional.ofNullable(
-        this.imageSetState.get()
-          .imageSet()
-          .images()
-          .get(imageID)
-          .fileName()
-      ).map(name -> {
-        return file.getParent().resolve(name);
-      });
-    });
+    return this.model.imageSelect(imageOpt);
   }
 
   @Override
   public void undo()
   {
-    final var undoStateNow =
-      this.undoState.get();
+    final var undoThen =
+      this.undoState.getValue();
     final var undoStackNew =
-      new LinkedList<>(undoStateNow.undoStack());
+      new LinkedList<>(undoThen.undoStack());
     final var redoStackNew =
-      new LinkedList<>(undoStateNow.redoStack());
+      new LinkedList<>(undoThen.redoStack());
 
     final var command = undoStackNew.removeFirst();
     if (command != null) {
       LOG.debug("Undo: {}", command.description());
       try {
         command.undo();
-      } catch (final LImageSetCommandException e) {
+      } catch (final Exception e) {
         this.publishError(e);
         return;
       }
       redoStackNew.addFirst(command);
-      this.undoState.set(new LUndoState(undoStackNew, redoStackNew));
+      this.undoState.set(new LMUndoState(undoStackNew, redoStackNew));
     }
+  }
+
+  private static void checkFXThread()
+  {
+    Preconditions.checkPreconditionV(
+      Platform.isFxApplicationThread(),
+      "Must be called on the FX application thread"
+    );
   }
 
   @Override
   public void redo()
   {
-    final var undoStateNow =
-      this.undoState.get();
+    final var undoThen =
+      this.undoState.getValue();
     final var undoStackNew =
-      new LinkedList<>(undoStateNow.undoStack());
+      new LinkedList<>(undoThen.undoStack());
     final var redoStackNew =
-      new LinkedList<>(undoStateNow.redoStack());
+      new LinkedList<>(undoThen.redoStack());
 
     final var command = redoStackNew.removeFirst();
     if (command != null) {
       LOG.debug("Redo: {}", command.description());
       try {
         command.execute();
-      } catch (final LImageSetCommandException e) {
+      } catch (final Exception e) {
         this.publishError(e);
         return;
       }
       undoStackNew.addFirst(command);
-      this.undoState.set(new LUndoState(undoStackNew, redoStackNew));
+      this.undoState.set(new LMUndoState(undoStackNew, redoStackNew));
     }
   }
 
@@ -591,23 +378,20 @@ public final class LController
     Objects.requireNonNull(files, "files");
 
     this.attributes.clear();
+    this.busySet(true);
 
     final var future = new CompletableFuture<>();
+    future.whenComplete((o, throwable) -> {
+      Platform.runLater(() -> this.busySet(false));
+    });
+
     Thread.ofVirtual()
       .start(() -> {
         try {
-          this.busy.set(Boolean.TRUE);
           LOG.info("Add Files: {}", files);
 
-          final var imageSet =
-            this.imageSetState.get()
-              .imageSet();
-
-          int index = 0;
-
-          final var commands =
-            new ArrayList<LImageSetCommandType>(files.size());
-
+          var index = 0;
+          final var imageCreates = new ArrayList<LMImageCreate>();
           for (final var file : files) {
             this.attributes.put(
               "File[%d]".formatted(Integer.valueOf(index)), file.toString());
@@ -619,29 +403,30 @@ public final class LController
               );
             }
 
-            final var image =
-              new LImage(
-                new LImageID(UUID.randomUUID()),
-                file.getFileName().toString(),
-                List.of()
-              );
-
-            commands.add(imageSet.imageUpdate(image));
+            final var imageID = new LImageID(UUID.randomUUID());
+            imageCreates.add(
+              new LMImageCreate(imageID, file.toAbsolutePath().normalize())
+            );
             ++index;
           }
 
-          final var command =
-            imageSet.compose("Load images", commands);
-          command.execute();
-
-          this.undoState.set(this.undoState.get().add(command));
-          future.complete(null);
+          Platform.runLater(() -> {
+            try {
+              this.executeSaveStateChangingCommand(
+                this.fileOrThrow(),
+                new LModelOpImagesCreate(this.model, imageCreates)
+              );
+              future.complete(null);
+            } catch (final Exception e) {
+              LOG.error("", e);
+              this.publishError(e);
+              future.completeExceptionally(e);
+            }
+          });
         } catch (final Throwable e) {
           LOG.error("", e);
           this.publishError(e);
           future.completeExceptionally(e);
-        } finally {
-          this.busy.set(Boolean.FALSE);
         }
       });
 
@@ -651,116 +436,95 @@ public final class LController
   @Override
   public CompletableFuture<Object> save()
   {
-    return this.save(this.fileStateOrThrow().file());
+    return this.save(this.fileOrThrow());
+  }
+
+  private Path fileOrThrow()
+  {
+    return switch (this.model.fileStatus().get()) {
+      case final LModelFileStatusType.None none -> {
+        throw new IllegalStateException();
+      }
+      case final LModelFileStatusType.Saved saved -> {
+        yield saved.file();
+      }
+      case final LModelFileStatusType.Unsaved unsaved -> {
+        yield unsaved.file();
+      }
+    };
   }
 
   @Override
   public void captionNew(
     final String text)
   {
-    final var state =
-      this.fileStateOrThrow();
-    final var newCaption =
-      new LImageCaption(new LImageCaptionID(UUID.randomUUID()), text);
-
     this.executeSaveStateChangingCommand(
-      state.imageSet().captionUpdate(newCaption),
-      state.file(),
-      state.imageSet()
+      this.fileOrThrow(),
+      new LModelOpCaptionCreate(
+        this.model,
+        new LImageCaptionID(UUID.randomUUID()),
+        text.trim()
+      )
     );
-  }
-
-  private LImageSetStateWithFileType fileStateOrThrow()
-  {
-    return switch (this.imageSetState.get()) {
-      case final LImageSetSaved saved -> {
-        yield saved;
-      }
-      case final LImageSetStateNone ignored -> {
-        throw new IllegalStateException();
-      }
-      case final LImageSetUnsaved unsaved -> {
-        yield unsaved;
-      }
-    };
   }
 
   @Override
   public void imageCaptionUnassign(
-    final LImageID image,
+    final List<LImageID> images,
     final List<LImageCaptionID> captions)
   {
-    final var state =
-      this.fileStateOrThrow();
-    final var subcommands =
-      new ArrayList<LImageSetCommandType>(captions.size());
-
-    for (final var caption : captions) {
-      subcommands.add(state.imageSet().captionUnassign(image, caption));
-    }
+    Objects.requireNonNull(images, "images");
+    Objects.requireNonNull(captions, "captions");
 
     this.executeSaveStateChangingCommand(
-      state.imageSet().compose("Assign captions", subcommands),
-      state.file(),
-      state.imageSet()
+      this.fileOrThrow(),
+      new LModelOpCaptionsUnassign(this.model, images, captions)
     );
   }
 
   @Override
   public void imageCaptionAssign(
-    final LImageID image,
+    final List<LImageID> images,
     final List<LImageCaptionID> captions)
   {
-    final var state =
-      this.fileStateOrThrow();
-    final var subcommands =
-      new ArrayList<LImageSetCommandType>(captions.size());
-
-    for (final var caption : captions) {
-      subcommands.add(state.imageSet().captionAssign(image, caption));
-    }
+    Objects.requireNonNull(images, "images");
+    Objects.requireNonNull(captions, "captions");
 
     this.executeSaveStateChangingCommand(
-      state.imageSet().compose("Unassign captions", subcommands),
-      state.file(),
-      state.imageSet()
+      this.fileOrThrow(),
+      new LModelOpCaptionsAssign(this.model, images, captions)
     );
   }
 
   @Override
   public void captionRemove(
-    final List<LImageCaption> captions)
+    final List<LMCaption> captions)
   {
-    final var state =
-      this.fileStateOrThrow();
-    final var subcommands =
-      new ArrayList<LImageSetCommandType>(captions.size());
-
-    for (final var caption : captions) {
-      subcommands.add(state.imageSet().captionRemove(caption.id()));
-    }
-
     this.executeSaveStateChangingCommand(
-      state.imageSet().compose("Remove captions", subcommands),
-      state.file(),
-      state.imageSet()
+      this.fileOrThrow(),
+      new LModelOpCaptionDelete(
+        this.model,
+        captions.stream()
+          .map(LMCaption::id)
+          .collect(Collectors.toList())
+      )
     );
   }
 
   private void executeSaveStateChangingCommand(
-    final LImageSetCommandType command,
     final Path file,
-    final LImageSetType imageSet)
+    final LModelOpType operation)
   {
     try {
-      command.execute();
-    } catch (final LImageSetCommandException e) {
+      operation.execute();
+    } catch (final LModelOpException e) {
       this.publishError(e);
       return;
     }
 
-    this.undoState.set(this.undoState.get().add(command));
-    this.imageSetState.set(new LImageSetUnsaved(file, imageSet));
+    final var undoStateThen = this.undoState.getValue();
+    this.undoState.set(undoStateThen.add(operation));
+    this.model.fileStatus().set(new LModelFileStatusType.Unsaved(file));
   }
 
   @Override
@@ -768,14 +532,7 @@ public final class LController
     final LImageID imageID,
     final LImageCaptionID captionID)
   {
-    final var state =
-      this.fileStateOrThrow();
 
-    this.executeSaveStateChangingCommand(
-      state.imageSet().captionPriorityIncrease(imageID, captionID),
-      state.file(),
-      state.imageSet()
-    );
   }
 
   @Override
@@ -783,36 +540,13 @@ public final class LController
     final LImageID imageID,
     final LImageCaptionID captionID)
   {
-    final var state =
-      this.fileStateOrThrow();
 
-    this.executeSaveStateChangingCommand(
-      state.imageSet().captionPriorityDecrease(imageID, captionID),
-      state.file(),
-      state.imageSet()
-    );
-  }
-
-  @Override
-  public long captionCount(
-    final LImageCaptionID captionID)
-  {
-    return this.fileStateOrThrow().imageSet().captionAssignmentCount(captionID);
   }
 
   @Override
   public void closeSet()
   {
-    this.attributes.clear();
-    this.undoState.set(LUndoState.empty());
-    this.closeExistingSet();
 
-    Platform.runLater(() -> {
-      this.captionListAssigned.clear();
-      this.captionListAvailable.clear();
-      this.imageList.clear();
-      this.imageSetState.set(NO_IMAGE_SET);
-    });
   }
 
   @Override
@@ -823,30 +557,69 @@ public final class LController
 
     this.attributes.clear();
     this.attributes.put("Directory", request.outputDirectory().toString());
+    this.busySet(true);
 
     final var future = new CompletableFuture<>();
+    future.whenComplete((o, throwable) -> {
+      Platform.runLater(() -> this.busySet(false));
+    });
+
+    final var file =
+      this.fileOrThrow();
+
+    final LImageSet imageSet;
+    try {
+      imageSet = this.model.createImageSet();
+    } catch (final Exception e) {
+      future.completeExceptionally(e);
+      return future;
+    }
+
     Thread.ofVirtual()
       .start(() -> {
         try {
-          this.busy.set(Boolean.TRUE);
           LOG.info("Export: {}", request);
-
-          final var state = this.fileStateOrThrow();
-          LExporters.export(
-            request,
-            state.file().getParent(),
-            state.imageSet()
-          );
-
+          LExporters.export(request, file.getParent(), imageSet);
           future.complete(null);
         } catch (final Throwable e) {
           LOG.error("", e);
           this.publishError(e);
           future.completeExceptionally(e);
-        } finally {
-          this.busy.set(Boolean.FALSE);
         }
       });
+
     return future;
+  }
+
+  @Override
+  public SortedList<LMImage> imageList()
+  {
+    return this.model.imagesView();
+  }
+
+  @Override
+  public SortedList<LMCaption> captionsAssigned()
+  {
+    return this.model.captionsAssigned();
+  }
+
+  @Override
+  public SortedList<LMCaption> captionsUnassigned()
+  {
+    return this.model.captionsUnassigned();
+  }
+
+  @Override
+  public void captionsUnassignedSetFilter(
+    final String text)
+  {
+    Objects.requireNonNull(text, "text");
+    this.model.captionsUnassignedSetFilter(text);
+  }
+
+  @Override
+  public ReadOnlyProperty<LModelFileStatusType> fileStatus()
+  {
+    return this.model.fileStatus();
   }
 }

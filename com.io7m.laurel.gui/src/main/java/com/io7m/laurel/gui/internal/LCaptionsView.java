@@ -20,28 +20,21 @@ package com.io7m.laurel.gui.internal;
 import com.io7m.jwheatsheaf.api.JWFileChooserAction;
 import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
 import com.io7m.jwheatsheaf.oxygen.JWOxygenIconSet;
-import com.io7m.laurel.model.LImage;
-import com.io7m.laurel.model.LImageCaption;
+import com.io7m.laurel.gui.internal.model.LMCaption;
+import com.io7m.laurel.gui.internal.model.LMImage;
+import com.io7m.laurel.gui.internal.model.LModelFileStatusType;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
 import javafx.stage.Modality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,9 +60,9 @@ public final class LCaptionsView implements LScreenViewType
   private final LPreferencesType preferences;
 
   @FXML private Parent captions;
-  @FXML private TableView<LImageCaption> captionsAvailableView;
-  @FXML private ListView<LImageCaption> captionsAssignedView;
-  @FXML private TableView<LImage> imagesAll;
+  @FXML private TableView<LMCaption> captionsUnassignedView;
+  @FXML private TableView<LMCaption> captionsAssignedView;
+  @FXML private TableView<LMImage> imagesAll;
   @FXML private ImageView imageView;
   @FXML private Parent errorImageLoad;
 
@@ -81,6 +74,7 @@ public final class LCaptionsView implements LScreenViewType
   @FXML private Button imageCaptionPriorityDown;
   @FXML private Button captionNew;
   @FXML private Button captionDelete;
+  @FXML private TextField captionAvailableSearch;
 
   /**
    * The captions view.
@@ -120,10 +114,98 @@ public final class LCaptionsView implements LScreenViewType
     this.captionNew.setDisable(false);
     this.captionDelete.setDisable(true);
 
-    this.controller.imageSetState()
-      .subscribe((oldValue, newValue) -> this.handleImageSetStateChanged());
+    this.controller.model()
+      .fileStatus()
+      .subscribe((oldValue, newValue) -> {
+        this.handleImageSetStateChanged(newValue);
+      });
 
-    this.imagesAll.setItems(this.controller.imageListReadable());
+    this.initializeImagesTable();
+    this.initializeCaptionsAssignedTable();
+    this.initializeCaptionsUnassignedTable();
+  }
+
+  private void initializeCaptionsUnassignedTable()
+  {
+    this.captionsUnassignedView.setPlaceholder(
+      new Label(this.strings.format(LStringConstants.CAPTION_NONE_UNASSIGNED)));
+    this.captionsUnassignedView.setColumnResizePolicy(
+      TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
+    this.captionsUnassignedView.setItems(
+      this.controller.captionsUnassigned());
+    this.captionsUnassignedView.setEditable(false);
+    this.captionsUnassignedView.getSelectionModel()
+      .setSelectionMode(SelectionMode.MULTIPLE);
+    this.captionsUnassignedView.getSelectionModel()
+      .selectedItemProperty()
+      .subscribe(this::onCaptionUnassignedSelected);
+
+    final var columns =
+      this.captionsUnassignedView.getColumns();
+
+    final var colText =
+      (TableColumn<LMCaption, String>) columns.get(0);
+    final var colCount =
+      (TableColumn<LMCaption, Long>) columns.get(1);
+
+    this.controller.captionsUnassigned()
+      .comparatorProperty()
+      .bind(this.captionsUnassignedView.comparatorProperty());
+
+    colText.setSortable(true);
+    colText.setReorderable(false);
+    colText.setCellValueFactory(param -> {
+      return param.getValue().text();
+    });
+
+    colCount.setSortable(true);
+    colCount.setReorderable(false);
+    colCount.setCellValueFactory(param -> {
+      return param.getValue().count().asObject();
+    });
+  }
+
+  private void initializeCaptionsAssignedTable()
+  {
+    this.captionsAssignedView.setPlaceholder(
+      new Label(""));
+    this.captionsAssignedView.setItems(
+      this.controller.captionsAssigned());
+    this.captionsAssignedView.setEditable(false);
+    this.captionsAssignedView.getSelectionModel()
+      .setSelectionMode(SelectionMode.MULTIPLE);
+    this.captionsAssignedView.getSelectionModel()
+      .selectedItemProperty()
+      .subscribe(this::onCaptionAssignedSelected);
+
+    final var columns =
+      this.captionsAssignedView.getColumns();
+
+    final var colText =
+      (TableColumn<LMCaption, String>) columns.get(0);
+    final var colCount =
+      (TableColumn<LMCaption, Long>) columns.get(1);
+
+    this.controller.captionsAssigned()
+      .comparatorProperty()
+      .bind(this.captionsAssignedView.comparatorProperty());
+
+    colText.setSortable(true);
+    colText.setReorderable(false);
+    colText.setCellValueFactory(param -> {
+      return param.getValue().text();
+    });
+
+    colCount.setSortable(true);
+    colCount.setReorderable(false);
+    colCount.setCellValueFactory(param -> {
+      return param.getValue().count().asObject();
+    });
+  }
+
+  private void initializeImagesTable()
+  {
+    this.imagesAll.setItems(this.controller.imageList());
     this.imagesAll.setEditable(false);
 
     {
@@ -131,16 +213,16 @@ public final class LCaptionsView implements LScreenViewType
         this.imagesAll.getColumns();
 
       final var colText =
-        (TableColumn<LImage, String>) columns.get(0);
+        (TableColumn<LMImage, String>) columns.get(0);
 
-      this.controller.imageListReadable()
+      this.controller.imageList()
         .comparatorProperty()
         .bind(this.imagesAll.comparatorProperty());
 
       colText.setSortable(true);
       colText.setReorderable(false);
       colText.setCellValueFactory(param -> {
-        return new ReadOnlyStringWrapper(param.getValue().fileName());
+        return param.getValue().fileName().map(x -> x.getFileName().toString());
       });
     }
 
@@ -149,67 +231,10 @@ public final class LCaptionsView implements LScreenViewType
     this.imagesAll.getSelectionModel()
       .selectedItemProperty()
       .subscribe(this::onImageSelected);
-
-    this.captionsAssignedView.setItems(this.controller.captionListAssigned());
-    this.captionsAssignedView.setEditable(false);
-    this.captionsAssignedView.setCellFactory(param -> new LImageCaptionCell());
-    this.captionsAssignedView.getSelectionModel()
-      .setSelectionMode(SelectionMode.MULTIPLE);
-    this.captionsAssignedView.getSelectionModel()
-      .selectedItemProperty()
-      .subscribe(this::onImageCaptionSelected);
-
-    {
-      final var columns =
-        this.captionsAvailableView.getColumns();
-
-      final var colText =
-        (TableColumn<LImageCaption, String>) columns.get(0);
-      final var colCount =
-        (TableColumn<LImageCaption, Long>) columns.get(1);
-
-      this.controller.captionListAvailable()
-        .comparatorProperty()
-        .bind(this.captionsAvailableView.comparatorProperty());
-
-      colText.setSortable(true);
-      colText.setReorderable(false);
-      colText.setCellValueFactory(param -> {
-        return new ReadOnlyStringWrapper(param.getValue().text());
-      });
-
-      colCount.setSortable(true);
-      colCount.setReorderable(false);
-      colCount.setCellValueFactory(param -> {
-        final var countThen =
-          this.controller.captionCount(param.getValue().id());
-
-        final var prop = new SimpleLongProperty(countThen);
-        this.controller.captionListAvailable()
-          .addListener((ListChangeListener<? super LImageCaption>) c -> {
-            final var countNow =
-              this.controller.captionCount(param.getValue().id());
-            prop.set(countNow);
-          });
-        return prop.asObject();
-      });
-    }
-
-    this.captionsAvailableView.setPlaceholder(
-      new Label(this.strings.format(LStringConstants.CAPTION_NONE)));
-    this.captionsAvailableView.setColumnResizePolicy(
-      TableView.CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS);
-    this.captionsAvailableView.setItems(this.controller.captionListAvailable());
-    this.captionsAvailableView.setEditable(false);
-    this.captionsAvailableView.getSelectionModel()
-      .setSelectionMode(SelectionMode.MULTIPLE);
-    this.captionsAvailableView.getSelectionModel()
-      .selectedItemProperty()
-      .subscribe(this::onCaptionSelected);
   }
 
-  private void onCaptionSelected(
-    final LImageCaption caption)
+  private void onCaptionUnassignedSelected(
+    final LMCaption caption)
   {
     this.updateImageCaptionUnassignButton();
     this.updateImageCaptionAssignButton();
@@ -223,8 +248,8 @@ public final class LCaptionsView implements LScreenViewType
     this.captionDelete.setDisable(false);
   }
 
-  private void onImageCaptionSelected(
-    final LImageCaption caption)
+  private void onCaptionAssignedSelected(
+    final LMCaption caption)
   {
     this.updateImageCaptionAssignButton();
     this.updateImageCaptionUnassignButton();
@@ -258,7 +283,7 @@ public final class LCaptionsView implements LScreenViewType
         .isEmpty();
 
     final var captionSelected =
-      !this.captionsAvailableView.getSelectionModel()
+      !this.captionsUnassignedView.getSelectionModel()
         .getSelectedItems()
         .isEmpty();
 
@@ -270,7 +295,7 @@ public final class LCaptionsView implements LScreenViewType
   }
 
   private void onImageSelected(
-    final LImage image)
+    final LMImage image)
   {
     this.updateImageCaptionUnassignButton();
     this.updateImageCaptionAssignButton();
@@ -286,7 +311,7 @@ public final class LCaptionsView implements LScreenViewType
     this.imageDelete.setDisable(false);
 
     final var imageFileOpt =
-      this.controller.imageSelect(Optional.of(image.imageID()));
+      this.controller.imageSelect(Optional.of(image.id()));
 
     if (imageFileOpt.isPresent()) {
       final var imageValue =
@@ -301,8 +326,10 @@ public final class LCaptionsView implements LScreenViewType
 
       imageValue.exceptionProperty()
         .subscribe(e -> {
-          LOG.error("Image load: ", e);
-          this.errorImageLoad.setVisible(true);
+          if (e != null) {
+            LOG.error("Image load: ", e);
+            this.errorImageLoad.setVisible(true);
+          }
         });
 
       this.imageView.setImage(imageValue);
@@ -331,67 +358,11 @@ public final class LCaptionsView implements LScreenViewType
     }
   }
 
-  private static final class LImageCell
-    extends ListCell<LImage>
+  private void handleImageSetStateChanged(
+    final LModelFileStatusType fileStatus)
   {
-    LImageCell()
-    {
-
-    }
-
-    @Override
-    protected void updateItem(
-      final LImage item,
-      final boolean empty)
-    {
-      super.updateItem(item, empty);
-
-      this.setGraphic(null);
-      this.setText(null);
-      this.setTooltip(null);
-
-      if (empty || item == null) {
-        return;
-      }
-
-      this.setTooltip(new Tooltip(item.imageID().toString()));
-      this.setText(item.fileName());
-    }
-  }
-
-  private static final class LImageCaptionCell
-    extends ListCell<LImageCaption>
-  {
-    LImageCaptionCell()
-    {
-
-    }
-
-    @Override
-    protected void updateItem(
-      final LImageCaption item,
-      final boolean empty)
-    {
-      super.updateItem(item, empty);
-
-      this.setGraphic(null);
-      this.setText(null);
-      this.setTooltip(null);
-
-      if (empty || item == null) {
-        return;
-      }
-
-      this.setTooltip(new Tooltip(item.id().toString()));
-      this.setText(item.text());
-    }
-  }
-
-  private void handleImageSetStateChanged()
-  {
-    final var state = this.controller.imageSetState().get();
     Platform.runLater(() -> {
-      final var none = state instanceof LImageSetStateNone;
+      final var none = fileStatus instanceof LModelFileStatusType.None;
       this.captions.setDisable(none);
       this.captions.setVisible(!none);
     });
@@ -441,10 +412,7 @@ public final class LCaptionsView implements LScreenViewType
       this.captionsAssignedView.getSelectionModel()
         .getSelectedItem();
 
-    this.controller.imageCaptionPriorityIncrease(
-      image.imageID(),
-      caption.id()
-    );
+    this.controller.imageCaptionPriorityIncrease(image.id(), caption.id());
     this.captionsAssignedView.requestFocus();
   }
 
@@ -458,27 +426,26 @@ public final class LCaptionsView implements LScreenViewType
       this.captionsAssignedView.getSelectionModel()
         .getSelectedItem();
 
-    this.controller.imageCaptionPriorityDecrease(
-      image.imageID(),
-      caption.id()
-    );
+    this.controller.imageCaptionPriorityDecrease(image.id(), caption.id());
     this.captionsAssignedView.requestFocus();
   }
 
   @FXML
   private void onImageCaptionAssign()
   {
-    final var image =
+    final var images =
       this.imagesAll.getSelectionModel()
-        .getSelectedItem();
+        .getSelectedItems();
     final var captionsAvailable =
-      this.captionsAvailableView.getSelectionModel()
+      this.captionsUnassignedView.getSelectionModel()
         .getSelectedItems();
 
     this.controller.imageCaptionAssign(
-      image.imageID(),
+      images.stream()
+        .map(LMImage::id)
+        .collect(Collectors.toList()),
       captionsAvailable.stream()
-        .map(LImageCaption::id)
+        .map(LMCaption::id)
         .collect(Collectors.toList())
     );
 
@@ -488,21 +455,23 @@ public final class LCaptionsView implements LScreenViewType
   @FXML
   private void onImageCaptionUnassign()
   {
-    final var image =
+    final var images =
       this.imagesAll.getSelectionModel()
-        .getSelectedItem();
+        .getSelectedItems();
     final var captionsAssigned =
       this.captionsAssignedView.getSelectionModel()
         .getSelectedItems();
 
     this.controller.imageCaptionUnassign(
-      image.imageID(),
+      images.stream()
+        .map(LMImage::id)
+        .collect(Collectors.toList()),
       captionsAssigned.stream()
-        .map(LImageCaption::id)
+        .map(LMCaption::id)
         .collect(Collectors.toList())
     );
 
-    this.captionsAvailableView.requestFocus();
+    this.captionsUnassignedView.requestFocus();
   }
 
   @FXML
@@ -523,11 +492,19 @@ public final class LCaptionsView implements LScreenViewType
   private void onCaptionDelete()
   {
     final var captionsAvailable =
-      this.captionsAvailableView.getSelectionModel()
+      this.captionsUnassignedView.getSelectionModel()
         .getSelectedItems();
 
     if (!captionsAvailable.isEmpty()) {
       this.controller.captionRemove(captionsAvailable);
     }
+  }
+
+  @FXML
+  private void onCaptionSearchChanged()
+  {
+    this.controller.captionsUnassignedSetFilter(
+      this.captionAvailableSearch.getText().trim()
+    );
   }
 }

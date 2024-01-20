@@ -18,14 +18,14 @@
 package com.io7m.laurel.reader.api;
 
 import com.io7m.anethum.api.ParserType;
-import com.io7m.laurel.model.LImageSetType;
+import com.io7m.laurel.model.LImageSet;
 
 /**
  * The type of parsers.
  */
 
 public interface LParserType
-  extends ParserType<LImageSetType>
+  extends ParserType<LImageSet>
 {
 
 }

@@ -17,15 +17,17 @@
 
 package com.io7m.laurel.gui.internal;
 
-import com.io7m.jattribute.core.AttributeReadableType;
+import com.io7m.laurel.gui.internal.model.LMCaption;
+import com.io7m.laurel.gui.internal.model.LMImage;
+import com.io7m.laurel.gui.internal.model.LMUndoState;
+import com.io7m.laurel.gui.internal.model.LModelFileStatusType;
+import com.io7m.laurel.gui.internal.model.LModelType;
 import com.io7m.laurel.io.LExportRequest;
-import com.io7m.laurel.model.LImage;
-import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
 import com.io7m.repetoir.core.RPServiceType;
 import com.io7m.seltzer.api.SStructuredErrorType;
-import javafx.collections.ObservableList;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.collections.transformation.SortedList;
 
 import java.nio.file.Path;
@@ -42,22 +44,16 @@ public interface LControllerType
   extends RPServiceType, AutoCloseable
 {
   /**
-   * @return The observable list of images
+   * @return The undo state
    */
 
-  SortedList<LImage> imageListReadable();
+  ReadOnlyProperty<LMUndoState> undoState();
 
   /**
-   * @return The assigned captions for the current image
+   * @return The model
    */
 
-  ObservableList<LImageCaption> captionListAssigned();
-
-  /**
-   * @return The available unassigned captions for the current image
-   */
-
-  SortedList<LImageCaption> captionListAvailable();
+  LModelType model();
 
   /**
    * @return The error stream
@@ -66,34 +62,31 @@ public interface LControllerType
   Flow.Publisher<SStructuredErrorType<String>> errors();
 
   /**
-   * @return The undo state
-   */
-
-  AttributeReadableType<LUndoState> undoState();
-
-  /**
    * @return The busy state
    */
 
-  AttributeReadableType<Boolean> busy();
-
-  /**
-   * @return The image set state
-   */
-
-  AttributeReadableType<LImageSetStateType> imageSetState();
+  ReadOnlyProperty<Boolean> busy();
 
   /**
    * @return {@code true} if the application is busy
    */
 
-  boolean isBusy();
+  default boolean isBusy()
+  {
+    return this.busy().getValue().booleanValue();
+  }
 
   /**
    * @return {@code true} if the application is saved
    */
 
-  boolean isSaved();
+  default boolean isSaved()
+  {
+    return this.model()
+      .fileStatus()
+      .getValue()
+      .isSaved();
+  }
 
   /**
    * Save the image set to the given file (and use this file from now on)
@@ -103,7 +96,7 @@ public interface LControllerType
    * @return The operation in progress
    */
 
-  CompletableFuture<Object> save(
+  CompletableFuture<?> save(
     Path path);
 
   /**
@@ -112,7 +105,7 @@ public interface LControllerType
    * @return The operation in progress
    */
 
-  CompletableFuture<Object> save();
+  CompletableFuture<?> save();
 
   /**
    * Open an image set from the given file.
@@ -122,18 +115,16 @@ public interface LControllerType
    * @return The operation in progress
    */
 
-  CompletableFuture<Object> open(
+  CompletableFuture<?> open(
     Path path);
 
   /**
    * Start a new image set using the given file.
    *
    * @param file The file
-   *
-   * @return The operation in progress
    */
 
-  CompletableFuture<Object> newSet(
+  void newSet(
     Path file);
 
   /**
@@ -167,7 +158,7 @@ public interface LControllerType
    * @return The operation in progress
    */
 
-  CompletableFuture<Object> imagesAdd(
+  CompletableFuture<?> imagesAdd(
     List<Path> files);
 
   /**
@@ -180,25 +171,25 @@ public interface LControllerType
     String text);
 
   /**
-   * Unassign captions from an image.
+   * Unassign captions from images.
    *
-   * @param image    The image
+   * @param images   The images
    * @param captions The captions
    */
 
   void imageCaptionUnassign(
-    LImageID image,
+    List<LImageID> images,
     List<LImageCaptionID> captions);
 
   /**
-   * Assign captions to an image.
+   * Assign captions to images.
    *
-   * @param image    The image
+   * @param images   The images
    * @param captions The captions
    */
 
   void imageCaptionAssign(
-    LImageID image,
+    List<LImageID> images,
     List<LImageCaptionID> captions);
 
   /**
@@ -208,7 +199,7 @@ public interface LControllerType
    */
 
   void captionRemove(
-    List<LImageCaption> captions);
+    List<LMCaption> captions);
 
   /**
    * Increase the priority of a caption on an image.
@@ -233,17 +224,6 @@ public interface LControllerType
     LImageCaptionID captionID);
 
   /**
-   * Count the number of times a caption is used.
-   *
-   * @param captionID The caption
-   *
-   * @return The number of occurrences
-   */
-
-  long captionCount(
-    LImageCaptionID captionID);
-
-  /**
    * Close the open image set.
    */
 
@@ -259,4 +239,36 @@ public interface LControllerType
 
   CompletableFuture<Object> export(
     LExportRequest request);
+
+  /**
+   * @return The image list
+   */
+
+  SortedList<LMImage> imageList();
+
+  /**
+   * @return The assigned captions
+   */
+
+  SortedList<LMCaption> captionsAssigned();
+
+  /**
+   * @return The unassigned captions
+   */
+
+  SortedList<LMCaption> captionsUnassigned();
+
+  /**
+   * Set the unassigned captions filter.
+   *
+   * @param text The filter
+   */
+
+  void captionsUnassignedSetFilter(String text);
+
+  /**
+   * @return The file status
+   */
+
+  ReadOnlyProperty<LModelFileStatusType> fileStatus();
 }

@@ -18,14 +18,14 @@
 package com.io7m.laurel.writer.api;
 
 import com.io7m.anethum.api.SerializerFactoryType;
-import com.io7m.laurel.model.LImageSetReadableType;
+import com.io7m.laurel.model.LImageSet;
 
 /**
  * A factory of serializers.
  */
 
 public interface LSerializerFactoryType
-  extends SerializerFactoryType<Void, LImageSetReadableType, LSerializerType>
+  extends SerializerFactoryType<Void, LImageSet, LSerializerType>
 {
 
 }

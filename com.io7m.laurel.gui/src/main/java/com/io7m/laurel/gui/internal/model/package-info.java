@@ -14,36 +14,13 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
-package com.io7m.laurel.gui.internal;
-
-import com.io7m.laurel.model.LImageSetType;
-
-import java.nio.file.Path;
-import java.util.Objects;
-
 /**
- * An image set is open but has unsaved changes.
- *
- * @param file     The file
- * @param imageSet The image set
+ * Image caption management (GUI)
  */
 
-public record LImageSetUnsaved(
-  Path file,
-  LImageSetType imageSet)
-  implements LImageSetStateWithFileType
-{
-  /**
-   * An image set is open but has unsaved changes.
-   *
-   * @param file     The file
-   * @param imageSet The image set
-   */
+@Version("1.0.0")
+@Export
+package com.io7m.laurel.gui.internal.model;
 
-  public LImageSetUnsaved
-  {
-    Objects.requireNonNull(file, "file");
-    Objects.requireNonNull(imageSet, "imageSet");
-  }
-}
+import org.osgi.annotation.bundle.Export;
+import org.osgi.annotation.versioning.Version;

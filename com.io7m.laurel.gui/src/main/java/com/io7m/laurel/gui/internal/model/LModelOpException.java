@@ -15,17 +15,43 @@
  */
 
 
-package com.io7m.laurel.model;
+package com.io7m.laurel.gui.internal.model;
+
+import java.util.Objects;
 
 /**
- * The type of events published by image sets.
+ * An exception during a command execution.
  */
 
-public sealed interface LEventType
-  permits LCaptionDeleted,
-  LCaptionUpdated,
-  LImageRemoved,
-  LImageUpdated
+public final class LModelOpException
+  extends Exception
 {
+  /**
+   * An exception during a command execution.
+   *
+   * @param message The message
+   */
 
+  public LModelOpException(
+    final String message)
+  {
+    super(Objects.requireNonNull(message, "message"));
+  }
+
+  /**
+   * An exception during a command execution.
+   *
+   * @param message The message
+   * @param cause   The cause
+   */
+
+  public LModelOpException(
+    final String message,
+    final Throwable cause)
+  {
+    super(
+      Objects.requireNonNull(message, "message"),
+      Objects.requireNonNull(cause, "cause")
+    );
+  }
 }

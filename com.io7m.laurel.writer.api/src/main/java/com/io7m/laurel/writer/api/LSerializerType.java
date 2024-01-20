@@ -18,14 +18,14 @@
 package com.io7m.laurel.writer.api;
 
 import com.io7m.anethum.api.SerializerType;
-import com.io7m.laurel.model.LImageSetReadableType;
+import com.io7m.laurel.model.LImageSet;
 
 /**
  * A serializer.
  */
 
 public interface LSerializerType
-  extends SerializerType<LImageSetReadableType>
+  extends SerializerType<LImageSet>
 {
 
 }

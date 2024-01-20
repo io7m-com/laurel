@@ -15,17 +15,14 @@
  */
 
 
-package com.io7m.laurel.model;
+package com.io7m.laurel.gui.internal.model;
 
 /**
- * A caption was deleted.
- *
- * @param captionId The caption ID
+ * The type of images or captions.
  */
 
-public record LCaptionDeleted(
-  LImageCaptionID captionId)
-  implements LEventType
+public sealed interface LMImageOrCaptionType
+  permits LMCaption, LMImage
 {
 
 }

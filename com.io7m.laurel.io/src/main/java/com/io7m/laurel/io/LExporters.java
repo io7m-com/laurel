@@ -18,7 +18,7 @@
 package com.io7m.laurel.io;
 
 import com.io7m.laurel.model.LImageCaption;
-import com.io7m.laurel.model.LImageSetReadableType;
+import com.io7m.laurel.model.LImageSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
+import java.util.SortedSet;
 import java.util.stream.Collectors;
 
 /**
@@ -58,7 +59,7 @@ public final class LExporters
   public static void export(
     final LExportRequest request,
     final Path sourceDirectory,
-    final LImageSetReadableType imageSet)
+    final LImageSet imageSet)
     throws IOException
   {
     Objects.requireNonNull(request, "request");
@@ -73,7 +74,7 @@ public final class LExporters
 
   private static void exportCaptions(
     final LExportRequest request,
-    final LImageSetReadableType imageSet)
+    final LImageSet imageSet)
     throws IOException
   {
     for (final var image : imageSet.images().values()) {
@@ -84,7 +85,7 @@ public final class LExporters
 
       LOG.info("Write {} -> {}", outputFileTmp, outputFile);
 
-      final var captions =
+      final SortedSet<LImageCaption> captions =
         imageSet.captionsForImage(image.imageID());
 
       final var text =
@@ -113,7 +114,7 @@ public final class LExporters
   private static void exportImages(
     final LExportRequest request,
     final Path sourceDirectory,
-    final LImageSetReadableType imageSet)
+    final LImageSet imageSet)
     throws IOException
   {
     for (final var image : imageSet.images().values()) {

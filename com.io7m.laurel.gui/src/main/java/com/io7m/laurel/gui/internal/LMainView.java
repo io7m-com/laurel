@@ -22,6 +22,8 @@ import com.io7m.jwheatsheaf.api.JWFileChooserAction;
 import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
 import com.io7m.jwheatsheaf.oxygen.JWOxygenIconSet;
 import com.io7m.laurel.gui.internal.errors.LErrorDialogs;
+import com.io7m.laurel.gui.internal.model.LMUndoState;
+import com.io7m.laurel.gui.internal.model.LModelFileStatusType;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -106,8 +108,9 @@ public final class LMainView implements LScreenViewType
   {
     LCSS.setCSS(this.root);
 
-    this.controller.imageSetState()
-      .subscribe((oldValue, newValue) -> this.handleImageSetStateChanged());
+    this.controller.model()
+      .fileStatus()
+      .subscribe((oldValue, newValue) -> this.handleModelFileStatus(newValue));
     this.controller.busy()
       .subscribe((oldValue, newValue) -> this.handleBusy());
 
@@ -131,7 +134,7 @@ public final class LMainView implements LScreenViewType
   }
 
   private void handleUndoChanged(
-    final LUndoState undoState)
+    final LMUndoState undoState)
   {
     Platform.runLater(() -> {
       final var undoStack = undoState.undoStack();
@@ -165,14 +168,45 @@ public final class LMainView implements LScreenViewType
     });
   }
 
-  private void handleImageSetStateChanged()
+  private void handleModelFileStatus(
+    final LModelFileStatusType status)
   {
     Platform.runLater(() -> {
-      final var stateNow = this.controller.imageSetState().get();
-      this.menuItemSave.setDisable(!(stateNow instanceof LImageSetUnsaved));
-      this.menuItemSaveAs.setDisable(stateNow instanceof LImageSetStateNone);
-      this.menuItemClose.setDisable(stateNow instanceof LImageSetStateNone);
-      this.menuItemExport.setDisable(stateNow instanceof LImageSetStateNone);
+      switch (status) {
+        case final LModelFileStatusType.None none -> {
+          this.stage.setTitle(this.strings.format(LStringConstants.TITLE));
+          this.menuItemSave.setDisable(true);
+          this.menuItemSaveAs.setDisable(true);
+          this.menuItemClose.setDisable(true);
+          this.menuItemExport.setDisable(true);
+        }
+
+        case final LModelFileStatusType.Saved saved -> {
+          this.stage.setTitle(
+            this.strings.format(
+              LStringConstants.TITLE_SAVED,
+              saved.file().toAbsolutePath().toString()
+            )
+          );
+          this.menuItemSave.setDisable(true);
+          this.menuItemSaveAs.setDisable(false);
+          this.menuItemClose.setDisable(false);
+          this.menuItemExport.setDisable(false);
+        }
+
+        case final LModelFileStatusType.Unsaved unsaved -> {
+          this.stage.setTitle(
+            this.strings.format(
+              LStringConstants.TITLE_UNSAVED,
+              unsaved.file().toAbsolutePath().toString()
+            )
+          );
+          this.menuItemSave.setDisable(false);
+          this.menuItemSaveAs.setDisable(false);
+          this.menuItemClose.setDisable(false);
+          this.menuItemExport.setDisable(false);
+        }
+      }
     });
   }
 

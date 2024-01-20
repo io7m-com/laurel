@@ -19,14 +19,14 @@ package com.io7m.laurel.reader.api;
 
 import com.io7m.anethum.api.ParserFactoryType;
 import com.io7m.blackthorne.core.BTPreserveLexical;
-import com.io7m.laurel.model.LImageSetType;
+import com.io7m.laurel.model.LImageSet;
 
 /**
  * The type of factories of parsers.
  */
 
 public interface LParserFactoryType
-  extends ParserFactoryType<BTPreserveLexical, LImageSetType, LParserType>
+  extends ParserFactoryType<BTPreserveLexical, LImageSet, LParserType>
 {
 
 }

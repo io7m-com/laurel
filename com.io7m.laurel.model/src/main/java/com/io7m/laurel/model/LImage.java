@@ -17,9 +17,11 @@
 
 package com.io7m.laurel.model;
 
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * An image.
@@ -32,7 +34,7 @@ import java.util.Objects;
 public record LImage(
   LImageID imageID,
   String fileName,
-  List<LImageCaptionID> captions)
+  SortedSet<LImageCaptionID> captions)
   implements Comparable<LImage>
 {
   /**
@@ -47,7 +49,7 @@ public record LImage(
   {
     Objects.requireNonNull(imageID, "imageID");
     Objects.requireNonNull(fileName, "fileName");
-    captions = List.copyOf(captions);
+    captions = Collections.unmodifiableSortedSet(new TreeSet<>(captions));
   }
 
   @Override

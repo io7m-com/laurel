@@ -15,21 +15,35 @@
  */
 
 
-package com.io7m.laurel.gui.internal;
-
-import com.io7m.laurel.model.LImageSetType;
+package com.io7m.laurel.gui.internal.model;
 
 /**
- * The controller's image set state.
+ * A model operation.
  */
 
-public sealed interface LImageSetStateType
-  permits LImageSetStateNone,
-  LImageSetStateWithFileType
+public interface LModelOpType
 {
   /**
-   * @return The current image set
+   * @return A humanly-readable description of the command
    */
 
-  LImageSetType imageSet();
+  String description();
+
+  /**
+   * Execute (or redo) the command.
+   *
+   * @throws LModelOpException On errors
+   */
+
+  void execute()
+    throws LModelOpException;
+
+  /**
+   * Undo the command.
+   *
+   * @throws LModelOpException On errors
+   */
+
+  void undo()
+    throws LModelOpException;
 }

@@ -26,8 +26,8 @@ import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
 import org.xml.sax.Attributes;
 
-import java.util.ArrayList;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import static com.io7m.laurel.io.internal.LNames.qName;
@@ -39,7 +39,7 @@ import static com.io7m.laurel.io.internal.LNames.qName;
 public final class L1EImage
   implements BTElementHandlerType<LImageCaptionID, LImage>
 {
-  private final ArrayList<LImageCaptionID> captions;
+  private final TreeSet<LImageCaptionID> captions;
   private LImageID imageId;
   private String fileName;
 
@@ -52,7 +52,7 @@ public final class L1EImage
   public L1EImage(
     final BTElementParsingContextType context)
   {
-    this.captions = new ArrayList<LImageCaptionID>();
+    this.captions = new TreeSet<>();
   }
 
   @Override

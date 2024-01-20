@@ -21,7 +21,7 @@ import com.io7m.anethum.api.SerializationException;
 import com.io7m.laurel.io.LSchemas;
 import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LImageCaption;
-import com.io7m.laurel.model.LImageSetReadableType;
+import com.io7m.laurel.model.LImageSet;
 import com.io7m.laurel.writer.api.LSerializerType;
 
 import javax.xml.stream.XMLOutputFactory;
@@ -71,7 +71,7 @@ public final class LSerializer implements LSerializerType
 
   @Override
   public void execute(
-    final LImageSetReadableType info)
+    final LImageSet info)
     throws SerializationException
   {
     try {
@@ -111,7 +111,7 @@ public final class LSerializer implements LSerializerType
   }
 
   private void writeImages(
-    final LImageSetReadableType info)
+    final LImageSet info)
     throws XMLStreamException
   {
     this.writer.writeStartElement("Images");
@@ -142,7 +142,7 @@ public final class LSerializer implements LSerializerType
   }
 
   private void writeCaptions(
-    final LImageSetReadableType info)
+    final LImageSet info)
     throws XMLStreamException
   {
     this.writer.writeStartElement("Captions");

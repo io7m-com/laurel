@@ -15,17 +15,52 @@
  */
 
 
-package com.io7m.laurel.model;
+package com.io7m.laurel.gui.internal.model;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
- * An image was removed.
- *
- * @param imageID The image ID
+ * Delete images.
  */
 
-public record LImageRemoved(
-  LImageID imageID)
-  implements LEventType
+public final class LModelOpImagesDelete extends LModelOpAbstract
 {
+  private final LModel model;
+  private final List<LMImage> images;
 
+  /**
+   * Delete images.
+   *
+   * @param inModel  The model
+   * @param inImages The images
+   */
+
+  public LModelOpImagesDelete(
+    final LModel inModel,
+    final List<LMImage> inImages)
+  {
+    this.model =
+      Objects.requireNonNull(inModel, "model");
+    this.images =
+      Objects.requireNonNull(inImages, "inImages");
+  }
+
+  @Override
+  protected void onExecute()
+  {
+
+  }
+
+  @Override
+  protected void onUndo()
+  {
+
+  }
+
+  @Override
+  public String description()
+  {
+    return "Delete images";
+  }
 }

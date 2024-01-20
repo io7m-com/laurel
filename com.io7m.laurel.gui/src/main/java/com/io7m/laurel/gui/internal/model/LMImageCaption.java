@@ -15,20 +15,31 @@
  */
 
 
-package com.io7m.laurel.gui.internal;
+package com.io7m.laurel.gui.internal.model;
 
-import java.nio.file.Path;
+import java.util.Objects;
 
 /**
- * The controller's image set state.
+ * A link from an image to a caption.
+ *
+ * @param image   The image
+ * @param caption The caption
  */
 
-public sealed interface LImageSetStateWithFileType
-  extends LImageSetStateType permits LImageSetSaved, LImageSetUnsaved
+public record LMImageCaption(
+  LMImage image,
+  LMCaption caption)
 {
   /**
-   * @return The file
+   * A link from an image to a caption.
+   *
+   * @param image   The image
+   * @param caption The caption
    */
 
-  Path file();
+  public LMImageCaption
+  {
+    Objects.requireNonNull(image, "image");
+    Objects.requireNonNull(caption, "caption");
+  }
 }

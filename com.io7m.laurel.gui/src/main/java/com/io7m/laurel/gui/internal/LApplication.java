@@ -88,7 +88,7 @@ public final class LApplication extends Application
     final var choosers = new LFileChoosers();
     services.register(LFileChoosers.class, choosers);
 
-    final var controller = new LController(attributes);
+    final var controller = new LController();
     services.register(LControllerType.class, controller);
 
     final var views =

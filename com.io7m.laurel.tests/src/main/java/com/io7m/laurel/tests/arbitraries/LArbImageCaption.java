@@ -22,6 +22,8 @@ import com.io7m.laurel.model.LImageCaptionID;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Combinators;
 
+import java.util.UUID;
+
 public final class LArbImageCaption extends LArbAbstract<LImageCaption>
 {
   public LArbImageCaption()
@@ -29,9 +31,8 @@ public final class LArbImageCaption extends LArbAbstract<LImageCaption>
     super(LImageCaption.class, () -> {
       return Combinators.combine(
         Arbitraries.defaultFor(LImageCaptionID.class),
-        Arbitraries.strings()
-          .alpha()
-          .ofMinLength(1)
+        Arbitraries.create(UUID::randomUUID)
+          .map(UUID::toString)
       ).as(LImageCaption::new);
     });
   }
