@@ -158,11 +158,15 @@ public final class LCaptionsView implements LScreenViewType
       return param.getValue().text();
     });
 
+    colCount.setPrefWidth(16.0);
     colCount.setSortable(true);
     colCount.setReorderable(false);
     colCount.setCellValueFactory(param -> {
       return param.getValue().count().asObject();
     });
+
+    this.captionsUnassignedView.getSortOrder().add(colText);
+    this.captionsUnassignedView.sort();
   }
 
   private void initializeCaptionsAssignedTable()
@@ -196,11 +200,15 @@ public final class LCaptionsView implements LScreenViewType
       return param.getValue().text();
     });
 
+    colCount.setPrefWidth(16.0);
     colCount.setSortable(true);
     colCount.setReorderable(false);
     colCount.setCellValueFactory(param -> {
       return param.getValue().count().asObject();
     });
+
+    this.captionsAssignedView.getSortOrder().add(colText);
+    this.captionsAssignedView.sort();
   }
 
   private void initializeImagesTable()
@@ -208,29 +216,30 @@ public final class LCaptionsView implements LScreenViewType
     this.imagesAll.setItems(this.controller.imageList());
     this.imagesAll.setEditable(false);
 
-    {
-      final var columns =
-        this.imagesAll.getColumns();
+    final var columns =
+      this.imagesAll.getColumns();
 
-      final var colText =
-        (TableColumn<LMImage, String>) columns.get(0);
+    final var colText =
+      (TableColumn<LMImage, String>) columns.get(0);
 
-      this.controller.imageList()
-        .comparatorProperty()
-        .bind(this.imagesAll.comparatorProperty());
+    this.controller.imageList()
+      .comparatorProperty()
+      .bind(this.imagesAll.comparatorProperty());
 
-      colText.setSortable(true);
-      colText.setReorderable(false);
-      colText.setCellValueFactory(param -> {
-        return param.getValue().fileName().map(x -> x.getFileName().toString());
-      });
-    }
+    colText.setSortable(true);
+    colText.setReorderable(false);
+    colText.setCellValueFactory(param -> {
+      return param.getValue().fileName().map(x -> x.getFileName().toString());
+    });
 
     this.imagesAll.getSelectionModel()
       .setSelectionMode(SelectionMode.MULTIPLE);
     this.imagesAll.getSelectionModel()
       .selectedItemProperty()
       .subscribe(this::onImageSelected);
+
+    this.imagesAll.getSortOrder().add(colText);
+    this.imagesAll.sort();
   }
 
   private void onCaptionUnassignedSelected(

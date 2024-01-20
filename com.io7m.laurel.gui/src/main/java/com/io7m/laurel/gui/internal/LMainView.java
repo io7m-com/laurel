@@ -131,6 +131,8 @@ public final class LMainView implements LScreenViewType
         case DO_NOT_EXIT -> event.consume();
       }
     });
+
+    this.handleUndoChanged(this.controller.undoState().getValue());
   }
 
   private void handleUndoChanged(
@@ -527,5 +529,15 @@ public final class LMainView implements LScreenViewType
   public void onRedo()
   {
     this.controller.redo();
+  }
+
+  /**
+   * The user tried to open the about screen.
+   */
+
+  @FXML
+  public void onAboutSelected()
+  {
+    LAbout.open(this.strings);
   }
 }
