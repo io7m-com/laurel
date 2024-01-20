@@ -30,7 +30,9 @@ module com.io7m.laurel.io
   requires com.io7m.anethum.api;
   requires com.io7m.blackthorne.core;
   requires com.io7m.blackthorne.jxe;
+  requires com.io7m.jdeferthrow.core;
   requires com.io7m.jxe.core;
+  requires org.apache.commons.io;
   requires org.slf4j;
 
   exports com.io7m.laurel.io.internal to com.io7m.laurel.tests;

@@ -120,4 +120,12 @@ public interface LModelType
 
   void captionsUnassignedSetFilter(
     String text);
+
+  /**
+   * Set the images caption filter.
+   *
+   * @param text The text
+   */
+
+  void imagesSetFilter(String text);
 }

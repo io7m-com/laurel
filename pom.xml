@@ -115,6 +115,11 @@
       </dependency>
 
       <dependency>
+        <groupId>com.io7m.jdeferthrow</groupId>
+        <artifactId>com.io7m.jdeferthrow.core</artifactId>
+        <version>1.2.0</version>
+      </dependency>
+      <dependency>
         <groupId>org.jgrapht</groupId>
         <artifactId>jgrapht-core</artifactId>
         <version>1.5.2</version>

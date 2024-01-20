@@ -43,6 +43,7 @@
                      </accelerator>
                   </MenuItem>
                   <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="menuItemImport" mnemonicParsing="false" onAction="#onImportSelected" text="Import..." />
                   <MenuItem fx:id="menuItemExport" disable="true" mnemonicParsing="false" onAction="#onExportSelected" text="Export..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="menuItemExit" mnemonicParsing="false" onAction="#onExitSelected" text="Exit" />

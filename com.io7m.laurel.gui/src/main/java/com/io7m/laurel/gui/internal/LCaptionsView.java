@@ -29,6 +29,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -66,6 +67,7 @@ public final class LCaptionsView implements LScreenViewType
   @FXML private ImageView imageView;
   @FXML private Parent errorImageLoad;
 
+  @FXML private ProgressBar imageProgress;
   @FXML private Button imageAdd;
   @FXML private Button imageDelete;
   @FXML private Button imageCaptionAssign;
@@ -75,6 +77,7 @@ public final class LCaptionsView implements LScreenViewType
   @FXML private Button captionNew;
   @FXML private Button captionDelete;
   @FXML private TextField captionAvailableSearch;
+  @FXML private TextField imageSearch;
 
   /**
    * The captions view.
@@ -104,6 +107,8 @@ public final class LCaptionsView implements LScreenViewType
   {
     this.captions.setDisable(true);
     this.captions.setVisible(false);
+
+    this.imageProgress.setVisible(false);
     this.errorImageLoad.setVisible(false);
 
     this.imageDelete.setDisable(true);
@@ -322,6 +327,7 @@ public final class LCaptionsView implements LScreenViewType
     final var imageFileOpt =
       this.controller.imageSelect(Optional.of(image.id()));
 
+    this.imageProgress.setVisible(true);
     if (imageFileOpt.isPresent()) {
       final var imageValue =
         new Image(
@@ -333,15 +339,32 @@ public final class LCaptionsView implements LScreenViewType
           true
         );
 
+      this.imageProgress.setVisible(true);
+
       imageValue.exceptionProperty()
         .subscribe(e -> {
           if (e != null) {
             LOG.error("Image load: ", e);
             this.errorImageLoad.setVisible(true);
           }
+          this.imageProgress.setVisible(true);
         });
 
+      imageValue.progressProperty()
+        .addListener((observable, oldValue, newValue) -> {
+          if (newValue.doubleValue() >= 1.0) {
+            this.imageProgress.setVisible(false);
+          }
+        });
+
+      this.imageProgress.progressProperty()
+        .bind(imageValue.progressProperty());
+
       this.imageView.setImage(imageValue);
+      this.errorImageLoad.setVisible(false);
+    } else {
+      this.imageView.setImage(null);
+      this.imageProgress.setVisible(false);
       this.errorImageLoad.setVisible(false);
     }
   }
@@ -515,5 +538,11 @@ public final class LCaptionsView implements LScreenViewType
     this.controller.captionsUnassignedSetFilter(
       this.captionAvailableSearch.getText().trim()
     );
+  }
+
+  @FXML
+  private void onImageSearchChanged()
+  {
+    this.controller.imagesSetFilter(this.imageSearch.getText().trim());
   }
 }

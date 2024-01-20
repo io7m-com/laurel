@@ -271,4 +271,23 @@ public interface LControllerType
    */
 
   ReadOnlyProperty<LModelFileStatusType> fileStatus();
+
+  /**
+   * Import captioned images from a directory.
+   *
+   * @param path The directory
+   *
+   * @return The operation
+   */
+
+  CompletableFuture<Object> importDirectory(Path path);
+
+  /**
+   * Set the image filter.
+   *
+   * @param text The filter
+   */
+
+  void imagesSetFilter(
+    String text);
 }

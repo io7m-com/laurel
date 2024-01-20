@@ -35,6 +35,7 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -68,6 +69,7 @@ public final class LMainView implements LScreenViewType
   private @FXML MenuItem menuItemSaveAs;
   private @FXML MenuItem menuItemClose;
   private @FXML MenuItem menuItemExport;
+  private @FXML MenuItem menuItemImport;
   private @FXML MenuItem menuItemExit;
   private @FXML MenuItem menuItemUndo;
   private @FXML MenuItem menuItemRedo;
@@ -509,6 +511,65 @@ public final class LMainView implements LScreenViewType
     if (result.isPresent()) {
       this.controller.export(result.get());
     }
+  }
+
+  /**
+   * The user tried to import.
+   *
+   * @throws Exception On errors
+   */
+
+  @FXML
+  public void onImportSelected()
+    throws Exception
+  {
+    if (this.controller.isSaved()) {
+      this.tryImport();
+      return;
+    }
+
+    switch (this.onConfirmUnsaved()) {
+      case CANCEL -> {
+        return;
+      }
+      case DISCARD -> {
+        this.tryImport();
+        return;
+      }
+      case SAVE -> {
+        this.controller.save();
+        this.tryImport();
+        return;
+      }
+    }
+  }
+
+  private void tryImport()
+    throws MalformedURLException
+  {
+    final var fileChooser =
+      this.choosers.fileChoosers()
+        .create(
+          JWFileChooserConfiguration.builder()
+            .setModality(Modality.APPLICATION_MODAL)
+            .setAction(JWFileChooserAction.OPEN_EXISTING_SINGLE)
+            .setTitle(this.strings.format("import.select"))
+            .setRecentFiles(this.preferences.recentFiles())
+            .setCssStylesheet(LCSS.defaultCSS().toURL())
+            .setFileImageSet(new JWOxygenIconSet())
+            .build()
+        );
+
+    final var files = fileChooser.showAndWait();
+    if (files.isEmpty()) {
+      return;
+    }
+
+    for (final var file : files) {
+      this.preferences.addRecentFile(file);
+    }
+
+    this.controller.importDirectory(files.get(0));
   }
 
   /**

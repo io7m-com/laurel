@@ -36,6 +36,14 @@
     </dependency>
 
     <dependency>
+      <groupId>com.io7m.jdeferthrow</groupId>
+      <artifactId>com.io7m.jdeferthrow.core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>

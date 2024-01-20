@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The model.
@@ -66,6 +67,7 @@ public final class LModel implements LModelType
   private final SortedList<LMCaption> imageCaptionsAssignedSortedView;
   private final SortedList<LMCaption> imageCaptionsUnassignedSortedView;
   private final SortedList<LMImage> imagesViewSorted;
+  private final FilteredList<LMImage> imagesViewFiltered;
   private Subscription imageCaptionSubscription;
 
   /**
@@ -113,10 +115,6 @@ public final class LModel implements LModelType
     this.imageCaptionsUnassignedSortedView =
       new SortedList<>(this.imageCaptionsUnassignedFilteredView);
 
-    this.imageSelected.addListener((observable, oldValue, newValue) -> {
-      this.onImageSelectionChanged(oldValue, newValue);
-    });
-
     this.imagesView =
       FXCollections.observableArrayList(
         param -> {
@@ -126,12 +124,23 @@ public final class LModel implements LModelType
         }
       );
 
+    this.imagesViewFiltered =
+      new FilteredList<>(this.imagesView);
     this.imagesViewSorted =
-      new SortedList<>(this.imagesView);
+      new SortedList<>(this.imagesViewFiltered);
+
+    this.imageSelected.addListener((observable, oldValue, newValue) -> {
+      this.onImageSelectionChanged(newValue);
+    });
 
     this.images.addListener(
       (MapChangeListener<? super LImageID, ? super LMImage>) change -> {
         this.imagesView.setAll(this.images.values());
+      });
+
+    this.captions.addListener(
+      (MapChangeListener<? super LImageCaptionID, ? super LMCaption>) change -> {
+        this.reloadCaptionsForImage(this.imageSelected.get());
       });
   }
 
@@ -145,26 +154,29 @@ public final class LModel implements LModelType
   }
 
   private void onImageSelectionChanged(
-    final LMImage imageThen,
-    final LMImage imageNow)
+    final LMImage image)
   {
     if (this.imageCaptionSubscription != null) {
       this.imageCaptionSubscription.unsubscribe();
     }
 
+    this.reloadCaptionsForImage(image);
+    if (image == null) {
+      return;
+    }
+
+    this.imageCaptionSubscription =
+      image.captions().subscribe(() -> this.reloadCaptionsForImage(image));
+  }
+
+  private void reloadCaptionsForImage(
+    final LMImage imageNow)
+  {
     if (imageNow == null) {
       this.imageCaptionsUnassignedView.setAll(this.captions.values());
       this.imageCaptionsAssignedView.clear();
       return;
     }
-
-    this.imageCaptionSubscription =
-      imageNow.captions().subscribe(() -> {
-        final var unassigned = new HashSet<>(this.captions.values());
-        unassigned.removeAll(imageNow.captions());
-        this.imageCaptionsAssignedView.setAll(imageNow.captions());
-        this.imageCaptionsUnassignedView.setAll(unassigned);
-      });
 
     final var unassigned = new HashSet<>(this.captions.values());
     unassigned.removeAll(imageNow.captions());
@@ -214,17 +226,27 @@ public final class LModel implements LModelType
       outCaptions.put(caption.id(), caption);
     }
 
+    final var directory = file.getParent();
+
     for (final var entry : this.images.entrySet()) {
-      final var image = new LImage(
-        entry.getKey(),
-        file.relativize(entry.getValue().fileName().getValue()).toString(),
-        new TreeSet<>(
-          entry.getValue().captions()
-            .stream()
-            .map(LMCaption::id)
-            .collect(Collectors.toSet())
-        )
-      );
+      final var modelImage =
+        entry.getValue();
+      final var imageFileName =
+        modelImage.fileName().getValue();
+      final var savedImageFileName =
+        directory.relativize(imageFileName);
+
+      final var image =
+        new LImage(
+          entry.getKey(),
+          savedImageFileName.toString(),
+          new TreeSet<>(
+            modelImage.captions()
+              .stream()
+              .map(LMCaption::id)
+              .collect(Collectors.toSet())
+          )
+        );
       outImages.put(image.imageID(), image);
     }
 
@@ -291,7 +313,7 @@ public final class LModel implements LModelType
     }
 
     this.fileStatus.set(new LModelFileStatusType.Saved(path));
-    this.onImageSelectionChanged(null, null);
+    this.onImageSelectionChanged(null);
   }
 
   @Override
@@ -360,6 +382,9 @@ public final class LModel implements LModelType
   public void captionsUnassignedSetFilter(
     final String text)
   {
+    final var searchUpper =
+      text.toUpperCase(Locale.ROOT);
+
     this.imageCaptionsUnassignedFilteredView.setPredicate(caption -> {
       if (text.isEmpty()) {
         return true;
@@ -367,10 +392,40 @@ public final class LModel implements LModelType
 
       final var captionUpper =
         caption.text().getValue().toUpperCase(Locale.ROOT);
-      final var searchUpper =
-        text.toUpperCase(Locale.ROOT);
-
       return captionUpper.contains(searchUpper);
+    });
+  }
+
+  @Override
+  public void imagesSetFilter(
+    final String text)
+  {
+    final List<String> searchCaptions;
+    if (text.isEmpty()) {
+      searchCaptions = List.of();
+    } else {
+      searchCaptions =
+        Stream.of(text.split(","))
+          .map(x -> x.toUpperCase(Locale.ROOT))
+          .map(String::trim)
+          .toList();
+    }
+
+    this.imagesViewFiltered.setPredicate(image -> {
+      if (searchCaptions.isEmpty()) {
+        return true;
+      }
+
+      for (final var imageCaption : image.captions()) {
+        final var imageCaptionText = imageCaption.text().getValue();
+        for (final var searchCaption : searchCaptions) {
+          if (imageCaptionText.equalsIgnoreCase(searchCaption)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
     });
   }
 

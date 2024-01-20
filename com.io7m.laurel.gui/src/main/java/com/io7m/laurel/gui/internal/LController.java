@@ -36,6 +36,7 @@ import com.io7m.laurel.gui.internal.model.LModelOpType;
 import com.io7m.laurel.gui.internal.model.LModelType;
 import com.io7m.laurel.io.LExportRequest;
 import com.io7m.laurel.io.LExporters;
+import com.io7m.laurel.io.LImporters;
 import com.io7m.laurel.io.LParsers;
 import com.io7m.laurel.io.LSerializers;
 import com.io7m.laurel.model.LImageCaptionID;
@@ -236,7 +237,7 @@ public final class LController implements LControllerType
     this.busySet(true);
 
     final var future = new CompletableFuture<>();
-    future.thenRun(() -> {
+    future.whenComplete((ignored0, ignored1) -> {
       LOG.debug("Open completed.");
       Platform.runLater(() -> this.busySet(false));
     });
@@ -250,7 +251,9 @@ public final class LController implements LControllerType
             try {
               this.model.replaceWith(path, newImageSet);
               future.complete(null);
-            } catch (final LModelOpException e) {
+            } catch (final Exception e) {
+              LOG.error("", e);
+              this.publishError(e);
               future.completeExceptionally(e);
             }
           });
@@ -259,6 +262,55 @@ public final class LController implements LControllerType
           this.publishParseErrors(e.statusValues());
           this.publishError(e);
           future.completeExceptionally(e);
+        } catch (final Throwable e) {
+          LOG.error("", e);
+          this.publishError(e);
+          future.completeExceptionally(e);
+        }
+      });
+
+    return future;
+  }
+
+  @Override
+  public CompletableFuture<Object> importDirectory(
+    final Path path)
+  {
+    Objects.requireNonNull(path, "path");
+
+    this.attributes.clear();
+    this.attributes.put("Directory", path.toString());
+    this.busySet(true);
+
+    final var future = new CompletableFuture<>();
+    future.whenComplete((ignored0, ignored1) -> {
+      LOG.debug("Import completed.");
+      Platform.runLater(() -> this.busySet(false));
+    });
+
+    Thread.ofVirtual()
+      .start(() -> {
+        try {
+          LOG.info("Import: {}", path);
+
+          final var newImageSet =
+            LImporters.importDirectory(path, error -> {
+              this.attributes.putAll(error.attributes());
+            });
+
+          Platform.runLater(() -> {
+            try {
+              this.model.replaceWith(
+                path.resolve("Captions.xml"),
+                newImageSet
+              );
+              future.complete(null);
+            } catch (final Exception e) {
+              LOG.error("", e);
+              this.publishError(e);
+              future.completeExceptionally(e);
+            }
+          });
         } catch (final Throwable e) {
           LOG.error("", e);
           this.publishError(e);
@@ -381,7 +433,7 @@ public final class LController implements LControllerType
     this.busySet(true);
 
     final var future = new CompletableFuture<>();
-    future.whenComplete((o, throwable) -> {
+    future.whenComplete((ignored0, ignored1) -> {
       Platform.runLater(() -> this.busySet(false));
     });
 
@@ -560,7 +612,7 @@ public final class LController implements LControllerType
     this.busySet(true);
 
     final var future = new CompletableFuture<>();
-    future.whenComplete((o, throwable) -> {
+    future.whenComplete((ignored0, ignored1) -> {
       Platform.runLater(() -> this.busySet(false));
     });
 
@@ -615,6 +667,14 @@ public final class LController implements LControllerType
   {
     Objects.requireNonNull(text, "text");
     this.model.captionsUnassignedSetFilter(text);
+  }
+
+  @Override
+  public void imagesSetFilter(
+    final String text)
+  {
+    Objects.requireNonNull(text, "text");
+    this.model.imagesSetFilter(text);
   }
 
   @Override
