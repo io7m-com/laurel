@@ -1,7 +1,6 @@
 .root
 {
   -fx-font-size: 10pt;
-  -fx-font-family: "Monospaced";
 
   -fx-base:              #314222;
   -fx-accent:            #A9FA62;

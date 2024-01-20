@@ -106,14 +106,16 @@ public final class LAbout implements LScreenViewType
       final Pane pane = loader.load();
       LCSS.setCSS(pane);
 
+      final var width = 650.0;
+      final var height = 432.0;
       stage.initModality(APPLICATION_MODAL);
       stage.setTitle(strings.format("about"));
-      stage.setWidth(640.0);
-      stage.setMaxWidth(640.0);
-      stage.setMinWidth(640.0);
-      stage.setMinHeight(432.0);
-      stage.setHeight(432.0);
-      stage.setMaxHeight(432.0);
+      stage.setWidth(width);
+      stage.setMaxWidth(width);
+      stage.setMinWidth(width);
+      stage.setMinHeight(height);
+      stage.setHeight(height);
+      stage.setMaxHeight(height);
       stage.setScene(new Scene(pane));
       stage.showAndWait();
 
