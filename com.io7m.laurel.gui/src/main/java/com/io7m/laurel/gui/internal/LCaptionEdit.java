@@ -18,6 +18,7 @@
 package com.io7m.laurel.gui.internal;
 
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -36,10 +37,13 @@ import static com.io7m.laurel.model.LImageCaption.VALID_CAPTION;
 
 public final class LCaptionEdit implements LScreenViewType
 {
+  private final String startingCaption;
+
   @FXML private Label error;
   @FXML private TextField textArea;
   @FXML private Button cancel;
   @FXML private Button save;
+  @FXML private Parent errorContainer;
 
   private final Stage stage;
   private Optional<String> result;
@@ -48,15 +52,19 @@ public final class LCaptionEdit implements LScreenViewType
    * The caption editor.
    *
    * @param inStage The stage
+   * @param caption The starting caption
    */
 
   public LCaptionEdit(
-    final Stage inStage)
+    final Stage inStage,
+    final String caption)
   {
     this.stage =
       Objects.requireNonNull(inStage, "stage");
     this.result =
       Optional.empty();
+    this.startingCaption =
+      Objects.requireNonNull(caption, "caption");
   }
 
   @Override
@@ -64,6 +72,8 @@ public final class LCaptionEdit implements LScreenViewType
     final URL url,
     final ResourceBundle resourceBundle)
   {
+    this.errorContainer.setVisible(false);
+    this.textArea.setText(this.startingCaption);
     this.error.setText("");
     this.save.setDisable(true);
   }
@@ -96,8 +106,10 @@ public final class LCaptionEdit implements LScreenViewType
     if (VALID_CAPTION.matcher(this.textArea.getText()).matches()) {
       this.save.setDisable(false);
       this.error.setText("");
+      this.errorContainer.setVisible(false);
     } else {
       this.error.setText("Caption must match %s".formatted(VALID_CAPTION));
+      this.errorContainer.setVisible(true);
     }
   }
 

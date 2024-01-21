@@ -27,6 +27,7 @@ import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
 import com.io7m.laurel.model.LImageSet;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -42,6 +43,7 @@ public final class L1EImageSet
 {
   private final TreeMap<LImageID, LImage> images;
   private final TreeMap<LImageCaptionID, LImageCaption> captions;
+  private final ArrayList<String> globalPrefixCaptions;
 
   /**
    * An element handler.
@@ -54,6 +56,7 @@ public final class L1EImageSet
   {
     this.images = new TreeMap<>();
     this.captions = new TreeMap<>();
+    this.globalPrefixCaptions = new ArrayList<String>();
   }
 
   @Override
@@ -62,6 +65,7 @@ public final class L1EImageSet
     final BTElementParsingContextType context)
   {
     return Map.ofEntries(
+      Map.entry(qName("GlobalPrefixCaptions"), L1EGlobalPrefixCaptions::new),
       Map.entry(qName("Images"), L1EImages::new),
       Map.entry(qName("Captions"), L1ECaptions::new)
     );
@@ -87,6 +91,12 @@ public final class L1EImageSet
               this.captions.put(c.id(), c);
             }
           }
+          case final String ignored1 -> {
+            for (final var x : xs) {
+              final var c = (String) x;
+              this.globalPrefixCaptions.add(c);
+            }
+          }
           default -> {
             throw new IllegalStateException(
               "Unexpected element: %s".formatted(result)
@@ -110,6 +120,7 @@ public final class L1EImageSet
     final BTElementParsingContextType context)
   {
     return new LImageSet(
+      this.globalPrefixCaptions,
       this.captions,
       this.images
     );

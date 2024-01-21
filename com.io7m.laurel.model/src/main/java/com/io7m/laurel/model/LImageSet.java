@@ -20,20 +20,24 @@ package com.io7m.laurel.model;
 import com.io7m.jaffirm.core.Preconditions;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
  * An image set.
  *
- * @param captions The captions
- * @param images   The images
+ * @param globalPrefixCaptions The global prefix captions
+ * @param captions             The captions
+ * @param images               The images
  */
 
 public record LImageSet(
+  List<String> globalPrefixCaptions,
   SortedMap<LImageCaptionID, LImageCaption> captions,
   SortedMap<LImageID, LImage> images)
 {
@@ -46,8 +50,13 @@ public record LImageSet(
 
   public LImageSet
   {
+    Objects.requireNonNull(globalPrefixCaptions, "globalPrefixCaptions");
     Objects.requireNonNull(captions, "captions");
     Objects.requireNonNull(images, "images");
+
+    for (final var caption : globalPrefixCaptions) {
+      new LImageCaption(new LImageCaptionID(UUID.randomUUID()), caption);
+    }
 
     final var texts = new HashSet<String>();
     for (final var entry : captions.entrySet()) {

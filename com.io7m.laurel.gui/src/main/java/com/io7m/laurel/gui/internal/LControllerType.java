@@ -28,6 +28,7 @@ import com.io7m.laurel.model.LImageID;
 import com.io7m.repetoir.core.RPServiceType;
 import com.io7m.seltzer.api.SStructuredErrorType;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 
 import java.nio.file.Path;
@@ -202,28 +203,6 @@ public interface LControllerType
     List<LMCaption> captions);
 
   /**
-   * Increase the priority of a caption on an image.
-   *
-   * @param imageID   The image
-   * @param captionID The caption
-   */
-
-  void imageCaptionPriorityIncrease(
-    LImageID imageID,
-    LImageCaptionID captionID);
-
-  /**
-   * Decreate the priority of a caption on an image.
-   *
-   * @param imageID   The image
-   * @param captionID The caption
-   */
-
-  void imageCaptionPriorityDecrease(
-    LImageID imageID,
-    LImageCaptionID captionID);
-
-  /**
    * Close the open image set.
    */
 
@@ -290,4 +269,46 @@ public interface LControllerType
 
   void imagesSetFilter(
     String text);
+
+  /**
+   * @return The global prefix captions
+   */
+
+  ObservableList<String> globalPrefixCaptions();
+
+  /**
+   * Create a new global prefix caption.
+   *
+   * @param text The text
+   */
+
+  void globalPrefixCaptionNew(String text);
+
+  /**
+   * Delete the caption at the given index.
+   *
+   * @param index The index
+   */
+
+  void globalPrefixCaptionDelete(int index);
+
+  /**
+   * Modify the caption at the given index.
+   *
+   * @param index The index
+   * @param text  The text
+   */
+
+  void globalPrefixCaptionModify(
+    int index,
+    String text);
+
+  /**
+   * Delete the given images.
+   *
+   * @param images The images
+   */
+
+  void imagesDelete(
+    List<LMImage> images);
 }

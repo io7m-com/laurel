@@ -83,6 +83,9 @@
                <VBox.margin>
                   <Insets top="8.0" />
                </VBox.margin>
+               <tooltip>
+                  <Tooltip text="%images.tooltip.search" />
+               </tooltip>
             </TextField>
             <TableView fx:id="imagesAll" VBox.vgrow="ALWAYS">
               <columns>
@@ -104,30 +107,6 @@
           <children>
             <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" text="Assigned Captions" HBox.hgrow="ALWAYS" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="imageCaptionPriorityDown" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onImageCaptionPriorityDown" prefHeight="32.0" prefWidth="32.0">
-              <graphic>
-                <ImageView>
-                  <image>
-                    <Image url="@image-tag-down.png" />
-                  </image>
-                </ImageView>
-              </graphic>
-              <tooltip>
-                <Tooltip text="%captions.tooltip.priority_down" />
-              </tooltip>
-            </Button>
-            <Button fx:id="imageCaptionPriorityUp" layoutX="341.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onImageCaptionPriorityUp" prefHeight="32.0" prefWidth="32.0">
-              <graphic>
-                <ImageView>
-                  <image>
-                    <Image url="@image-tag-up.png" />
-                  </image>
-                </ImageView>
-              </graphic>
-              <tooltip>
-                <Tooltip text="%captions.tooltip.priority_up" />
-              </tooltip>
-            </Button>
           </children>
         </HBox>
             <TableView fx:id="captionsAssignedView" VBox.vgrow="ALWAYS">
@@ -177,6 +156,18 @@
           <children>
             <Label maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" text="Available Captions" HBox.hgrow="ALWAYS" />
             <Region HBox.hgrow="ALWAYS" />
+                  <Button fx:id="captionsGlobal" layoutX="281.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onCaptionGlobal" prefHeight="32.0" prefWidth="32.0">
+                     <graphic>
+                        <ImageView>
+                           <image>
+                              <Image url="@image-tag-global.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <tooltip>
+                        <Tooltip text="%captions.tooltip.global" />
+                     </tooltip>
+                  </Button>
             <Button fx:id="captionNew" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onCaptionNew" prefHeight="32.0" prefWidth="32.0">
               <graphic>
                 <ImageView>

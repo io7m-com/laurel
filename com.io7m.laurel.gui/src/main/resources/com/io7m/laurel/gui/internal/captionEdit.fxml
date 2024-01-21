@@ -4,6 +4,8 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -14,11 +16,23 @@
    </padding>
    <children>
       <TextField fx:id="textArea" maxHeight="-Infinity" minHeight="-Infinity" onAction="#onTextChanged" onKeyTyped="#onTextChanged" prefHeight="32.0" VBox.vgrow="ALWAYS" />
-      <Label fx:id="error" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" text="Label" textFill="RED">
+      <HBox fx:id="errorContainer" alignment="CENTER">
          <VBox.margin>
             <Insets top="8.0" />
          </VBox.margin>
-      </Label>
+         <children>
+            <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@error16.png" />
+               </image>
+            </ImageView>
+            <Label fx:id="error" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" text="Label" textFill="RED">
+               <HBox.margin>
+                  <Insets left="8.0" />
+               </HBox.margin>
+            </Label>
+         </children>
+      </HBox>
       <HBox>
          <children>
             <Button fx:id="cancel" cancelButton="true" mnemonicParsing="false" onAction="#onCaptionCancelled" prefHeight="32.0" prefWidth="128.0" text="%cancel" HBox.hgrow="NEVER" />

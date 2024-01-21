@@ -17,8 +17,10 @@
 
 package com.io7m.laurel.gui.internal.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Delete images.
@@ -28,6 +30,8 @@ public final class LModelOpImagesDelete extends LModelOpAbstract
 {
   private final LModel model;
   private final List<LMImage> images;
+  private ArrayList<LModelOpCaptionsAssign> assignments;
+  private List<LMImageCreate> imageCreates;
 
   /**
    * Delete images.
@@ -48,14 +52,49 @@ public final class LModelOpImagesDelete extends LModelOpAbstract
 
   @Override
   protected void onExecute()
+    throws LModelOpException
   {
+    this.assignments =
+      new ArrayList<>();
+    this.imageCreates =
+      this.images.stream()
+        .map(x -> new LMImageCreate(x.id(), x.fileName().get()))
+        .collect(Collectors.toList());
 
+    for (final var image : this.images) {
+      final var imageCaptions =
+        image.captions()
+          .stream()
+          .map(LMCaption::id)
+          .collect(Collectors.toList());
+
+      this.assignments.add(
+        new LModelOpCaptionsAssign(
+          this.model, List.of(image.id()), imageCaptions
+        )
+      );
+
+      new LModelOpCaptionsUnassign(
+        this.model, List.of(image.id()), imageCaptions
+      ).execute();
+
+      this.model.images().remove(image.id());
+      this.model.imageCaptionGraph().removeVertex(image);
+    }
   }
 
   @Override
   protected void onUndo()
+    throws LModelOpException
   {
+    new LModelOpImagesCreate(
+      this.model,
+      this.imageCreates
+    ).execute();
 
+    for (final var assignment : this.assignments) {
+      assignment.execute();
+    }
   }
 
   @Override

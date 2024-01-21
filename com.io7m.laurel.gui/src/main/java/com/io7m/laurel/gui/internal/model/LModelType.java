@@ -21,6 +21,7 @@ import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
 import com.io7m.laurel.model.LImageSet;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.collections.transformation.SortedList;
 
@@ -128,4 +129,11 @@ public interface LModelType
    */
 
   void imagesSetFilter(String text);
+
+  /**
+   * @return The global prefix captions
+   */
+
+  ObservableList<String> globalPrefixCaptions();
+
 }

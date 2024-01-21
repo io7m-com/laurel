@@ -73,7 +73,7 @@ public final class LCaptionEditors implements RPServiceType
       final var loader =
         new FXMLLoader(layout, this.strings.resources());
 
-      final var editor = new LCaptionEdit(stage);
+      final var editor = new LCaptionEdit(stage, caption);
       loader.setControllerFactory(param -> {
         return editor;
       });

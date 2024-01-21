@@ -26,7 +26,9 @@ import com.io7m.laurel.gui.internal.model.LModelFileStatusType;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -36,14 +38,22 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+
+import static javafx.stage.Modality.APPLICATION_MODAL;
 
 /**
  * The captions view.
@@ -54,6 +64,7 @@ public final class LCaptionsView implements LScreenViewType
   private static final Logger LOG =
     LoggerFactory.getLogger(LCaptionsView.class);
 
+  private final RPServiceDirectoryType services;
   private final LControllerType controller;
   private final LStrings strings;
   private final LFileChoosers choosers;
@@ -72,8 +83,6 @@ public final class LCaptionsView implements LScreenViewType
   @FXML private Button imageDelete;
   @FXML private Button imageCaptionAssign;
   @FXML private Button imageCaptionUnassign;
-  @FXML private Button imageCaptionPriorityUp;
-  @FXML private Button imageCaptionPriorityDown;
   @FXML private Button captionNew;
   @FXML private Button captionDelete;
   @FXML private TextField captionAvailableSearch;
@@ -82,22 +91,24 @@ public final class LCaptionsView implements LScreenViewType
   /**
    * The captions view.
    *
-   * @param services The service directory
+   * @param inServices The service directory
    */
 
   public LCaptionsView(
-    final RPServiceDirectoryType services)
+    final RPServiceDirectoryType inServices)
   {
+    this.services =
+      Objects.requireNonNull(inServices, "services");
     this.controller =
-      services.requireService(LControllerType.class);
+      inServices.requireService(LControllerType.class);
     this.strings =
-      services.requireService(LStrings.class);
+      inServices.requireService(LStrings.class);
     this.choosers =
-      services.requireService(LFileChoosers.class);
+      inServices.requireService(LFileChoosers.class);
     this.editors =
-      services.requireService(LCaptionEditors.class);
+      inServices.requireService(LCaptionEditors.class);
     this.preferences =
-      services.requireService(LPreferencesType.class);
+      inServices.requireService(LPreferencesType.class);
   }
 
   @Override
@@ -114,8 +125,6 @@ public final class LCaptionsView implements LScreenViewType
     this.imageDelete.setDisable(true);
     this.imageCaptionAssign.setDisable(true);
     this.imageCaptionUnassign.setDisable(true);
-    this.imageCaptionPriorityUp.setDisable(true);
-    this.imageCaptionPriorityDown.setDisable(true);
     this.captionNew.setDisable(false);
     this.captionDelete.setDisable(true);
 
@@ -252,7 +261,6 @@ public final class LCaptionsView implements LScreenViewType
   {
     this.updateImageCaptionUnassignButton();
     this.updateImageCaptionAssignButton();
-    this.updateImageCaptionPriorityButtons();
 
     if (caption == null) {
       this.captionDelete.setDisable(true);
@@ -267,7 +275,6 @@ public final class LCaptionsView implements LScreenViewType
   {
     this.updateImageCaptionAssignButton();
     this.updateImageCaptionUnassignButton();
-    this.updateImageCaptionPriorityButtons();
   }
 
   private void updateImageCaptionUnassignButton()
@@ -313,7 +320,6 @@ public final class LCaptionsView implements LScreenViewType
   {
     this.updateImageCaptionUnassignButton();
     this.updateImageCaptionAssignButton();
-    this.updateImageCaptionPriorityButtons();
 
     if (image == null) {
       this.controller.imageSelect(Optional.empty());
@@ -369,27 +375,6 @@ public final class LCaptionsView implements LScreenViewType
     }
   }
 
-  private void updateImageCaptionPriorityButtons()
-  {
-    final var imageSelected =
-      !this.imagesAll.getSelectionModel()
-        .getSelectedItems()
-        .isEmpty();
-
-    final var captionSelected =
-      this.captionsAssignedView.getSelectionModel()
-        .getSelectedItems()
-        .size() == 1;
-
-    if (imageSelected && captionSelected) {
-      this.imageCaptionPriorityDown.setDisable(false);
-      this.imageCaptionPriorityUp.setDisable(false);
-    } else {
-      this.imageCaptionPriorityDown.setDisable(true);
-      this.imageCaptionPriorityUp.setDisable(true);
-    }
-  }
-
   private void handleImageSetStateChanged(
     final LModelFileStatusType fileStatus)
   {
@@ -431,35 +416,13 @@ public final class LCaptionsView implements LScreenViewType
   @FXML
   private void onImageDelete()
   {
+    final var images =
+      List.copyOf(
+        this.imagesAll.getSelectionModel()
+          .getSelectedItems()
+      );
 
-  }
-
-  @FXML
-  private void onImageCaptionPriorityUp()
-  {
-    final var image =
-      this.imagesAll.getSelectionModel()
-        .getSelectedItem();
-    final var caption =
-      this.captionsAssignedView.getSelectionModel()
-        .getSelectedItem();
-
-    this.controller.imageCaptionPriorityIncrease(image.id(), caption.id());
-    this.captionsAssignedView.requestFocus();
-  }
-
-  @FXML
-  private void onImageCaptionPriorityDown()
-  {
-    final var image =
-      this.imagesAll.getSelectionModel()
-        .getSelectedItem();
-    final var caption =
-      this.captionsAssignedView.getSelectionModel()
-        .getSelectedItem();
-
-    this.controller.imageCaptionPriorityDecrease(image.id(), caption.id());
-    this.captionsAssignedView.requestFocus();
+    this.controller.imagesDelete(images);
   }
 
   @FXML
@@ -544,5 +507,45 @@ public final class LCaptionsView implements LScreenViewType
   private void onImageSearchChanged()
   {
     this.controller.imagesSetFilter(this.imageSearch.getText().trim());
+  }
+
+  @FXML
+  private void onCaptionGlobal()
+  {
+    try {
+      final var stage = new Stage();
+
+      final var layout =
+        LCaptionsView.class.getResource(
+          "/com/io7m/laurel/gui/internal/globalPrefixCaptions.fxml");
+
+      Objects.requireNonNull(layout, "layout");
+
+      final var loader =
+        new FXMLLoader(layout, this.strings.resources());
+
+      final var globals = new LGlobalPrefixCaptions(this.services, stage);
+      loader.setControllerFactory(param -> {
+        return globals;
+      });
+
+      final Pane pane = loader.load();
+      LCSS.setCSS(pane);
+
+      final var width = 650.0;
+      final var height = 432.0;
+      stage.initModality(APPLICATION_MODAL);
+      stage.setTitle(this.strings.format("globals"));
+      stage.setWidth(width);
+      stage.setMaxWidth(width);
+      stage.setMinWidth(width);
+      stage.setMinHeight(height);
+      stage.setHeight(height);
+      stage.setMaxHeight(height);
+      stage.setScene(new Scene(pane));
+      stage.showAndWait();
+    } catch (final IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }

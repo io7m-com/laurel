@@ -84,6 +84,7 @@ public final class LSerializer implements LSerializerType
       this.writer.writeStartElement("ImageSet");
       this.writer.writeDefaultNamespace(findNS());
 
+      this.writeGlobalPrefixCaptions(info);
       this.writeCaptions(info);
       this.writeImages(info);
 
@@ -108,6 +109,26 @@ public final class LSerializer implements LSerializerType
     } catch (final XMLStreamException | TransformerException | IOException e) {
       throw new SerializationException(e.getMessage(), e);
     }
+  }
+
+  private void writeGlobalPrefixCaptions(
+    final LImageSet info)
+    throws XMLStreamException
+  {
+    this.writer.writeStartElement("GlobalPrefixCaptions");
+    for (final var caption : info.globalPrefixCaptions()) {
+      this.writeGlobalPrefixCaption(caption);
+    }
+    this.writer.writeEndElement();
+  }
+
+  private void writeGlobalPrefixCaption(
+    final String caption)
+    throws XMLStreamException
+  {
+    this.writer.writeStartElement("GlobalPrefixCaption");
+    this.writer.writeAttribute("Text", caption);
+    this.writer.writeEndElement();
   }
 
   private void writeImages(

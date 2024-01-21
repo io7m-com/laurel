@@ -68,6 +68,7 @@ public final class LModel implements LModelType
   private final SortedList<LMCaption> imageCaptionsUnassignedSortedView;
   private final SortedList<LMImage> imagesViewSorted;
   private final FilteredList<LMImage> imagesViewFiltered;
+  private final ObservableList<String> globalPrefixCaptions;
   private Subscription imageCaptionSubscription;
 
   /**
@@ -88,6 +89,9 @@ public final class LModel implements LModelType
       new HashMap<>();
     this.imageCaptionGraph =
       new SimpleDirectedGraph<>(LMImageCaption.class);
+
+    this.globalPrefixCaptions =
+      FXCollections.observableArrayList();
 
     this.imageCaptionsAssignedView =
       FXCollections.observableArrayList(
@@ -227,7 +231,6 @@ public final class LModel implements LModelType
     }
 
     final var directory = file.getParent();
-
     for (final var entry : this.images.entrySet()) {
       final var modelImage =
         entry.getValue();
@@ -250,7 +253,11 @@ public final class LModel implements LModelType
       outImages.put(image.imageID(), image);
     }
 
-    return new LImageSet(outCaptions, outImages);
+    return new LImageSet(
+      List.copyOf(this.globalPrefixCaptions),
+      outCaptions,
+      outImages
+    );
   }
 
   @Override
@@ -265,6 +272,8 @@ public final class LModel implements LModelType
     this.clear();
 
     try {
+      this.globalPrefixCaptions.setAll(newImageSet.globalPrefixCaptions());
+
       final var commands = new ArrayList<LModelOpType>();
       for (final var entry : newImageSet.captions().entrySet()) {
         commands.add(
@@ -361,6 +370,7 @@ public final class LModel implements LModelType
       this.imageCaptionGraph.removeVertex(node);
     }
 
+    this.globalPrefixCaptions.clear();
     this.captions.clear();
     this.captionText.clear();
     this.images.clear();
@@ -429,12 +439,40 @@ public final class LModel implements LModelType
     });
   }
 
+  @Override
+  public ObservableList<String> globalPrefixCaptions()
+  {
+    return this.globalPrefixCaptions;
+  }
+
   /**
    * @return The caption texts
    */
 
-  public HashMap<String, LImageCaptionID> captionTexts()
+  HashMap<String, LImageCaptionID> captionTexts()
   {
     return this.captionText;
+  }
+
+  void globalPrefixCaptionAdd(
+    final int index,
+    final String text)
+  {
+    this.globalPrefixCaptions.add(index, text);
+  }
+
+  String globalPrefixCaptionRemove(
+    final int index)
+  {
+    return this.globalPrefixCaptions.remove(index);
+  }
+
+  String globalPrefixCaptionModify(
+    final int index,
+    final String text)
+  {
+    final var oldText = this.globalPrefixCaptions.get(index);
+    this.globalPrefixCaptions.set(index, text);
+    return oldText;
   }
 }

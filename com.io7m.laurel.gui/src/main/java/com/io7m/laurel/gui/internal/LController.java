@@ -31,7 +31,11 @@ import com.io7m.laurel.gui.internal.model.LModelOpCaptionDelete;
 import com.io7m.laurel.gui.internal.model.LModelOpCaptionsAssign;
 import com.io7m.laurel.gui.internal.model.LModelOpCaptionsUnassign;
 import com.io7m.laurel.gui.internal.model.LModelOpException;
+import com.io7m.laurel.gui.internal.model.LModelOpGlobalPrefixCaptionCreate;
+import com.io7m.laurel.gui.internal.model.LModelOpGlobalPrefixCaptionDelete;
+import com.io7m.laurel.gui.internal.model.LModelOpGlobalPrefixCaptionModify;
 import com.io7m.laurel.gui.internal.model.LModelOpImagesCreate;
+import com.io7m.laurel.gui.internal.model.LModelOpImagesDelete;
 import com.io7m.laurel.gui.internal.model.LModelOpType;
 import com.io7m.laurel.gui.internal.model.LModelType;
 import com.io7m.laurel.io.LExportRequest;
@@ -48,6 +52,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -580,22 +585,6 @@ public final class LController implements LControllerType
   }
 
   @Override
-  public void imageCaptionPriorityIncrease(
-    final LImageID imageID,
-    final LImageCaptionID captionID)
-  {
-
-  }
-
-  @Override
-  public void imageCaptionPriorityDecrease(
-    final LImageID imageID,
-    final LImageCaptionID captionID)
-  {
-
-  }
-
-  @Override
   public void closeSet()
   {
 
@@ -675,6 +664,57 @@ public final class LController implements LControllerType
   {
     Objects.requireNonNull(text, "text");
     this.model.imagesSetFilter(text);
+  }
+
+  @Override
+  public ObservableList<String> globalPrefixCaptions()
+  {
+    return this.model.globalPrefixCaptions();
+  }
+
+  @Override
+  public void globalPrefixCaptionNew(
+    final String text)
+  {
+    this.executeSaveStateChangingCommand(
+      this.fileOrThrow(),
+      new LModelOpGlobalPrefixCaptionCreate(
+        this.model,
+        Math.max(0, this.model.globalPrefixCaptions().size() - 1),
+        text
+      )
+    );
+  }
+
+  @Override
+  public void globalPrefixCaptionDelete(
+    final int index)
+  {
+    this.executeSaveStateChangingCommand(
+      this.fileOrThrow(),
+      new LModelOpGlobalPrefixCaptionDelete(this.model, index)
+    );
+  }
+
+  @Override
+  public void globalPrefixCaptionModify(
+    final int index,
+    final String text)
+  {
+    this.executeSaveStateChangingCommand(
+      this.fileOrThrow(),
+      new LModelOpGlobalPrefixCaptionModify(this.model, index, text)
+    );
+  }
+
+  @Override
+  public void imagesDelete(
+    final List<LMImage> images)
+  {
+    this.executeSaveStateChangingCommand(
+      this.fileOrThrow(),
+      new LModelOpImagesDelete(this.model, images)
+    );
   }
 
   @Override

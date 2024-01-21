@@ -27,6 +27,7 @@ import net.jqwik.api.Combinators;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -62,6 +63,7 @@ public final class LArbImageSet extends LArbAbstract<LImageSet>
         }
 
         return new LImageSet(
+          List.of("a", "b", "c"),
           new TreeMap<>(captionMap(captions)),
           new TreeMap<>(imageMap(imagesConstructed))
         );

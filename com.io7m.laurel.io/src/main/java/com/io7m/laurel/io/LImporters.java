@@ -122,7 +122,7 @@ public final class LImporters
     }
 
     exceptionTracker.throwIfNecessary();
-    return new LImageSet(captions, images);
+    return new LImageSet(List.of(), captions, images);
   }
 
   private static LImage processImageFile(

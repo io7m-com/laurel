@@ -19,6 +19,7 @@ package com.io7m.laurel.io;
 
 import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageSet;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +29,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.SortedSet;
-import java.util.stream.Collectors;
 
 /**
  * Functions to export image sets.
@@ -78,21 +79,38 @@ public final class LExporters
     throws IOException
   {
     for (final var image : imageSet.images().values()) {
+      final var imageFullName =
+        request.outputDirectory().resolve(image.fileName());
+
+      final var rawName =
+        FilenameUtils.removeExtension(imageFullName.getFileName().toString());
+      final var captionName =
+        "%s.caption".formatted(rawName);
+      final var captionNameTmp =
+        "%s.caption.tmp".formatted(rawName);
       final var outputFile =
-        request.outputDirectory().resolve(image.fileName() + ".caption");
+        imageFullName.resolveSibling(captionName);
       final var outputFileTmp =
-        request.outputDirectory().resolve(image.fileName() + ".caption.tmp");
+        imageFullName.resolveSibling(captionNameTmp);
 
       LOG.info("Write {} -> {}", outputFileTmp, outputFile);
 
       final SortedSet<LImageCaption> captions =
         imageSet.captionsForImage(image.imageID());
 
-      final var text =
+      final var textLines =
+        new ArrayList<String>(
+          imageSet.globalPrefixCaptions().size() + captions.size()
+        );
+      textLines.addAll(imageSet.globalPrefixCaptions());
+      textLines.addAll(
         captions.stream()
           .map(LImageCaption::text)
-          .collect(Collectors.joining(",\n"))
-        + '\n';
+          .toList()
+      );
+
+      final var text =
+        String.join(",\n", textLines) + "\n";
 
       Files.writeString(
         outputFileTmp,

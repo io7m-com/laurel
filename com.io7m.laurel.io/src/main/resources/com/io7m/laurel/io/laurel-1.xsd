@@ -16,6 +16,23 @@
     </xsd:restriction>
   </xsd:simpleType>
 
+  <xsd:element name="GlobalPrefixCaption">
+    <xsd:complexType>
+      <xsd:attribute name="Text"
+                     use="required"
+                     type="i:CaptionTextType"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="GlobalPrefixCaptions">
+    <xsd:complexType>
+      <xsd:sequence minOccurs="0"
+                    maxOccurs="unbounded">
+        <xsd:element ref="i:GlobalPrefixCaption"/>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+
   <xsd:element name="Caption">
     <xsd:complexType>
       <xsd:attribute name="ID"
@@ -71,6 +88,7 @@
   <xsd:element name="ImageSet">
     <xsd:complexType>
       <xsd:sequence>
+        <xsd:element ref="i:GlobalPrefixCaptions"/>
         <xsd:element ref="i:Captions"/>
         <xsd:element ref="i:Images"/>
       </xsd:sequence>

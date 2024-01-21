@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <ImageSet xmlns="urn:com.io7m.laurel:image-set:1">
+  <GlobalPrefixCaptions>
+    <GlobalPrefixCaption Text="a"/>
+    <GlobalPrefixCaption Text="b"/>
+    <GlobalPrefixCaption Text="c"/>
+  </GlobalPrefixCaptions>
   <Captions>
     <Caption ID="bee6e222-15fe-482f-b292-1467388ef54f" Text="red"/>
     <Caption ID="0d941a07-fd2f-49c4-843e-d21a0bdb40e2" Text="blue"/>
