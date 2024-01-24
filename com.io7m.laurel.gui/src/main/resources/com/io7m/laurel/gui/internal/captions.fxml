@@ -23,7 +23,7 @@
         <StackPane>
           <children>
             <Rectangle arcHeight="1.0" arcWidth="1.0" fill="#ffffff00" height="258.0" stroke="#979797" strokeType="INSIDE" width="258.0" />
-            <ImageView fx:id="imageView" fitHeight="256.0" fitWidth="256.0" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER" />
+            <ImageView fx:id="imageView" fitHeight="256.0" fitWidth="256.0" onMouseReleased="#onImageClicked" pickOnBounds="true" preserveRatio="true" StackPane.alignment="CENTER" />
                   <ProgressBar fx:id="imageProgress" prefHeight="8.0" prefWidth="128.0" />
             <HBox fx:id="errorImageLoad" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" StackPane.alignment="BOTTOM_RIGHT">
               <StackPane.margin>

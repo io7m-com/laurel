@@ -311,4 +311,10 @@ public interface LControllerType
 
   void imagesDelete(
     List<LMImage> images);
+
+  /**
+   * @return The selected image
+   */
+
+  ReadOnlyProperty<LMImage> imageSelected();
 }

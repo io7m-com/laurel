@@ -718,6 +718,12 @@ public final class LController implements LControllerType
   }
 
   @Override
+  public ReadOnlyProperty<LMImage> imageSelected()
+  {
+    return this.model.imageSelected();
+  }
+
+  @Override
   public ReadOnlyProperty<LModelFileStatusType> fileStatus()
   {
     return this.model.fileStatus();

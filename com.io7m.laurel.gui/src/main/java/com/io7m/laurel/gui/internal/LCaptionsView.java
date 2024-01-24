@@ -88,6 +88,9 @@ public final class LCaptionsView implements LScreenViewType
   @FXML private TextField captionAvailableSearch;
   @FXML private TextField imageSearch;
 
+  private Stage imageDisplayWindow;
+  private LImageView imageDisplay;
+
   /**
    * The captions view.
    *
@@ -116,6 +119,14 @@ public final class LCaptionsView implements LScreenViewType
     final URL url,
     final ResourceBundle resourceBundle)
   {
+    this.imageDisplayWindow = new Stage();
+    this.imageDisplay =
+      LImageView.create(
+        this.imageDisplayWindow,
+        this.services,
+        this.strings
+      );
+
     this.captions.setDisable(true);
     this.captions.setVisible(false);
 
@@ -340,8 +351,8 @@ public final class LCaptionsView implements LScreenViewType
           imageFileOpt.get().toUri().toString(),
           256.0,
           256.0,
-          false,
-          false,
+          true,
+          true,
           true
         );
 
@@ -546,6 +557,14 @@ public final class LCaptionsView implements LScreenViewType
       stage.showAndWait();
     } catch (final IOException e) {
       throw new UncheckedIOException(e);
+    }
+  }
+
+  @FXML
+  private void onImageClicked()
+  {
+    if (!this.imageDisplayWindow.isShowing()) {
+      this.imageDisplayWindow.show();
     }
   }
 }
