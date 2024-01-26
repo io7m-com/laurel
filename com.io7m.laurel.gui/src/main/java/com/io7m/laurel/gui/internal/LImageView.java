@@ -150,6 +150,7 @@ public final class LImageView implements LScreenViewType
   /**
    * The image view screen.
    *
+   * @param stage    The stage
    * @param services The services
    * @param strings  The strings
    *

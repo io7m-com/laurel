@@ -317,4 +317,22 @@ public interface LControllerType
    */
 
   ReadOnlyProperty<LMImage> imageSelected();
+
+  /**
+   * @return The copied captions, if any
+   */
+
+  ObservableList<LMCaption> captionsAssignedCopied();
+
+  /**
+   * @param captions The captions to copy
+   */
+
+  void captionsAssignedCopy(List<LMCaption> captions);
+
+  /**
+   * Paste the captions.
+   */
+
+  void captionsAssignedPaste();
 }

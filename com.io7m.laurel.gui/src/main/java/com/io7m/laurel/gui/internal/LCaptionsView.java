@@ -25,12 +25,15 @@ import com.io7m.laurel.gui.internal.model.LMImage;
 import com.io7m.laurel.gui.internal.model.LModelFileStatusType;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
@@ -77,7 +80,6 @@ public final class LCaptionsView implements LScreenViewType
   @FXML private TableView<LMImage> imagesAll;
   @FXML private ImageView imageView;
   @FXML private Parent errorImageLoad;
-
   @FXML private ProgressBar imageProgress;
   @FXML private Button imageAdd;
   @FXML private Button imageDelete;
@@ -87,6 +89,9 @@ public final class LCaptionsView implements LScreenViewType
   @FXML private Button captionDelete;
   @FXML private TextField captionAvailableSearch;
   @FXML private TextField imageSearch;
+  @FXML private ContextMenu assignedCaptionsContextMenu;
+  @FXML private MenuItem assignedCaptionsContextMenuCopy;
+  @FXML private MenuItem assignedCaptionsContextMenuPaste;
 
   private Stage imageDisplayWindow;
   private LImageView imageDisplay;
@@ -129,6 +134,7 @@ public final class LCaptionsView implements LScreenViewType
 
     this.captions.setDisable(true);
     this.captions.setVisible(false);
+    this.assignedCaptionsContextMenuPaste.setDisable(true);
 
     this.imageProgress.setVisible(false);
     this.errorImageLoad.setVisible(false);
@@ -145,9 +151,20 @@ public final class LCaptionsView implements LScreenViewType
         this.handleImageSetStateChanged(newValue);
       });
 
+    this.controller.captionsAssignedCopied()
+      .addListener(this::onCaptionsAssignedCopiedChanged);
+
     this.initializeImagesTable();
     this.initializeCaptionsAssignedTable();
     this.initializeCaptionsUnassignedTable();
+  }
+
+  private void onCaptionsAssignedCopiedChanged(
+    final Observable observable)
+  {
+    final var copied = this.controller.captionsAssignedCopied();
+    LOG.debug("Captions copied: {}", copied);
+    this.assignedCaptionsContextMenuPaste.setDisable(copied.isEmpty());
   }
 
   private void initializeCaptionsUnassignedTable()
@@ -566,5 +583,24 @@ public final class LCaptionsView implements LScreenViewType
     if (!this.imageDisplayWindow.isShowing()) {
       this.imageDisplayWindow.show();
     }
+  }
+
+  @FXML
+  private void onCaptionsAssignedCopy()
+  {
+    final var captionsCopied =
+      List.copyOf(
+        this.captionsAssignedView.getSelectionModel()
+          .getSelectedItems()
+      );
+
+    LOG.debug("Copying captions: {}", captionsCopied);
+    this.controller.captionsAssignedCopy(captionsCopied);
+  }
+
+  @FXML
+  private void onCaptionsAssignedPaste()
+  {
+    this.controller.captionsAssignedPaste();
   }
 }

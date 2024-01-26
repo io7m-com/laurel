@@ -19,7 +19,6 @@ package com.io7m.laurel.gui.internal;
 
 import com.io7m.anethum.api.ParseStatusType;
 import com.io7m.anethum.api.ParsingException;
-import com.io7m.jaffirm.core.Preconditions;
 import com.io7m.laurel.gui.internal.model.LMCaption;
 import com.io7m.laurel.gui.internal.model.LMImage;
 import com.io7m.laurel.gui.internal.model.LMImageCreate;
@@ -52,6 +51,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import org.slf4j.Logger;
@@ -94,6 +94,7 @@ public final class LController implements LControllerType
   private final ConcurrentHashMap<String, String> attributes;
   private final LModel model;
   private final SimpleObjectProperty<LMUndoState> undoState;
+  private final ObservableList<LMCaption> captionsCopied;
 
   /**
    * Construct a controller.
@@ -112,6 +113,8 @@ public final class LController implements LControllerType
       new ConcurrentHashMap<>();
     this.undoState =
       new SimpleObjectProperty<>(LMUndoState.empty());
+    this.captionsCopied =
+      FXCollections.observableArrayList();
   }
 
   @Override
@@ -396,14 +399,6 @@ public final class LController implements LControllerType
     }
   }
 
-  private static void checkFXThread()
-  {
-    Preconditions.checkPreconditionV(
-      Platform.isFxApplicationThread(),
-      "Must be called on the FX application thread"
-    );
-  }
-
   @Override
   public void redo()
   {
@@ -557,6 +552,8 @@ public final class LController implements LControllerType
   public void captionRemove(
     final List<LMCaption> captions)
   {
+    this.captionsCopied.removeAll(captions);
+
     this.executeSaveStateChangingCommand(
       this.fileOrThrow(),
       new LModelOpCaptionDelete(
@@ -721,6 +718,34 @@ public final class LController implements LControllerType
   public ReadOnlyProperty<LMImage> imageSelected()
   {
     return this.model.imageSelected();
+  }
+
+  @Override
+  public ObservableList<LMCaption> captionsAssignedCopied()
+  {
+    return this.captionsCopied;
+  }
+
+  @Override
+  public void captionsAssignedCopy(
+    final List<LMCaption> captions)
+  {
+    this.captionsCopied.setAll(captions);
+  }
+
+  @Override
+  public void captionsAssignedPaste()
+  {
+    this.executeSaveStateChangingCommand(
+      this.fileOrThrow(),
+      new LModelOpCaptionsAssign(
+        this.model,
+        List.of(this.imageSelected().getValue().id()),
+        this.captionsCopied.stream()
+          .map(LMCaption::id)
+          .collect(Collectors.toList())
+      )
+    );
   }
 
   @Override
