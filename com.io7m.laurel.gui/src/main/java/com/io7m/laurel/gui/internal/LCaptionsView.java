@@ -39,10 +39,8 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +90,7 @@ public final class LCaptionsView implements LScreenViewType
   @FXML private ContextMenu assignedCaptionsContextMenu;
   @FXML private MenuItem assignedCaptionsContextMenuCopy;
   @FXML private MenuItem assignedCaptionsContextMenuPaste;
+  @FXML private MenuItem imagesCompareCaptions;
 
   private Stage imageDisplayWindow;
   private LImageView imageDisplay;
@@ -348,6 +347,7 @@ public final class LCaptionsView implements LScreenViewType
   {
     this.updateImageCaptionUnassignButton();
     this.updateImageCaptionAssignButton();
+    this.updateImageCaptionsCompareMenuItem();
 
     if (image == null) {
       this.controller.imageSelect(Optional.empty());
@@ -361,45 +361,25 @@ public final class LCaptionsView implements LScreenViewType
     final var imageFileOpt =
       this.controller.imageSelect(Optional.of(image.id()));
 
-    this.imageProgress.setVisible(true);
-    if (imageFileOpt.isPresent()) {
-      final var imageValue =
-        new Image(
-          imageFileOpt.get().toUri().toString(),
-          256.0,
-          256.0,
-          true,
-          true,
-          true
-        );
+    LImages.imageLoad(
+      imageFileOpt,
+      this.imageProgress,
+      this.imageView,
+      this.errorImageLoad,
+      256.0,
+      256.0
+    );
+  }
 
-      this.imageProgress.setVisible(true);
+  private void updateImageCaptionsCompareMenuItem()
+  {
+    final var selected =
+      List.copyOf(this.imagesAll.getSelectionModel().getSelectedItems());
 
-      imageValue.exceptionProperty()
-        .subscribe(e -> {
-          if (e != null) {
-            LOG.error("Image load: ", e);
-            this.errorImageLoad.setVisible(true);
-          }
-          this.imageProgress.setVisible(true);
-        });
-
-      imageValue.progressProperty()
-        .addListener((observable, oldValue, newValue) -> {
-          if (newValue.doubleValue() >= 1.0) {
-            this.imageProgress.setVisible(false);
-          }
-        });
-
-      this.imageProgress.progressProperty()
-        .bind(imageValue.progressProperty());
-
-      this.imageView.setImage(imageValue);
-      this.errorImageLoad.setVisible(false);
+    if (selected.size() == 2) {
+      this.imagesCompareCaptions.setDisable(false);
     } else {
-      this.imageView.setImage(null);
-      this.imageProgress.setVisible(false);
-      this.errorImageLoad.setVisible(false);
+      this.imagesCompareCaptions.setDisable(true);
     }
   }
 
@@ -421,7 +401,7 @@ public final class LCaptionsView implements LScreenViewType
       this.choosers.fileChoosers()
         .create(
           JWFileChooserConfiguration.builder()
-            .setModality(Modality.APPLICATION_MODAL)
+            .setModality(APPLICATION_MODAL)
             .setAction(JWFileChooserAction.OPEN_EXISTING_MULTIPLE)
             .setCssStylesheet(LCSS.defaultCSS().toURL())
             .setRecentFiles(this.preferences.recentFiles())
@@ -602,5 +582,47 @@ public final class LCaptionsView implements LScreenViewType
   private void onCaptionsAssignedPaste()
   {
     this.controller.captionsAssignedPaste();
+  }
+
+  @FXML
+  private void onCaptionsCompareSelected()
+  {
+    try {
+      final var stage = new Stage();
+
+      final var layout =
+        LCaptionsView.class.getResource(
+          "/com/io7m/laurel/gui/internal/captionCompare.fxml");
+
+      Objects.requireNonNull(layout, "layout");
+
+      final var loader =
+        new FXMLLoader(layout, this.strings.resources());
+
+      final var selectedItems =
+        this.imagesAll.getSelectionModel().getSelectedItems();
+
+      final var compareView =
+        new LCaptionCompareView(
+          this.services,
+          stage,
+          selectedItems.get(0),
+          selectedItems.get(1)
+        );
+
+      loader.setControllerFactory(param -> {
+        return compareView;
+      });
+
+      final Pane pane = loader.load();
+      LCSS.setCSS(pane);
+
+      stage.initModality(APPLICATION_MODAL);
+      stage.setTitle(this.strings.format("captions.compare"));
+      stage.setScene(new Scene(pane));
+      stage.showAndWait();
+    } catch (final IOException e) {
+      throw new UncheckedIOException(e);
+    }
   }
 }
