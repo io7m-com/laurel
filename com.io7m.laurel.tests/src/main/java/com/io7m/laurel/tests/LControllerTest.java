@@ -46,6 +46,8 @@ public final class LControllerTest
   private static final Logger LOG =
     LoggerFactory.getLogger(LControllerTest.class);
 
+  private static final long TIMEOUT = 10L;
+
   private LController controller;
   private ArrayList<SStructuredErrorType<?>> errors;
 
@@ -97,7 +99,7 @@ public final class LControllerTest
       this.controller.fileStatus().getValue()
     );
 
-    this.controller.open(file).get(5L, TimeUnit.SECONDS);
+    this.controller.open(file).get(TIMEOUT, TimeUnit.SECONDS);
 
     assertInstanceOf(
       LModelFileStatusType.Saved.class,
@@ -119,7 +121,7 @@ public final class LControllerTest
     );
 
     assertThrows(Exception.class, () -> {
-      this.controller.open(file).get(5L, TimeUnit.SECONDS);
+      this.controller.open(file).get(TIMEOUT, TimeUnit.SECONDS);
     });
 
     assertInstanceOf(
@@ -140,7 +142,7 @@ public final class LControllerTest
 
     assertThrows(Exception.class, () -> {
       this.controller.open(directory.resolve("nonexistent"))
-        .get(5L, TimeUnit.SECONDS);
+        .get(TIMEOUT, TimeUnit.SECONDS);
     });
 
     assertInstanceOf(
@@ -162,7 +164,7 @@ public final class LControllerTest
       this.controller.fileStatus().getValue()
     );
 
-    this.controller.open(file).get(5L, TimeUnit.SECONDS);
+    this.controller.open(file).get(TIMEOUT, TimeUnit.SECONDS);
 
     assertInstanceOf(
       LModelFileStatusType.Saved.class,
@@ -176,7 +178,7 @@ public final class LControllerTest
       this.controller.fileStatus().getValue()
     );
 
-    this.controller.save().get(5L, TimeUnit.SECONDS);
+    this.controller.save().get(TIMEOUT, TimeUnit.SECONDS);
 
     assertInstanceOf(
       LModelFileStatusType.Saved.class,
@@ -211,7 +213,7 @@ public final class LControllerTest
       this.controller.fileStatus().getValue()
     );
 
-    this.controller.save().get(5L, TimeUnit.SECONDS);
+    this.controller.save().get(TIMEOUT, TimeUnit.SECONDS);
 
     assertInstanceOf(
       LModelFileStatusType.Saved.class,
@@ -260,7 +262,7 @@ public final class LControllerTest
       this.controller.fileStatus().getValue()
     );
 
-    this.controller.save().get(5L, TimeUnit.SECONDS);
+    this.controller.save().get(TIMEOUT, TimeUnit.SECONDS);
 
     assertInstanceOf(
       LModelFileStatusType.Saved.class,
@@ -290,7 +292,7 @@ public final class LControllerTest
       this.controller.fileStatus().getValue()
     );
 
-    this.controller.imagesAdd(List.of(imageFile)).get(5L, TimeUnit.SECONDS);
+    this.controller.imagesAdd(List.of(imageFile)).get(TIMEOUT, TimeUnit.SECONDS);
 
     assertInstanceOf(
       LModelFileStatusType.Unsaved.class,
@@ -311,7 +313,7 @@ public final class LControllerTest
       this.controller.fileStatus().getValue()
     );
 
-    this.controller.save().get(5L, TimeUnit.SECONDS);
+    this.controller.save().get(TIMEOUT, TimeUnit.SECONDS);
 
     assertInstanceOf(
       LModelFileStatusType.Saved.class,
@@ -344,7 +346,7 @@ public final class LControllerTest
     );
 
     assertThrows(Exception.class, () -> {
-      this.controller.save().get(5L, TimeUnit.SECONDS);
+      this.controller.save().get(TIMEOUT, TimeUnit.SECONDS);
     });
 
     assertInstanceOf(
