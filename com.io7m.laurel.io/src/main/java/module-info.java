@@ -32,8 +32,10 @@ module com.io7m.laurel.io
   requires com.io7m.blackthorne.jxe;
   requires com.io7m.jdeferthrow.core;
   requires com.io7m.jxe.core;
+  requires java.sql;
   requires org.apache.commons.io;
   requires org.slf4j;
+  requires org.xerial.sqlitejdbc;
 
   exports com.io7m.laurel.io.internal to com.io7m.laurel.tests;
   exports com.io7m.laurel.io;

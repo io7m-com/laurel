@@ -45,6 +45,7 @@
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="menuItemImport" mnemonicParsing="false" onAction="#onImportSelected" text="Import..." />
                   <MenuItem fx:id="menuItemExport" disable="true" mnemonicParsing="false" onAction="#onExportSelected" text="Export..." />
+                  <MenuItem mnemonicParsing="false" onAction="#onMergeSelected" text="%merge" />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="menuItemExit" mnemonicParsing="false" onAction="#onExitSelected" text="Exit" />
             </items>

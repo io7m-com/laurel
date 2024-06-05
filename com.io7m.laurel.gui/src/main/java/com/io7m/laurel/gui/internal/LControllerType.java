@@ -335,4 +335,15 @@ public interface LControllerType
    */
 
   void captionsAssignedPaste();
+
+  /**
+   * Merge the contents of the given files.
+   *
+   * @param files The files
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<Object> merge(
+    List<Path> files);
 }

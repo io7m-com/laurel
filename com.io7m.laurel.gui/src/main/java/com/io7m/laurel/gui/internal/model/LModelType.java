@@ -135,5 +135,4 @@ public interface LModelType
    */
 
   ObservableList<String> globalPrefixCaptions();
-
 }

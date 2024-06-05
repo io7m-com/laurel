@@ -37,6 +37,8 @@ import javafx.stage.Stage;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -61,6 +63,7 @@ public final class LMainView implements LScreenViewType
   private final Stage stage;
   private final LExporterDialogs exporterDialogs;
   private final LPreferencesType preferences;
+  private final LMergeDialogs mergeDialogs;
 
   private @FXML Parent root;
   private @FXML MenuItem menuItemNew;
@@ -96,6 +99,8 @@ public final class LMainView implements LScreenViewType
       services.requireService(LErrorDialogs.class);
     this.exporterDialogs =
       services.requireService(LExporterDialogs.class);
+    this.mergeDialogs =
+      services.requireService(LMergeDialogs.class);
     this.preferences =
       services.requireService(LPreferencesType.class);
 
@@ -600,5 +605,41 @@ public final class LMainView implements LScreenViewType
   public void onAboutSelected()
   {
     LAbout.open(this.strings);
+  }
+
+  /**
+   * The user tried to merge.
+   */
+
+  @FXML
+  public void onMergeSelected()
+  {
+    if (this.controller.isSaved()) {
+      this.controller.closeSet();
+      this.tryMerge();
+      return;
+    }
+
+    switch (this.onConfirmUnsaved()) {
+      case CANCEL -> {
+        return;
+      }
+      case DISCARD -> {
+        this.controller.closeSet();
+        this.tryMerge();
+        return;
+      }
+      case SAVE -> {
+        this.controller.save();
+        this.controller.closeSet();
+        this.tryMerge();
+        return;
+      }
+    }
+  }
+
+  private void tryMerge()
+  {
+    this.mergeDialogs.open();
   }
 }

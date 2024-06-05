@@ -32,6 +32,7 @@ open module com.io7m.laurel.gui
   requires com.io7m.jade.api;
   requires com.io7m.jaffirm.core;
   requires com.io7m.jattribute.core;
+  requires com.io7m.jdeferthrow.core;
   requires com.io7m.junreachable.core;
   requires com.io7m.jwheatsheaf.api;
   requires com.io7m.jwheatsheaf.oxygen;

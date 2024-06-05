@@ -85,6 +85,9 @@ public final class LApplication extends Application
     final var exporters = new LExporterDialogs(services, strings);
     services.register(LExporterDialogs.class, exporters);
 
+    final var mergers = new LMergeDialogs(services, strings);
+    services.register(LMergeDialogs.class, mergers);
+
     final var choosers = new LFileChoosers();
     services.register(LFileChoosers.class, choosers);
 

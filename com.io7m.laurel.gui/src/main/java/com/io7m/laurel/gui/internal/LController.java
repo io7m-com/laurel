@@ -19,6 +19,7 @@ package com.io7m.laurel.gui.internal;
 
 import com.io7m.anethum.api.ParseStatusType;
 import com.io7m.anethum.api.ParsingException;
+import com.io7m.jdeferthrow.core.ExceptionTracker;
 import com.io7m.laurel.gui.internal.model.LMCaption;
 import com.io7m.laurel.gui.internal.model.LMImage;
 import com.io7m.laurel.gui.internal.model.LMImageCreate;
@@ -39,6 +40,7 @@ import com.io7m.laurel.gui.internal.model.LModelOpType;
 import com.io7m.laurel.gui.internal.model.LModelType;
 import com.io7m.laurel.io.LExportRequest;
 import com.io7m.laurel.io.LExporters;
+import com.io7m.laurel.io.LImageSets;
 import com.io7m.laurel.io.LImporters;
 import com.io7m.laurel.io.LParsers;
 import com.io7m.laurel.io.LSerializers;
@@ -61,6 +63,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -746,6 +749,81 @@ public final class LController implements LControllerType
           .collect(Collectors.toList())
       )
     );
+  }
+
+  @Override
+  public CompletableFuture<Object> merge(
+    final List<Path> files)
+  {
+    Objects.requireNonNull(files, "files");
+
+    this.attributes.clear();
+
+    for (int index = 0; index < files.size(); ++index) {
+      this.attributes.put(
+        "File [%d]".formatted(Integer.valueOf(index)),
+        files.get(index).toString()
+      );
+    }
+
+    this.busySet(true);
+
+    final var future = new CompletableFuture<>();
+    future.whenComplete((ignored0, ignored1) -> {
+      LOG.debug("Merge completed.");
+      Platform.runLater(() -> this.busySet(false));
+    });
+
+    Thread.ofVirtual()
+      .start(() -> {
+        final var exceptions =
+          new ExceptionTracker<Exception>();
+
+        final var imageSets =
+          new ArrayList<LImageSet>(files.size());
+
+        for (final var file : files) {
+          try {
+            LOG.info("Open: {}", file);
+            imageSets.add(PARSERS.parseFile(file));
+          } catch (final ParsingException e) {
+            LOG.error("", e);
+            this.publishParseErrors(e.statusValues());
+            this.publishError(e);
+            exceptions.addException(e);
+          } catch (final Throwable e) {
+            LOG.error("", e);
+            this.publishError(e);
+            exceptions.addException(new Exception(e));
+          }
+        }
+
+        try {
+          exceptions.throwIfNecessary();
+        } catch (final Exception e) {
+          future.completeExceptionally(e);
+          return;
+        }
+
+        final var merged =
+          LImageSets.mergeAll(imageSets);
+
+        Platform.runLater(() -> {
+          try {
+            this.model.replaceWith(
+              Paths.get(""),
+              merged
+            );
+            future.complete(null);
+          } catch (final Exception e) {
+            LOG.error("", e);
+            this.publishError(e);
+            future.completeExceptionally(e);
+          }
+        });
+      });
+
+    return future;
   }
 
   @Override
