@@ -15,16 +15,12 @@
  */
 
 /**
- * Image caption management (Model)
+ * Image caption management (File model)
  */
 
-module com.io7m.laurel.model
-{
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
+@Export
+@Version("1.0.0")
+package com.io7m.laurel.filemodel;
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
-
-  exports com.io7m.laurel.model;
-}
+import org.osgi.annotation.bundle.Export;
+import org.osgi.annotation.versioning.Version;

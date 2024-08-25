@@ -14,17 +14,42 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.model;
+
+import java.util.regex.Pattern;
+
 /**
- * Image caption management (Model)
+ * A SHA-256 hash value.
+ *
+ * @param value The value
  */
 
-module com.io7m.laurel.model
+public record LHashSHA256(
+  String value)
+  implements LHashType
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
+  private static final Pattern VALID_HASH =
+    Pattern.compile("[a-f0-9]{64}");
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
+  /**
+   * A SHA-256 hash value.
+   *
+   * @param value The value
+   */
 
-  exports com.io7m.laurel.model;
+  public LHashSHA256
+  {
+    if (!VALID_HASH.matcher(value).matches()) {
+      throw new IllegalArgumentException(
+        "Hash values must match %s".formatted(VALID_HASH)
+      );
+    }
+  }
+
+  @Override
+  public String name()
+  {
+    return "SHA-256";
+  }
 }

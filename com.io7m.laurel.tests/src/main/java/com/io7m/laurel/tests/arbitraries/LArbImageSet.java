@@ -17,7 +17,7 @@
 
 package com.io7m.laurel.tests.arbitraries;
 
-import com.io7m.laurel.model.LImage;
+import com.io7m.laurel.model.LOldImage;
 import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
@@ -27,7 +27,6 @@ import net.jqwik.api.Combinators;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -51,7 +50,7 @@ public final class LArbImageSet extends LArbAbstract<LImageSet>
           .ofMaxSize(10)
       ).as((id, captions, images) -> {
 
-        final var imagesConstructed = new ArrayList<LImage>();
+        final var imagesConstructed = new ArrayList<LOldImage>();
         for (final var imageId : images) {
           final var imageCaps = new TreeSet<LImageCaptionID>();
           for (final var caption : captions) {
@@ -59,7 +58,7 @@ public final class LArbImageSet extends LArbAbstract<LImageSet>
               imageCaps.add(caption.id());
             }
           }
-          imagesConstructed.add(new LImage(imageId, imageId + ".png", imageCaps));
+          imagesConstructed.add(new LOldImage(imageId, imageId + ".png", imageCaps));
         }
 
         return new LImageSet(
@@ -79,8 +78,8 @@ public final class LArbImageSet extends LArbAbstract<LImageSet>
       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
-  private static Map<LImageID, LImage> imageMap(
-    final Collection<LImage> images)
+  private static Map<LImageID, LOldImage> imageMap(
+    final Collection<LOldImage> images)
   {
     return images.stream()
       .map(x -> Map.entry(x.imageID(), x))

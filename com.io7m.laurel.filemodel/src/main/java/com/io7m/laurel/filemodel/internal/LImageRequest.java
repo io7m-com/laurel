@@ -14,17 +14,39 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.filemodel.internal;
+
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.Objects;
+import java.util.Optional;
+
 /**
- * Image caption management (Model)
+ * An image request.
+ *
+ * @param name   The name
+ * @param file   The file
+ * @param source The source
  */
 
-module com.io7m.laurel.model
+public record LImageRequest(
+  String name,
+  Path file,
+  Optional<URI> source)
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
+  /**
+   * An image request.
+   *
+   * @param name   The name
+   * @param file   The file
+   * @param source The source
+   */
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
-
-  exports com.io7m.laurel.model;
+  public LImageRequest
+  {
+    Objects.requireNonNull(name, "name");
+    Objects.requireNonNull(file, "file");
+    Objects.requireNonNull(source, "source");
+  }
 }

@@ -17,40 +17,47 @@
 
 package com.io7m.laurel.model;
 
-import java.net.URI;
-import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * An image.
  *
- * @param name   The name
- * @param file   The file
- * @param source The source
- * @param hash   The hash
+ * @param imageID  The image ID
+ * @param fileName The file name
+ * @param captions The captions
  */
 
-public record LImage(
-  String name,
-  Optional<Path> file,
-  Optional<URI> source,
-  LHashType hash)
+public record LOldImage(
+  LImageID imageID,
+  String fileName,
+  SortedSet<LImageCaptionID> captions)
+  implements Comparable<LOldImage>
 {
   /**
    * An image.
    *
-   * @param name   The name
-   * @param file   The file
-   * @param source The source
-   * @param hash   The hash
+   * @param imageID  The image ID
+   * @param fileName The file name
+   * @param captions The captions
    */
 
-  public LImage
+  public LOldImage
   {
-    Objects.requireNonNull(name, "name");
-    Objects.requireNonNull(file, "file");
-    Objects.requireNonNull(source, "source");
-    Objects.requireNonNull(hash, "hash");
+    Objects.requireNonNull(imageID, "imageID");
+    Objects.requireNonNull(fileName, "fileName");
+    captions = Collections.unmodifiableSortedSet(new TreeSet<>(captions));
+  }
+
+  @Override
+  public int compareTo(
+    final LOldImage other)
+  {
+    return Comparator.comparing(LOldImage::fileName)
+      .thenComparing(LOldImage::imageID)
+      .compare(this, other);
   }
 }

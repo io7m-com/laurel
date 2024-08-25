@@ -18,7 +18,7 @@
 package com.io7m.laurel.io;
 
 import com.io7m.jdeferthrow.core.ExceptionTracker;
-import com.io7m.laurel.model.LImage;
+import com.io7m.laurel.model.LOldImage;
 import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
@@ -83,7 +83,7 @@ public final class LImporters
       new ExceptionTracker<Exception>();
 
     final var images =
-      new TreeMap<LImageID, LImage>();
+      new TreeMap<LImageID, LOldImage>();
     final var captions =
       new TreeMap<LImageCaptionID, LImageCaption>();
     final var captionTexts =
@@ -125,7 +125,7 @@ public final class LImporters
     return new LImageSet(List.of(), captions, images);
   }
 
-  private static LImage processImageFile(
+  private static LOldImage processImageFile(
     final ExceptionTracker<Exception> exceptionTracker,
     final int fileIndex,
     final Path sourceDirectory,
@@ -198,7 +198,7 @@ public final class LImporters
         ++captionIndex;
       }
 
-      return new LImage(
+      return new LOldImage(
         new LImageID(
           UUID.nameUUIDFromBytes(
             file.toAbsolutePath()

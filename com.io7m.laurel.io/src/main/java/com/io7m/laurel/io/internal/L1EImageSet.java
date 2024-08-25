@@ -21,7 +21,7 @@ import com.io7m.blackthorne.core.BTElementHandlerConstructorType;
 import com.io7m.blackthorne.core.BTElementHandlerType;
 import com.io7m.blackthorne.core.BTElementParsingContextType;
 import com.io7m.blackthorne.core.BTQualifiedName;
-import com.io7m.laurel.model.LImage;
+import com.io7m.laurel.model.LOldImage;
 import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
@@ -41,7 +41,7 @@ import static com.io7m.laurel.io.internal.LNames.qName;
 public final class L1EImageSet
   implements BTElementHandlerType<Object, LImageSet>
 {
-  private final TreeMap<LImageID, LImage> images;
+  private final TreeMap<LImageID, LOldImage> images;
   private final TreeMap<LImageCaptionID, LImageCaption> captions;
   private final ArrayList<String> globalPrefixCaptions;
 
@@ -79,9 +79,9 @@ public final class L1EImageSet
     switch (result) {
       case final List xs when !xs.isEmpty() -> {
         switch (xs.get(0)) {
-          case final LImage ignored0 -> {
+          case final LOldImage ignored0 -> {
             for (final var x : xs) {
-              final var i = (LImage) x;
+              final var i = (LOldImage) x;
               this.images.put(i.imageID(), i);
             }
           }

@@ -14,17 +14,21 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.filemodel.internal;
+
+import com.io7m.darco.api.DDatabaseType;
+
 /**
- * Image caption management (Model)
+ * The type of laurel SQLite databases.
  */
 
-module com.io7m.laurel.model
+public interface LDatabaseType
+  extends DDatabaseType<
+  LDatabaseConfiguration,
+  LDatabaseConnectionType,
+  LDatabaseTransactionType,
+  LDatabaseQueryProviderType<?, ?, ?>>
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
-
-  exports com.io7m.laurel.model;
 }

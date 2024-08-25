@@ -14,17 +14,31 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.filemodel.internal;
+
+import java.util.Properties;
+import java.util.function.Function;
+
 /**
- * Image caption management (Model)
+ * A command factory.
+ *
+ * @param <T> The type of parameters
  */
 
-module com.io7m.laurel.model
+public interface LCommandFactoryType<T>
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
+  /**
+   * @return The canonical name of the command class
+   *
+   * @see Class#getCanonicalName()
+   */
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
+  String commandClass();
 
-  exports com.io7m.laurel.model;
+  /**
+   * @return A function to create a command from a set of properties
+   */
+
+  Function<Properties, LCommandType<T>> constructor();
 }

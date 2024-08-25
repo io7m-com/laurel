@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public record LImageSet(
   List<String> globalPrefixCaptions,
   SortedMap<LImageCaptionID, LImageCaption> captions,
-  SortedMap<LImageID, LImage> images)
+  SortedMap<LImageID, LOldImage> images)
 {
   /**
    * An image set.

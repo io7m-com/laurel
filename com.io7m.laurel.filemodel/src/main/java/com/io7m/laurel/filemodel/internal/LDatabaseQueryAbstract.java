@@ -14,17 +14,24 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.filemodel.internal;
+
+import com.io7m.darco.api.DDatabaseQueryAbstract;
+
 /**
- * Image caption management (Model)
+ * An abstract query for the laurel SQLite database.
+ *
+ * @param <P> The query parameters
+ * @param <R> The query results
  */
 
-module com.io7m.laurel.model
+public abstract class LDatabaseQueryAbstract<P, R>
+  extends DDatabaseQueryAbstract<LDatabaseTransactionType, P, R>
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
-
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
-
-  exports com.io7m.laurel.model;
+  protected LDatabaseQueryAbstract(
+    final LDatabaseTransactionType t)
+  {
+    super(t);
+  }
 }

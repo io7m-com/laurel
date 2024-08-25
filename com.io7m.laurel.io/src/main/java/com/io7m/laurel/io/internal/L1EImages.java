@@ -21,7 +21,7 @@ import com.io7m.blackthorne.core.BTElementHandlerConstructorType;
 import com.io7m.blackthorne.core.BTElementHandlerType;
 import com.io7m.blackthorne.core.BTElementParsingContextType;
 import com.io7m.blackthorne.core.BTQualifiedName;
-import com.io7m.laurel.model.LImage;
+import com.io7m.laurel.model.LOldImage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +34,9 @@ import static com.io7m.laurel.io.internal.LNames.qName;
  */
 
 public final class L1EImages
-  implements BTElementHandlerType<LImage, List<LImage>>
+  implements BTElementHandlerType<LOldImage, List<LOldImage>>
 {
-  private final ArrayList<LImage> images;
+  private final ArrayList<LOldImage> images;
 
   /**
    * An element handler.
@@ -51,7 +51,7 @@ public final class L1EImages
   }
 
   @Override
-  public Map<BTQualifiedName, BTElementHandlerConstructorType<?, ? extends LImage>>
+  public Map<BTQualifiedName, BTElementHandlerConstructorType<?, ? extends LOldImage>>
   onChildHandlersRequested(
     final BTElementParsingContextType context)
   {
@@ -66,13 +66,13 @@ public final class L1EImages
   @Override
   public void onChildValueProduced(
     final BTElementParsingContextType context,
-    final LImage result)
+    final LOldImage result)
   {
     this.images.add(result);
   }
 
   @Override
-  public List<LImage> onElementFinished(
+  public List<LOldImage> onElementFinished(
     final BTElementParsingContextType context)
   {
     return List.copyOf(this.images);

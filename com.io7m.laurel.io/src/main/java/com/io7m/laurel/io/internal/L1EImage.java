@@ -21,7 +21,7 @@ import com.io7m.blackthorne.core.BTElementHandlerConstructorType;
 import com.io7m.blackthorne.core.BTElementHandlerType;
 import com.io7m.blackthorne.core.BTElementParsingContextType;
 import com.io7m.blackthorne.core.BTQualifiedName;
-import com.io7m.laurel.model.LImage;
+import com.io7m.laurel.model.LOldImage;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
 import org.xml.sax.Attributes;
@@ -37,7 +37,7 @@ import static com.io7m.laurel.io.internal.LNames.qName;
  */
 
 public final class L1EImage
-  implements BTElementHandlerType<LImageCaptionID, LImage>
+  implements BTElementHandlerType<LImageCaptionID, LOldImage>
 {
   private final TreeSet<LImageCaptionID> captions;
   private LImageID imageId;
@@ -88,10 +88,10 @@ public final class L1EImage
   }
 
   @Override
-  public LImage onElementFinished(
+  public LOldImage onElementFinished(
     final BTElementParsingContextType context)
   {
-    return new LImage(
+    return new LOldImage(
       this.imageId,
       this.fileName,
       this.captions

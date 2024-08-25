@@ -15,42 +15,48 @@
  */
 
 
-package com.io7m.laurel.model;
+package com.io7m.laurel.filemodel.internal;
 
-import java.net.URI;
-import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Properties;
+import java.util.ServiceLoader;
 
 /**
- * An image.
- *
- * @param name   The name
- * @param file   The file
- * @param source The source
- * @param hash   The hash
+ * The command directory.
  */
 
-public record LImage(
-  String name,
-  Optional<Path> file,
-  Optional<URI> source,
-  LHashType hash)
+public final class LCommands
 {
+  private LCommands()
+  {
+
+  }
+
   /**
-   * An image.
+   * Find a suitable command for the given properties.
    *
-   * @param name   The name
-   * @param file   The file
-   * @param source The source
-   * @param hash   The hash
+   * @param properties The properties
+   *
+   * @return The command
    */
 
-  public LImage
+  public static LCommandType<?> forProperties(
+    final Properties properties)
   {
-    Objects.requireNonNull(name, "name");
-    Objects.requireNonNull(file, "file");
-    Objects.requireNonNull(source, "source");
-    Objects.requireNonNull(hash, "hash");
+    final var type = properties.getProperty("@Type");
+    Objects.requireNonNull(type, "type");
+
+    final var factories =
+      ServiceLoader.load(LCommandFactoryType.class);
+
+    for (final LCommandFactoryType<?> factory : factories) {
+      if (Objects.equals(factory.commandClass(), type)) {
+        return factory.constructor().apply(properties);
+      }
+    }
+
+    throw new IllegalStateException(
+      "No command available of type %s".formatted(type)
+    );
   }
 }

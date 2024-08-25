@@ -14,17 +14,16 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/**
- * Image caption management (Model)
- */
 
-module com.io7m.laurel.model
+package com.io7m.laurel.filemodel.internal;
+
+import java.util.Properties;
+import java.util.function.Function;
+
+record LCommandFactory<T>(
+  String commandClass,
+  Function<Properties, LCommandType<T>> constructor)
+  implements LCommandFactoryType<T>
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
-
-  exports com.io7m.laurel.model;
 }

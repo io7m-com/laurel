@@ -14,17 +14,22 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.filemodel.internal;
+
+import com.io7m.darco.api.DDatabaseQueryProviderType;
+import com.io7m.darco.api.DDatabaseQueryType;
+
 /**
- * Image caption management (Model)
+ * The type of laurel SQLite database query providers.
+ *
+ * @param <P> The type of query parameters
+ * @param <R> The type of query results
+ * @param <Q> The precise type of query
  */
 
-module com.io7m.laurel.model
+public interface LDatabaseQueryProviderType<P, R, Q extends DDatabaseQueryType<P, R>>
+  extends DDatabaseQueryProviderType<LDatabaseTransactionType, P, R, Q>
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
-
-  exports com.io7m.laurel.model;
 }

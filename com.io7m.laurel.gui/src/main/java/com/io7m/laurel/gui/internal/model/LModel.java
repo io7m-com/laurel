@@ -18,7 +18,7 @@
 package com.io7m.laurel.gui.internal.model;
 
 import com.io7m.laurel.gui.internal.model.LModelFileStatusType.None;
-import com.io7m.laurel.model.LImage;
+import com.io7m.laurel.model.LOldImage;
 import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
@@ -219,7 +219,7 @@ public final class LModel implements LModelType
     final var outCaptions =
       new TreeMap<LImageCaptionID, LImageCaption>();
     final var outImages =
-      new TreeMap<LImageID, LImage>();
+      new TreeMap<LImageID, LOldImage>();
 
     for (final var entry : this.captions.entrySet()) {
       final var caption =
@@ -240,7 +240,7 @@ public final class LModel implements LModelType
         directory.relativize(imageFileName);
 
       final var image =
-        new LImage(
+        new LOldImage(
           entry.getKey(),
           savedImageFileName.toString(),
           new TreeSet<>(

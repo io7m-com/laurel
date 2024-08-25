@@ -27,20 +27,23 @@ open module com.io7m.laurel.tests
   requires com.io7m.laurel.reader.api;
   requires com.io7m.laurel.writer.api;
   requires com.io7m.laurel.gui;
+  requires com.io7m.laurel.filemodel;
 
   requires com.io7m.anethum.api;
   requires com.io7m.jattribute.core;
   requires com.io7m.jmulticlose.core;
+  requires com.io7m.zelador.test_extension;
   requires javafx.base;
   requires javafx.controls;
   requires net.jqwik.api;
   requires org.apache.commons.io;
   requires org.slf4j;
 
-  requires transitive org.junit.jupiter.api;
-  requires transitive org.junit.jupiter.engine;
-  requires transitive org.junit.platform.commons;
-  requires transitive org.junit.platform.engine;
+  requires org.junit.jupiter.api;
+  requires org.junit.jupiter.engine;
+  requires org.junit.platform.commons;
+  requires org.junit.platform.engine;
+  requires org.junit.platform.launcher;
 
   uses ArbitraryProvider;
 

@@ -17,40 +17,50 @@
 
 package com.io7m.laurel.model;
 
-import java.net.URI;
-import java.nio.file.Path;
+
+import java.util.Comparator;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
- * An image.
+ * A caption.
  *
- * @param name   The name
- * @param file   The file
- * @param source The source
- * @param hash   The hash
+ * @param text The caption text
  */
 
-public record LImage(
-  String name,
-  Optional<Path> file,
-  Optional<URI> source,
-  LHashType hash)
+public record LTag(String text)
+  implements Comparable<LTag>
 {
   /**
-   * An image.
-   *
-   * @param name   The name
-   * @param file   The file
-   * @param source The source
-   * @param hash   The hash
+   * The pattern that defines a valid caption.
    */
 
-  public LImage
+  public static final Pattern VALID_CAPTION =
+    Pattern.compile("[a-z0-9A-Z_-][a-z0-9A-Z_ \\-']*");
+
+  /**
+   * A caption.
+   *
+   * @param text The caption text
+   */
+
+  public LTag
   {
-    Objects.requireNonNull(name, "name");
-    Objects.requireNonNull(file, "file");
-    Objects.requireNonNull(source, "source");
-    Objects.requireNonNull(hash, "hash");
+    Objects.requireNonNull(text, "text");
+    text = text.trim();
+
+    if (!VALID_CAPTION.matcher(text).matches()) {
+      throw new IllegalArgumentException(
+        "Caption must match %s".formatted(VALID_CAPTION)
+      );
+    }
+  }
+
+  @Override
+  public int compareTo(
+    final LTag other)
+  {
+    return Comparator.comparing(LTag::text)
+      .compare(this, other);
   }
 }

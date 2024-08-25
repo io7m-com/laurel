@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Schemas xmlns="urn:com.io7m.trasco.database.statements:1:0">
+
+  <Schema versionCurrent="0">
+    <Comment>
+      The schema version table stores the current version of the database schema. Implementations are expected to query
+      this table on connecting to the database in order to ensure that the calling code is compatible with the tables in
+      the database.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE schema_version (
+  version_lock            INTEGER NOT NULL DEFAULT 1,
+  version_application_id  TEXT    NOT NULL,
+  version_number          INTEGER NOT NULL,
+
+  CONSTRAINT check_lock_primary
+    PRIMARY KEY (version_lock),
+
+  CONSTRAINT check_lock_locked
+    CHECK (version_lock = 1)
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+  </Schema>
+
+  <Schema versionCurrent="1">
+    <Comment>
+      The image_blobs table stores the image blobs.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE image_blobs (
+  image_blob_id      INTEGER PRIMARY KEY NOT NULL,
+  image_blob_data    BLOB                NOT NULL,
+  image_blob_sha256  TEXT                NOT NULL
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The images table stores the complete set of images.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE images (
+  image_id      INTEGER PRIMARY KEY NOT NULL,
+  image_name    TEXT                NOT NULL,
+  image_file    TEXT,
+  image_source  TEXT,
+  image_blob    INTEGER             NOT NULL,
+
+-- [jooq ignore start]
+  CONSTRAINT images_name_unique
+    UNIQUE (image_name),
+-- [jooq ignore stop]
+
+  CONSTRAINT images_blob_exists
+    FOREIGN KEY (image_blob) REFERENCES image_blobs (image_blob_id)
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The tags table stores the complete set of available tags.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE tags (
+  tag_id    INTEGER PRIMARY KEY NOT NULL,
+  tag_text  TEXT                NOT NULL
+
+-- [jooq ignore start]
+  ,
+  CONSTRAINT tags_text_unique
+    UNIQUE (tag_text)
+-- [jooq ignore stop]
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The image_tags table stores the associations between images and tags.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE image_tags (
+  image_tag_image  INTEGER NOT NULL,
+  image_tag_tag    INTEGER NOT NULL,
+
+  CONSTRAINT image_tags_image_exists
+    FOREIGN KEY (image_tag_image) REFERENCES images (image_id),
+
+  CONSTRAINT image_tags_tag_exists
+    FOREIGN KEY (image_tag_tag) REFERENCES tags (tag_id),
+
+  CONSTRAINT image_tags_primary_key
+    PRIMARY KEY (image_tag_image, image_tag_tag)
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The undo table stores the undo history.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE undo (
+  undo_id           INTEGER PRIMARY KEY NOT NULL,
+  undo_data         BLOB                NOT NULL,
+  undo_description  TEXT                NOT NULL,
+  undo_time         INTEGER             NOT NULL
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The redo table stores the redo history.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE redo (
+  redo_id           INTEGER PRIMARY KEY NOT NULL,
+  redo_data         BLOB                NOT NULL,
+  redo_description  TEXT                NOT NULL,
+  redo_time         INTEGER             NOT NULL
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+  </Schema>
+
+</Schemas>

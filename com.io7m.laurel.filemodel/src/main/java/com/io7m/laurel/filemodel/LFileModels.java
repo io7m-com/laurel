@@ -14,17 +14,41 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.filemodel;
+
+import com.io7m.laurel.filemodel.internal.LFileModel;
+import com.io7m.laurel.model.LException;
+
+import java.nio.file.Path;
+
 /**
- * Image caption management (Model)
+ * The file models.
  */
 
-module com.io7m.laurel.model
+public final class LFileModels
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
+  private LFileModels()
+  {
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
+  }
 
-  exports com.io7m.laurel.model;
+  /**
+   * Open a file model.
+   *
+   * @param file     The file
+   * @param readOnly {@code true} if the file should be read-only
+   *
+   * @return A file model
+   *
+   * @throws LException On errors
+   */
+
+  public static LFileModelType open(
+    final Path file,
+    final boolean readOnly)
+    throws LException
+  {
+    return LFileModel.open(file, readOnly);
+  }
 }

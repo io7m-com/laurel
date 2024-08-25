@@ -14,17 +14,26 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.filemodel.internal;
+
 /**
- * Image caption management (Model)
+ * A value that indicates whether a command can be undone. Even commands that
+ * execute state changes might sometimes not support being undone (because,
+ * for example, the command execution didn't result in any actual state changes).
  */
 
-module com.io7m.laurel.model
+public enum LCommandUndoable
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
+  /**
+   * The command can be undone.
+   */
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
+  COMMAND_UNDOABLE,
 
-  exports com.io7m.laurel.model;
+  /**
+   * The command can't be undone.
+   */
+
+  COMMAND_NOT_UNDOABLE
 }

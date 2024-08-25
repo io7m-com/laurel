@@ -14,17 +14,27 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+
+package com.io7m.laurel.model;
+
 /**
- * Image caption management (Model)
+ * A hash value.
  */
 
-module com.io7m.laurel.model
+public sealed interface LHashType
+  permits LHashSHA256
 {
-  requires static org.osgi.annotation.bundle;
-  requires static org.osgi.annotation.versioning;
+  /**
+   * @return The lowercase hex hash value
+   */
 
-  requires com.io7m.seltzer.api;
-  requires com.io7m.jaffirm.core;
+  String value();
 
-  exports com.io7m.laurel.model;
+  /**
+   * @return The hash algorithm name
+   *
+   * @see "https://docs.oracle.com/en/java/javase/21/docs/specs/security/standard-names.html#messagedigest-algorithms"
+   */
+
+  String name();
 }
