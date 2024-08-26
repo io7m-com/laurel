@@ -20,14 +20,19 @@ package com.io7m.laurel.filemodel.internal;
 import com.io7m.darco.api.DDatabaseCreate;
 import com.io7m.darco.api.DDatabaseException;
 import com.io7m.darco.api.DDatabaseTelemetryNoOp;
+import com.io7m.darco.api.DDatabaseUnit;
 import com.io7m.darco.api.DDatabaseUpgrade;
 import com.io7m.jattribute.core.AttributeReadableType;
 import com.io7m.jattribute.core.AttributeType;
 import com.io7m.jattribute.core.Attributes;
+import com.io7m.jmulticlose.core.CloseableCollection;
+import com.io7m.jmulticlose.core.CloseableCollectionType;
+import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LTag;
+import com.io7m.seltzer.api.SStructuredErrorType;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.slf4j.Logger;
@@ -42,9 +47,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.io7m.laurel.filemodel.internal.Tables.REDO;
@@ -76,6 +83,8 @@ public final class LFileModel implements LFileModelType
   private final ConcurrentHashMap<String, String> attributes;
   private final LDatabaseType database;
   private final ReentrantLock commandLock;
+  private final CloseableCollectionType<LException> resources;
+  private final SubmissionPublisher<LFileModelEvent> events;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -102,6 +111,20 @@ public final class LFileModel implements LFileModelType
       new ReentrantLock();
     this.attributes =
       new ConcurrentHashMap<>();
+
+    this.resources =
+      CloseableCollection.create(() -> {
+        return new LException(
+          "One or more resources could not be closed.",
+          "error-resource-close",
+          Map.of(),
+          Optional.empty()
+        );
+      });
+
+    this.resources.add(this.database);
+    this.events =
+      this.resources.add(new SubmissionPublisher<>());
   }
 
   /**
@@ -299,6 +322,12 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public SubmissionPublisher<LFileModelEvent> events()
+  {
+    return this.events;
+  }
+
+  @Override
   public CompletableFuture<?> tagAdd(
     final LTag text)
   {
@@ -383,6 +412,11 @@ public final class LFileModel implements LFileModelType
 
         t.commit();
 
+        if (command.requiresCompaction()) {
+          final var context = t.get(DSLContext.class);
+          context.execute("VACUUM");
+        }
+
         switch (undoable) {
           case COMMAND_UNDOABLE -> {
             this.undo.set(Optional.of(command));
@@ -391,35 +425,42 @@ public final class LFileModel implements LFileModelType
 
           }
         }
-      } catch (final DDatabaseException e) {
-        throw new LException(
-          e.getMessage(),
-          e,
-          e.errorCode(),
-          e.attributes(),
-          e.remediatingAction()
-        );
+      } catch (final Throwable e) {
+        throw this.handleThrowable(e);
       }
     } finally {
       this.commandLock.unlock();
     }
   }
 
+  private LException handleThrowable(
+    final Throwable e)
+  {
+    if (e instanceof final SStructuredErrorType<?> x) {
+      this.attributes.putAll(x.attributes());
+      return new LException(
+        e.getMessage(),
+        e,
+        x.errorCode().toString(),
+        this.attributes(),
+        x.remediatingAction()
+      );
+    }
+
+    return new LException(
+      e.getMessage(),
+      e,
+      "error-exception",
+      this.attributes(),
+      Optional.empty()
+    );
+  }
+
   @Override
   public void close()
     throws LException
   {
-    try {
-      this.database.close();
-    } catch (final DDatabaseException e) {
-      throw new LException(
-        e.getMessage(),
-        e,
-        e.errorCode(),
-        e.attributes(),
-        e.remediatingAction()
-      );
-    }
+    this.resources.close();
   }
 
   @Override
@@ -502,16 +543,8 @@ public final class LFileModel implements LFileModelType
           this.undo.set(Optional.empty());
         }
 
-      } catch (final DDatabaseException e) {
-        this.attributes.putAll(e.attributes());
-
-        throw new LException(
-          e.getMessage(),
-          e,
-          e.errorCode(),
-          Map.copyOf(this.attributes),
-          e.remediatingAction()
-        );
+      } catch (final Throwable e) {
+        throw this.handleThrowable(e);
       }
     } finally {
       this.commandLock.unlock();
@@ -532,6 +565,15 @@ public final class LFileModel implements LFileModelType
         }
       });
     return future;
+  }
+
+  @Override
+  public CompletableFuture<?> compact()
+  {
+    return this.runCommand(
+      new LCommandCompact(),
+      DDatabaseUnit.UNIT
+    );
   }
 
   @Override
@@ -573,14 +615,8 @@ public final class LFileModel implements LFileModelType
         } else {
           this.redo.set(Optional.empty());
         }
-      } catch (final DDatabaseException e) {
-        throw new LException(
-          e.getMessage(),
-          e,
-          e.errorCode(),
-          e.attributes(),
-          e.remediatingAction()
-        );
+      } catch (final Throwable e) {
+        throw this.handleThrowable(e);
       }
     } finally {
       this.commandLock.unlock();
@@ -614,5 +650,27 @@ public final class LFileModel implements LFileModelType
     final Optional<LImage> image)
   {
     this.imageSelected.set(image);
+  }
+
+  void clearUndo()
+  {
+    this.undo.set(Optional.empty());
+    this.redo.set(Optional.empty());
+  }
+
+  void event(
+    final LFileModelEvent event)
+  {
+    this.events.submit(event);
+  }
+
+  void eventWithoutProgress(
+    final String format,
+    final Object... arguments)
+  {
+    this.event(new LFileModelEvent(
+      String.format(format, arguments),
+      OptionalDouble.empty()
+    ));
   }
 }

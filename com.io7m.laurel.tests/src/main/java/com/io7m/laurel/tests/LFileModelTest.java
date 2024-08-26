@@ -17,8 +17,10 @@
 
 package com.io7m.laurel.tests;
 
+import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LFileModels;
+import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LTag;
 import com.io7m.zelador.test_extension.CloseableResourcesType;
@@ -90,6 +92,11 @@ public final class LFileModelTest
         .subscribe((oldValue, newValue) -> LOG.debug("Redo: {}", newValue))
     );
 
+    this.model.events()
+      .subscribe(new LPerpetualSubscriber<>(event -> {
+        LOG.debug("Event: {}", event);
+      }));
+
     try (var stream = LFileModelTest.class.getResourceAsStream(
       "/com/io7m/laurel/tests/001.png")) {
       Files.write(this.imageFile, stream.readAllBytes(), OPEN_OPTIONS);
@@ -126,6 +133,8 @@ public final class LFileModelTest
     this.model.imageSelect(Optional.empty()).get(TIMEOUT, SECONDS);
     assertEquals(Optional.empty(), this.model.imageSelected().get());
     assertEquals(List.of(), this.model.tagsAssigned().get());
+
+    this.compact();
   }
 
   @Test
@@ -228,6 +237,8 @@ public final class LFileModelTest
       this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
     assertEquals(3, this.model.imageList().get().size());
+
+    this.compact();
   }
 
   @Test
@@ -341,5 +352,15 @@ public final class LFileModelTest
     assertEquals(List.of(ta, tb, tc), this.model.tagList().get());
     assertEquals(Optional.of("Add tag 'C'"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
+
+    this.compact();
+  }
+
+  private void compact()
+    throws Exception
+  {
+    this.model.compact().get(TIMEOUT, SECONDS);
+    assertEquals(Optional.empty(), this.model.redoText().get());
+    assertEquals(Optional.empty(), this.model.undoText().get());
   }
 }

@@ -35,6 +35,15 @@ import java.util.Properties;
 public interface LCommandType<P>
 {
   /**
+   * @return {@code true} if the database should be compacted after this command
+   */
+
+  default boolean requiresCompaction()
+  {
+    return false;
+  }
+
+  /**
    * Execute the command.
    *
    * @param model       The model

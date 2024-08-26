@@ -26,6 +26,10 @@
     </dependency>
 
     <dependency>
+      <groupId>com.io7m.seltzer</groupId>
+      <artifactId>com.io7m.seltzer.api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.io7m.jattribute</groupId>
       <artifactId>com.io7m.jattribute.core</artifactId>
     </dependency>

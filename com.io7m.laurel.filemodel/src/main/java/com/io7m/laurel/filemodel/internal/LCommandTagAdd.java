@@ -91,6 +91,8 @@ public final class LCommandTagAdd
     final var context =
       transaction.get(DSLContext.class);
 
+    model.eventWithoutProgress("Adding tag '%s'.", tag);
+
     final var recOpt =
       context.insertInto(TAGS)
         .set(TAGS.TAG_TEXT, tag.text())
@@ -99,6 +101,7 @@ public final class LCommandTagAdd
         .fetchOptional();
 
     if (recOpt.isEmpty()) {
+      model.eventWithoutProgress("Tag '%s' already existed.", tag);
       return LCommandUndoable.COMMAND_NOT_UNDOABLE;
     }
 
@@ -107,6 +110,7 @@ public final class LCommandTagAdd
     this.text = tag.text();
 
     model.setTagsAll(listTags(transaction));
+    model.eventWithoutProgress("Tag '%s' added.", tag);
     return LCommandUndoable.COMMAND_UNDOABLE;
   }
 
@@ -117,6 +121,8 @@ public final class LCommandTagAdd
   {
     final var context =
       transaction.get(DSLContext.class);
+
+    model.eventWithoutProgress("Deleting tag '%s'.", this.text);
 
     context.deleteFrom(TAGS)
       .where(TAGS.TAG_ID.eq(this.id))
@@ -133,6 +139,8 @@ public final class LCommandTagAdd
     final var context =
       transaction.get(DSLContext.class);
 
+    model.eventWithoutProgress("Adding tag '%s'.", this.text);
+
     context.insertInto(TAGS)
       .set(TAGS.TAG_ID, this.id)
       .set(TAGS.TAG_TEXT, this.text)
@@ -141,6 +149,7 @@ public final class LCommandTagAdd
       .execute();
 
     model.setTagsAll(listTags(transaction));
+    model.eventWithoutProgress("Tag '%s' added.", this.text);
   }
 
   @Override

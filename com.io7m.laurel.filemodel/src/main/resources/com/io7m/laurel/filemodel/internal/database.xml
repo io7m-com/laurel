@@ -29,6 +29,21 @@ STRICT
 
   <Schema versionCurrent="1">
     <Comment>
+      The metadata table stores metadata about the image set. This is purely descriptive data intended for human
+      consumption.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE metadata (
+  meta_name  TEXT NOT NULL,
+  meta_value TEXT NOT NULL
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
       The image_blobs table stores the image blobs.
     </Comment>
 

@@ -15,58 +15,32 @@
  */
 
 
-package com.io7m.laurel.model;
+package com.io7m.laurel.filemodel;
 
-
-import java.util.Comparator;
 import java.util.Objects;
-import java.util.regex.Pattern;
+import java.util.OptionalDouble;
 
 /**
- * A caption.
+ * An event raised by the model.
  *
- * @param text The caption text
+ * @param message  The event message
+ * @param progress The progress value, if any
  */
 
-public record LTag(String text)
-  implements Comparable<LTag>
+public record LFileModelEvent(
+  String message,
+  OptionalDouble progress)
 {
   /**
-   * The pattern that defines a valid caption.
-   */
-
-  public static final Pattern VALID_CAPTION =
-    Pattern.compile("[a-z0-9A-Z_-][a-z0-9A-Z_ \\-']*");
-
-  /**
-   * A caption.
+   * An event raised by the model.
    *
-   * @param text The caption text
+   * @param message  The event message
+   * @param progress The progress value, if any
    */
 
-  public LTag
+  public LFileModelEvent
   {
-    Objects.requireNonNull(text, "text");
-    text = text.trim();
-
-    if (!VALID_CAPTION.matcher(text).matches()) {
-      throw new IllegalArgumentException(
-        "Caption must match %s".formatted(VALID_CAPTION)
-      );
-    }
-  }
-
-  @Override
-  public String toString()
-  {
-    return this.text;
-  }
-
-  @Override
-  public int compareTo(
-    final LTag other)
-  {
-    return Comparator.comparing(LTag::text)
-      .compare(this, other);
+    Objects.requireNonNull(message, "message");
+    Objects.requireNonNull(progress, "progress");
   }
 }

@@ -33,15 +33,16 @@ module com.io7m.laurel.filemodel
 
   requires com.io7m.darco.api;
   requires com.io7m.darco.sqlite;
+  requires com.io7m.jattribute.core;
   requires com.io7m.jmulticlose.core;
   requires com.io7m.lanark.core;
+  requires com.io7m.laurel.model;
+  requires com.io7m.seltzer.api;
   requires io.opentelemetry.api;
+  requires java.desktop;
   requires org.jooq;
   requires org.slf4j;
   requires org.xerial.sqlitejdbc;
-  requires com.io7m.laurel.model;
-  requires com.io7m.jattribute.core;
-  requires java.desktop;
 
   provides LCommandFactoryType with
     LCommandTagAdd,

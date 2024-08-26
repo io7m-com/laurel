@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 
 /**
  * The interface to a file model.
@@ -35,6 +36,12 @@ import java.util.concurrent.CompletableFuture;
 public interface LFileModelType
   extends AutoCloseable
 {
+  /**
+   * @return The file model events
+   */
+
+  Flow.Publisher<LFileModelEvent> events();
+
   /**
    * Add a tag.
    *
@@ -122,6 +129,15 @@ public interface LFileModelType
    */
 
   CompletableFuture<?> redo();
+
+  /**
+   * Compact the file, deleting the undo/redo log and cleaning up any
+   * unused data in the file.
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> compact();
 
   /**
    * @return Text describing the top of the redo stack, if any

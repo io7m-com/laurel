@@ -97,6 +97,7 @@ public final class LCommandImageAdd
 
     final var file = request.file().toAbsolutePath();
     model.setAttribute("ImageFile", file);
+    model.eventWithoutProgress("Adding image '%s'.", file);
 
     final var imageBytes =
       loadImage(model, request);
@@ -130,6 +131,7 @@ public final class LCommandImageAdd
         .get(IMAGES.IMAGE_ID);
 
     model.setImagesAll(listImages(transaction));
+    model.eventWithoutProgress("Added image '%s'.", file);
     return LCommandUndoable.COMMAND_UNDOABLE;
   }
 
@@ -220,11 +222,14 @@ public final class LCommandImageAdd
     final var context =
       transaction.get(DSLContext.class);
 
+    model.eventWithoutProgress("Deleting image '%s'.", this.savedFile);
+
     context.deleteFrom(IMAGES)
       .where(IMAGES.IMAGE_ID.eq(this.savedImageId))
       .execute();
 
     model.setImagesAll(listImages(transaction));
+    model.eventWithoutProgress("Deleted image '%s'.", this.savedFile);
   }
 
   @Override
@@ -235,6 +240,7 @@ public final class LCommandImageAdd
     final var context =
       transaction.get(DSLContext.class);
 
+    model.eventWithoutProgress("Adding image '%s'.", this.savedFile);
     context.insertInto(IMAGES)
       .set(IMAGES.IMAGE_ID, this.savedImageId)
       .set(IMAGES.IMAGE_BLOB, this.savedBlobId)
@@ -244,6 +250,7 @@ public final class LCommandImageAdd
       .execute();
 
     model.setImagesAll(listImages(transaction));
+    model.eventWithoutProgress("Added image '%s'.", this.savedFile);
   }
 
   @Override
