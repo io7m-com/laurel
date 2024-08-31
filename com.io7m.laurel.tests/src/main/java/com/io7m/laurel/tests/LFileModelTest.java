@@ -21,6 +21,7 @@ import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LFileModels;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
+import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LTag;
 import com.io7m.zelador.test_extension.CloseableResourcesType;
@@ -362,5 +363,76 @@ public final class LFileModelTest
     this.model.compact().get(TIMEOUT, SECONDS);
     assertEquals(Optional.empty(), this.model.redoText().get());
     assertEquals(Optional.empty(), this.model.undoText().get());
+  }
+
+  @Test
+  public void testCategoryAdd()
+    throws Exception
+  {
+    final var ta = new LCategory("A");
+    final var tb = new LCategory("B");
+    final var tc = new LCategory("C");
+
+    assertEquals(Optional.empty(), this.model.undoText().get());
+
+    this.model.categoryAdd(ta).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'A'"), this.model.undoText().get());
+    assertEquals(Optional.empty(), this.model.redoText().get());
+
+    this.model.categoryAdd(tb).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tb), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'B'"), this.model.undoText().get());
+    assertEquals(Optional.empty(), this.model.redoText().get());
+
+    this.model.categoryAdd(tc).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tb, tc), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'C'"), this.model.undoText().get());
+    assertEquals(Optional.empty(), this.model.redoText().get());
+
+    this.model.categoryAdd(ta).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tb, tc), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'C'"), this.model.undoText().get());
+    assertEquals(Optional.empty(), this.model.redoText().get());
+
+    /*
+     * Now undo the operations.
+     */
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tb), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'B'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add category 'C'"), this.model.redoText().get());
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'A'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add category 'B'"), this.model.redoText().get());
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.model.categoryList().get());
+    assertEquals(Optional.empty(), this.model.undoText().get());
+    assertEquals(Optional.of("Add category 'A'"), this.model.redoText().get());
+
+    /*
+     * Now redo the operations.
+     */
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'A'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add category 'B'"), this.model.redoText().get());
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tb), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'B'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add category 'C'"), this.model.redoText().get());
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tb, tc), this.model.categoryList().get());
+    assertEquals(Optional.of("Add category 'C'"), this.model.undoText().get());
+    assertEquals(Optional.empty(), this.model.redoText().get());
+
+    this.compact();
   }
 }

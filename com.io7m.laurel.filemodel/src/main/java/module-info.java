@@ -14,6 +14,7 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import com.io7m.laurel.filemodel.internal.LCommandCategoryAdd;
 import com.io7m.laurel.filemodel.internal.LCommandFactoryType;
 import com.io7m.laurel.filemodel.internal.LCommandImageAdd;
 import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
@@ -45,9 +46,10 @@ module com.io7m.laurel.filemodel
   requires org.xerial.sqlitejdbc;
 
   provides LCommandFactoryType with
-    LCommandTagAdd,
+    LCommandCategoryAdd,
     LCommandImageAdd,
-    LCommandImageSelect;
+    LCommandImageSelect,
+    LCommandTagAdd;
 
   exports com.io7m.laurel.filemodel;
   exports com.io7m.laurel.filemodel.internal

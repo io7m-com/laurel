@@ -29,6 +29,7 @@ import com.io7m.jmulticlose.core.CloseableCollection;
 import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
+import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LTag;
@@ -72,6 +73,7 @@ public final class LFileModel implements LFileModelType
       LOG.error("Uncaught attribute exception: ", throwable);
     });
 
+  private final AttributeType<List<LCategory>> categoriesAll;
   private final AttributeType<List<LImage>> imagesAll;
   private final AttributeType<List<LTag>> tagsAll;
   private final AttributeType<List<LTag>> tagsAssigned;
@@ -80,10 +82,10 @@ public final class LFileModel implements LFileModelType
   private final AttributeType<Optional<LImage>> imageSelected;
   private final AttributeType<Optional<String>> redoText;
   private final AttributeType<Optional<String>> undoText;
+  private final CloseableCollectionType<LException> resources;
   private final ConcurrentHashMap<String, String> attributes;
   private final LDatabaseType database;
   private final ReentrantLock commandLock;
-  private final CloseableCollectionType<LException> resources;
   private final SubmissionPublisher<LFileModelEvent> events;
 
   private LFileModel(
@@ -91,6 +93,8 @@ public final class LFileModel implements LFileModelType
   {
     this.database =
       Objects.requireNonNull(inDatabase, "database");
+    this.categoriesAll =
+      ATTRIBUTES.create(List.of());
     this.tagsAll =
       ATTRIBUTES.create(List.of());
     this.tagsAssigned =
@@ -325,6 +329,13 @@ public final class LFileModel implements LFileModelType
   public SubmissionPublisher<LFileModelEvent> events()
   {
     return this.events;
+  }
+
+  @Override
+  public CompletableFuture<?> categoryAdd(
+    final LCategory text)
+  {
+    return this.runCommand(new LCommandCategoryAdd(), text);
   }
 
   @Override
@@ -582,6 +593,12 @@ public final class LFileModel implements LFileModelType
     return this.redoText;
   }
 
+  @Override
+  public AttributeReadableType<List<LCategory>> categoryList()
+  {
+    return this.categoriesAll;
+  }
+
   private void executeRedo()
     throws Exception
   {
@@ -672,5 +689,11 @@ public final class LFileModel implements LFileModelType
       String.format(format, arguments),
       OptionalDouble.empty()
     ));
+  }
+
+  void setCategoriesAll(
+    final List<LCategory> categories)
+  {
+    this.categoriesAll.set(categories);
   }
 }

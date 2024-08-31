@@ -104,6 +104,49 @@ STRICT
 ]]></Statement>
 
     <Comment>
+      The categories table stores the categories for tags.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE categories (
+  category_id    INTEGER PRIMARY KEY NOT NULL,
+  category_text  TEXT                NOT NULL
+
+-- [jooq ignore start]
+  ,
+  CONSTRAINT categories_text_unique
+    UNIQUE (category_text)
+-- [jooq ignore stop]
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The tag_categories table associates tags with categories.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE tag_categories (
+  tag_tag_id       INTEGER NOT NULL,
+  tag_category_id  INTEGER NOT NULL,
+
+  CONSTRAINT tag_categories_tag_exists
+    FOREIGN KEY (tag_tag_id) REFERENCES tags (tag_id),
+
+  CONSTRAINT tag_categories_category_exists
+    FOREIGN KEY (tag_category_id) REFERENCES categories (category_id),
+
+  CONSTRAINT tag_categories_primary_key
+    PRIMARY KEY (tag_tag_id, tag_category_id)
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
       The image_tags table stores the associations between images and tags.
     </Comment>
 

@@ -18,6 +18,7 @@
 package com.io7m.laurel.filemodel;
 
 import com.io7m.jattribute.core.AttributeReadableType;
+import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LTag;
@@ -41,6 +42,17 @@ public interface LFileModelType
    */
 
   Flow.Publisher<LFileModelEvent> events();
+
+  /**
+   * Add a category.
+   *
+   * @param text The category
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> categoryAdd(
+    LCategory text);
 
   /**
    * Add a tag.
@@ -144,4 +156,10 @@ public interface LFileModelType
    */
 
   AttributeReadableType<Optional<String>> redoText();
+
+  /**
+   * @return The current complete list of categories
+   */
+
+  AttributeReadableType<List<LCategory>> categoryList();
 }
