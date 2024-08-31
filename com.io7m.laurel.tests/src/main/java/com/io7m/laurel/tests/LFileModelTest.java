@@ -17,7 +17,6 @@
 
 package com.io7m.laurel.tests;
 
-import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LFileModels;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
@@ -152,7 +151,7 @@ public final class LFileModelTest
     ).get(TIMEOUT, SECONDS);
 
     assertEquals(
-      Optional.of("Add image 'image-a'"),
+      Optional.of("Add image(s)"),
       this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
     assertEquals(1, this.model.imageList().get().size());
@@ -164,7 +163,7 @@ public final class LFileModelTest
     ).get(TIMEOUT, SECONDS);
 
     assertEquals(
-      Optional.of("Add image 'image-b'"),
+      Optional.of("Add image(s)"),
       this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
     assertEquals(2, this.model.imageList().get().size());
@@ -176,7 +175,7 @@ public final class LFileModelTest
     ).get(TIMEOUT, SECONDS);
 
     assertEquals(
-      Optional.of("Add image 'image-c'"),
+      Optional.of("Add image(s)"),
       this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
     assertEquals(3, this.model.imageList().get().size());
@@ -187,26 +186,26 @@ public final class LFileModelTest
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(
-      Optional.of("Add image 'image-b'"),
+      Optional.of("Add image(s)"),
       this.model.undoText().get());
     assertEquals(
-      Optional.of("Add image 'image-c'"),
+      Optional.of("Add image(s)"),
       this.model.redoText().get());
     assertEquals(2, this.model.imageList().get().size());
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(
-      Optional.of("Add image 'image-a'"),
+      Optional.of("Add image(s)"),
       this.model.undoText().get());
     assertEquals(
-      Optional.of("Add image 'image-b'"),
+      Optional.of("Add image(s)"),
       this.model.redoText().get());
     assertEquals(1, this.model.imageList().get().size());
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(Optional.empty(), this.model.undoText().get());
     assertEquals(
-      Optional.of("Add image 'image-a'"),
+      Optional.of("Add image(s)"),
       this.model.redoText().get());
     assertEquals(0, this.model.imageList().get().size());
 
@@ -216,25 +215,25 @@ public final class LFileModelTest
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(
-      Optional.of("Add image 'image-a'"),
+      Optional.of("Add image(s)"),
       this.model.undoText().get());
     assertEquals(
-      Optional.of("Add image 'image-b'"),
+      Optional.of("Add image(s)"),
       this.model.redoText().get());
     assertEquals(1, this.model.imageList().get().size());
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(
-      Optional.of("Add image 'image-b'"),
+      Optional.of("Add image(s)"),
       this.model.undoText().get());
     assertEquals(
-      Optional.of("Add image 'image-c'"),
+      Optional.of("Add image(s)"),
       this.model.redoText().get());
     assertEquals(2, this.model.imageList().get().size());
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(
-      Optional.of("Add image 'image-c'"),
+      Optional.of("Add image(s)"),
       this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
     assertEquals(3, this.model.imageList().get().size());
@@ -298,22 +297,22 @@ public final class LFileModelTest
 
     this.model.tagAdd(ta).get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'A'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.model.tagAdd(tb).get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'B'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.model.tagAdd(tc).get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb, tc), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'C'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.model.tagAdd(ta).get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb, tc), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'C'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     /*
@@ -322,18 +321,18 @@ public final class LFileModelTest
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'B'"), this.model.undoText().get());
-    assertEquals(Optional.of("Add tag 'C'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.redoText().get());
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'A'"), this.model.undoText().get());
-    assertEquals(Optional.of("Add tag 'B'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.redoText().get());
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(), this.model.tagList().get());
     assertEquals(Optional.empty(), this.model.undoText().get());
-    assertEquals(Optional.of("Add tag 'A'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.redoText().get());
 
     /*
      * Now redo the operations.
@@ -341,17 +340,17 @@ public final class LFileModelTest
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'A'"), this.model.undoText().get());
-    assertEquals(Optional.of("Add tag 'B'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.redoText().get());
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'B'"), this.model.undoText().get());
-    assertEquals(Optional.of("Add tag 'C'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.redoText().get());
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb, tc), this.model.tagList().get());
-    assertEquals(Optional.of("Add tag 'C'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add tag(s)"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.compact();
@@ -377,22 +376,22 @@ public final class LFileModelTest
 
     this.model.categoryAdd(ta).get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'A'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.model.categoryAdd(tb).get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'B'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.model.categoryAdd(tc).get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb, tc), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'C'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.model.categoryAdd(ta).get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb, tc), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'C'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     /*
@@ -401,18 +400,18 @@ public final class LFileModelTest
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'B'"), this.model.undoText().get());
-    assertEquals(Optional.of("Add category 'C'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.redoText().get());
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'A'"), this.model.undoText().get());
-    assertEquals(Optional.of("Add category 'B'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.redoText().get());
 
     this.model.undo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(), this.model.categoryList().get());
     assertEquals(Optional.empty(), this.model.undoText().get());
-    assertEquals(Optional.of("Add category 'A'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.redoText().get());
 
     /*
      * Now redo the operations.
@@ -420,17 +419,17 @@ public final class LFileModelTest
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'A'"), this.model.undoText().get());
-    assertEquals(Optional.of("Add category 'B'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.redoText().get());
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'B'"), this.model.undoText().get());
-    assertEquals(Optional.of("Add category 'C'"), this.model.redoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.redoText().get());
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(ta, tb, tc), this.model.categoryList().get());
-    assertEquals(Optional.of("Add category 'C'"), this.model.undoText().get());
+    assertEquals(Optional.of("Add categories"), this.model.undoText().get());
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.compact();

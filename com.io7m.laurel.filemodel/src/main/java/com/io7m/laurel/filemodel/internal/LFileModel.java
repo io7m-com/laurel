@@ -335,14 +335,14 @@ public final class LFileModel implements LFileModelType
   public CompletableFuture<?> categoryAdd(
     final LCategory text)
   {
-    return this.runCommand(new LCommandCategoryAdd(), text);
+    return this.runCommand(new LCommandCategoriesAdd(), List.of(text));
   }
 
   @Override
   public CompletableFuture<?> tagAdd(
     final LTag text)
   {
-    return this.runCommand(new LCommandTagAdd(), text);
+    return this.runCommand(new LCommandTagsAdd(), List.of(text));
   }
 
   @Override
@@ -356,8 +356,8 @@ public final class LFileModel implements LFileModelType
     Objects.requireNonNull(source, "source");
 
     return this.runCommand(
-      new LCommandImageAdd(),
-      new LImageRequest(name, file, source)
+      new LCommandImagesAdd(),
+      List.of(new LImageRequest(name, file, source))
     );
   }
 
@@ -688,6 +688,20 @@ public final class LFileModel implements LFileModelType
     this.event(new LFileModelEvent(
       String.format(format, arguments),
       OptionalDouble.empty()
+    ));
+  }
+
+  void eventWithProgressCurrentMax(
+    final int current,
+    final int max,
+    final String format,
+    final Object... arguments)
+  {
+    this.event(new LFileModelEvent(
+      String.format(format, arguments),
+      OptionalDouble.of(
+        (double) current / (double) max
+      )
     ));
   }
 

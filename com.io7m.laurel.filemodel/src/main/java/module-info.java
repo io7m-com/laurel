@@ -14,11 +14,11 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-import com.io7m.laurel.filemodel.internal.LCommandCategoryAdd;
+import com.io7m.laurel.filemodel.internal.LCommandCategoriesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandFactoryType;
-import com.io7m.laurel.filemodel.internal.LCommandImageAdd;
+import com.io7m.laurel.filemodel.internal.LCommandImagesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
-import com.io7m.laurel.filemodel.internal.LCommandTagAdd;
+import com.io7m.laurel.filemodel.internal.LCommandTagsAdd;
 
 /**
  * Image caption management (File model)
@@ -46,10 +46,10 @@ module com.io7m.laurel.filemodel
   requires org.xerial.sqlitejdbc;
 
   provides LCommandFactoryType with
-    LCommandCategoryAdd,
-    LCommandImageAdd,
+    LCommandCategoriesAdd,
+    LCommandImagesAdd,
     LCommandImageSelect,
-    LCommandTagAdd;
+    LCommandTagsAdd;
 
   exports com.io7m.laurel.filemodel;
   exports com.io7m.laurel.filemodel.internal

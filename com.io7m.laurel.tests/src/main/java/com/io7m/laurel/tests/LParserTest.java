@@ -18,7 +18,6 @@
 package com.io7m.laurel.tests;
 
 import com.io7m.anethum.api.ParsingException;
-
 import com.io7m.laurel.io.LParsers;
 import com.io7m.laurel.io.LSerializers;
 import com.io7m.laurel.model.LImageSet;

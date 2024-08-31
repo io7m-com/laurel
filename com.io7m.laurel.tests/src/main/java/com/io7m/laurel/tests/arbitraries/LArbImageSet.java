@@ -17,11 +17,11 @@
 
 package com.io7m.laurel.tests.arbitraries;
 
-import com.io7m.laurel.model.LOldImage;
 import com.io7m.laurel.model.LImageCaption;
 import com.io7m.laurel.model.LImageCaptionID;
 import com.io7m.laurel.model.LImageID;
 import com.io7m.laurel.model.LImageSet;
+import com.io7m.laurel.model.LOldImage;
 import net.jqwik.api.Arbitraries;
 import net.jqwik.api.Combinators;
 
