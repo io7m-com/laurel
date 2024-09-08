@@ -15,9 +15,11 @@
  */
 
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesAdd;
+import com.io7m.laurel.filemodel.internal.LCommandCategoriesSetRequired;
+import com.io7m.laurel.filemodel.internal.LCommandCategoriesUnsetRequired;
 import com.io7m.laurel.filemodel.internal.LCommandFactoryType;
-import com.io7m.laurel.filemodel.internal.LCommandImagesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
+import com.io7m.laurel.filemodel.internal.LCommandImagesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandTagsAdd;
 
 /**
@@ -49,7 +51,9 @@ module com.io7m.laurel.filemodel
     LCommandCategoriesAdd,
     LCommandImagesAdd,
     LCommandImageSelect,
-    LCommandTagsAdd;
+    LCommandTagsAdd,
+    LCommandCategoriesSetRequired,
+    LCommandCategoriesUnsetRequired;
 
   exports com.io7m.laurel.filemodel;
   exports com.io7m.laurel.filemodel.internal

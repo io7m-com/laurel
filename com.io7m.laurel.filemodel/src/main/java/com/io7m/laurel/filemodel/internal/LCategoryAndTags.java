@@ -20,29 +20,30 @@ package com.io7m.laurel.filemodel.internal;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LTag;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
- * A category and a tag.
+ * A category and some tags.
  *
  * @param category The category
- * @param tag      The tag
+ * @param tags     The tags
  */
 
-public record LCategoryAndTag(
+public record LCategoryAndTags(
   LCategory category,
-  LTag tag)
+  List<LTag> tags)
 {
   /**
-   * A category and a tag.
+   * A category and some tags.
    *
    * @param category The category
-   * @param tag      The tag
+   * @param tags     The tags
    */
 
-  public LCategoryAndTag
+  public LCategoryAndTags
   {
     Objects.requireNonNull(category, "category");
-    Objects.requireNonNull(tag, "tag");
+    Objects.requireNonNull(tags, "tags");
   }
 }

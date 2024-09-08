@@ -39,6 +39,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -433,5 +434,47 @@ public final class LFileModelTest
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.compact();
+  }
+
+  @Test
+  public void testCategorySetRequired()
+    throws Exception
+  {
+    final var ta = new LCategory("A");
+    final var tb = new LCategory("B");
+    final var tc = new LCategory("C");
+
+    assertEquals(List.of(), this.model.categoriesRequired().get());
+    assertEquals(Optional.empty(), this.model.undoText().get());
+
+    this.model.categoryAdd(ta).get(TIMEOUT, SECONDS);
+    this.model.categoryAdd(tb).get(TIMEOUT, SECONDS);
+    this.model.categoryAdd(tc).get(TIMEOUT, SECONDS);
+
+    this.model.categorySetRequired(Set.of(ta, tc)).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tc), this.model.categoriesRequired().get());
+
+    // Redundant, won't be added to the undo stack.
+    this.model.categorySetRequired(Set.of(ta, tc)).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tc), this.model.categoriesRequired().get());
+
+    // Redundant, won't be added to the undo stack.
+    this.model.categorySetNotRequired(Set.of(tb)).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tc), this.model.categoriesRequired().get());
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.model.categoriesRequired().get());
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tc), this.model.categoriesRequired().get());
+
+    this.model.categorySetNotRequired(Set.of(ta)).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tc), this.model.categoriesRequired().get());
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ta, tc), this.model.categoriesRequired().get());
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tc), this.model.categoriesRequired().get());
   }
 }

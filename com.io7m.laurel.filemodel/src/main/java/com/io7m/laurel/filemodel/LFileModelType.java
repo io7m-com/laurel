@@ -27,6 +27,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 
@@ -42,6 +43,28 @@ public interface LFileModelType
    */
 
   Flow.Publisher<LFileModelEvent> events();
+
+  /**
+   * Set categories as required.
+   *
+   * @param categories The categories
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> categorySetRequired(
+    Set<LCategory> categories);
+
+  /**
+   * Set categories as not required.
+   *
+   * @param categories The categories
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> categorySetNotRequired(
+    Set<LCategory> categories);
 
   /**
    * Add a category.
@@ -107,6 +130,12 @@ public interface LFileModelType
    */
 
   AttributeReadableType<List<LImage>> imageList();
+
+  /**
+   * @return The current complete list of required tag categories
+   */
+
+  AttributeReadableType<List<LCategory>> categoriesRequired();
 
   /**
    * @return The current complete list of tags

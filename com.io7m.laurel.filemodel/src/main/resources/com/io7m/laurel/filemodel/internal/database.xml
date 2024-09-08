@@ -109,8 +109,9 @@ STRICT
 
     <Statement><![CDATA[
 CREATE TABLE categories (
-  category_id    INTEGER PRIMARY KEY NOT NULL,
-  category_text  TEXT                NOT NULL
+  category_id        INTEGER PRIMARY KEY NOT NULL,
+  category_text      TEXT                NOT NULL,
+  category_required  INTEGER             NOT NULL
 
 -- [jooq ignore start]
   ,

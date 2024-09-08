@@ -50,6 +50,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SubmissionPublisher;
@@ -74,6 +75,7 @@ public final class LFileModel implements LFileModelType
     });
 
   private final AttributeType<List<LCategory>> categoriesAll;
+  private final AttributeType<List<LCategory>> categoriesRequired;
   private final AttributeType<List<LImage>> imagesAll;
   private final AttributeType<List<LTag>> tagsAll;
   private final AttributeType<List<LTag>> tagsAssigned;
@@ -94,6 +96,8 @@ public final class LFileModel implements LFileModelType
     this.database =
       Objects.requireNonNull(inDatabase, "database");
     this.categoriesAll =
+      ATTRIBUTES.create(List.of());
+    this.categoriesRequired =
       ATTRIBUTES.create(List.of());
     this.tagsAll =
       ATTRIBUTES.create(List.of());
@@ -346,6 +350,22 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public CompletableFuture<?> categorySetRequired(
+    final Set<LCategory> categories)
+  {
+    return this.runCommand(
+      new LCommandCategoriesSetRequired(), List.copyOf(categories));
+  }
+
+  @Override
+  public CompletableFuture<?> categorySetNotRequired(
+    final Set<LCategory> categories)
+  {
+    return this.runCommand(
+      new LCommandCategoriesUnsetRequired(), List.copyOf(categories));
+  }
+
+  @Override
   public CompletableFuture<?> imageAdd(
     final String name,
     final Path file,
@@ -484,6 +504,12 @@ public final class LFileModel implements LFileModelType
   public AttributeReadableType<List<LImage>> imageList()
   {
     return this.imagesAll;
+  }
+
+  @Override
+  public AttributeReadableType<List<LCategory>> categoriesRequired()
+  {
+    return this.categoriesRequired;
   }
 
   @Override
@@ -709,5 +735,11 @@ public final class LFileModel implements LFileModelType
     final List<LCategory> categories)
   {
     this.categoriesAll.set(categories);
+  }
+
+  void setCategoriesRequired(
+    final List<LCategory> categories)
+  {
+    this.categoriesRequired.set(categories);
   }
 }

@@ -27,10 +27,10 @@ import java.util.Properties;
 import static com.io7m.laurel.filemodel.internal.Tables.CATEGORIES;
 
 /**
- * Add categories.
+ * Set categories as required.
  */
 
-public final class LCommandCategoriesAdd
+public final class LCommandCategoriesSetRequired
   extends LCommandAbstract<List<LCategory>>
 {
   private final ArrayList<SavedData> savedData;
@@ -43,16 +43,16 @@ public final class LCommandCategoriesAdd
   }
 
   /**
-   * Add categories.
+   * Set categories as required.
    */
 
-  public LCommandCategoriesAdd()
+  public LCommandCategoriesSetRequired()
   {
     this.savedData = new ArrayList<>();
   }
 
   /**
-   * Add categories.
+   * Set categories as required.
    *
    * @return A command factory
    */
@@ -60,15 +60,15 @@ public final class LCommandCategoriesAdd
   public static LCommandFactoryType<List<LCategory>> provider()
   {
     return new LCommandFactory<>(
-      LCommandCategoriesAdd.class.getCanonicalName(),
-      LCommandCategoriesAdd::fromProperties
+      LCommandCategoriesSetRequired.class.getCanonicalName(),
+      LCommandCategoriesSetRequired::fromProperties
     );
   }
 
-  private static LCommandCategoriesAdd fromProperties(
+  private static LCommandCategoriesSetRequired fromProperties(
     final Properties p)
   {
-    final var c = new LCommandCategoriesAdd();
+    final var c = new LCommandCategoriesSetRequired();
 
     for (int index = 0; index < Integer.MAX_VALUE; ++index) {
       final var idKey =
@@ -93,20 +93,6 @@ public final class LCommandCategoriesAdd
     return c;
   }
 
-  private static List<LCategory> listCategories(
-    final LDatabaseTransactionType transaction)
-  {
-    final var context =
-      transaction.get(DSLContext.class);
-
-    return context.select(CATEGORIES.CATEGORY_TEXT)
-      .from(CATEGORIES)
-      .orderBy(CATEGORIES.CATEGORY_TEXT.asc())
-      .stream()
-      .map(r -> new LCategory(r.get(CATEGORIES.CATEGORY_TEXT)))
-      .toList();
-  }
-
   @Override
   protected LCommandUndoable onExecute(
     final LFileModel model,
@@ -119,13 +105,17 @@ public final class LCommandCategoriesAdd
     final var max = categories.size();
     for (int index = 0; index < max; ++index) {
       final var category = categories.get(index);
-      model.eventWithProgressCurrentMax(index, max, "Adding category '%s'", category);
+      model.eventWithProgressCurrentMax(
+        index,
+        max,
+        "Updating category '%s'",
+        category);
 
       final var recOpt =
-        context.insertInto(CATEGORIES)
-          .set(CATEGORIES.CATEGORY_TEXT, category.text())
-          .set(CATEGORIES.CATEGORY_REQUIRED, 0L)
-          .onDuplicateKeyIgnore()
+        context.update(CATEGORIES)
+          .set(CATEGORIES.CATEGORY_REQUIRED, 1L)
+          .where(CATEGORIES.CATEGORY_TEXT.eq(category.text())
+                   .and(CATEGORIES.CATEGORY_REQUIRED.eq(0L)))
           .returning(CATEGORIES.CATEGORY_ID)
           .fetchOptional();
 
@@ -133,7 +123,7 @@ public final class LCommandCategoriesAdd
         model.eventWithProgressCurrentMax(
           index,
           max,
-          "Category '%s' already existed.",
+          "Category '%s' either did not exist or was already required.",
           category
         );
         continue;
@@ -148,8 +138,8 @@ public final class LCommandCategoriesAdd
       );
     }
 
-    model.setCategoriesAll(listCategories(transaction));
-    model.eventWithoutProgress("Added %d categories.", this.savedData.size());
+    model.eventWithoutProgress("Updated %d categories.", this.savedData.size());
+    model.setCategoriesRequired(listRequired(transaction));
 
     if (!this.savedData.isEmpty()) {
       return LCommandUndoable.COMMAND_UNDOABLE;
@@ -172,16 +162,17 @@ public final class LCommandCategoriesAdd
       model.eventWithProgressCurrentMax(
         index,
         max,
-        "Removing category '%s'",
+        "Updating category '%s'",
         data.text
       );
-      context.deleteFrom(CATEGORIES)
+      context.update(CATEGORIES)
+        .set(CATEGORIES.CATEGORY_REQUIRED, 0L)
         .where(CATEGORIES.CATEGORY_ID.eq(data.id))
         .execute();
     }
 
-    model.setCategoriesAll(listCategories(transaction));
-    model.eventWithoutProgress("Removed %d categories.", Integer.valueOf(max));
+    model.eventWithoutProgress("Updated %d categories.", Integer.valueOf(max));
+    model.setCategoriesRequired(listRequired(transaction));
   }
 
   @Override
@@ -198,20 +189,32 @@ public final class LCommandCategoriesAdd
       model.eventWithProgressCurrentMax(
         index,
         max,
-        "Adding category '%s'",
+        "Updating category '%s'",
         data.text
       );
-      context.insertInto(CATEGORIES)
-        .set(CATEGORIES.CATEGORY_ID, data.id)
-        .set(CATEGORIES.CATEGORY_TEXT, data.text)
-        .set(CATEGORIES.CATEGORY_REQUIRED, 0L)
-        .onDuplicateKeyUpdate()
-        .set(CATEGORIES.CATEGORY_TEXT, data.text)
+      context.update(CATEGORIES)
+        .set(CATEGORIES.CATEGORY_REQUIRED, 1L)
+        .where(CATEGORIES.CATEGORY_ID.eq(data.id))
         .execute();
     }
 
-    model.setCategoriesAll(listCategories(transaction));
-    model.eventWithoutProgress("Added %d categories.", Integer.valueOf(max));
+    model.eventWithoutProgress("Updated %d categories.", Integer.valueOf(max));
+    model.setCategoriesRequired(listRequired(transaction));
+  }
+
+  private static List<LCategory> listRequired(
+    final LDatabaseTransactionType transaction)
+  {
+    final var context =
+      transaction.get(DSLContext.class);
+
+    return context.select(CATEGORIES.CATEGORY_TEXT)
+      .from(CATEGORIES)
+      .where(CATEGORIES.CATEGORY_REQUIRED.eq(1L))
+      .orderBy(CATEGORIES.CATEGORY_TEXT.asc())
+      .stream()
+      .map(r -> new LCategory(r.get(CATEGORIES.CATEGORY_TEXT)))
+      .toList();
   }
 
   @Override
@@ -236,7 +239,7 @@ public final class LCommandCategoriesAdd
   @Override
   public String describe()
   {
-    return "Add categories";
+    return "Set categories as required";
   }
-  
+
 }
