@@ -17,73 +17,75 @@
 
 package com.io7m.laurel.filemodel.internal;
 
-import com.io7m.laurel.model.LCategory;
 import org.jooq.DSLContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import static com.io7m.laurel.filemodel.internal.Tables.CATEGORIES;
+import static com.io7m.laurel.filemodel.internal.Tables.TAGS;
+import static com.io7m.laurel.filemodel.internal.Tables.TAG_CATEGORIES;
 
 /**
- * Add categories.
+ * Unassign tags from categories.
  */
 
-public final class LCommandCategoriesAdd
-  extends LCommandAbstract<List<LCategory>>
+public final class LCommandCategoryTagsUnassign
+  extends LCommandAbstract<List<LCategoryAndTags>>
 {
   private final ArrayList<SavedData> savedData;
 
   private record SavedData(
-    long id,
-    String text)
+    long categoryId,
+    long tagId)
   {
 
   }
 
   /**
-   * Add categories.
+   * Unassign tags from categories.
    */
 
-  public LCommandCategoriesAdd()
+  public LCommandCategoryTagsUnassign()
   {
     this.savedData = new ArrayList<>();
   }
 
   /**
-   * Add categories.
+   * Unassign tags from categories.
    *
    * @return A command factory
    */
 
-  public static LCommandFactoryType<List<LCategory>> provider()
+  public static LCommandFactoryType<List<LCategoryAndTags>> provider()
   {
     return new LCommandFactory<>(
-      LCommandCategoriesAdd.class.getCanonicalName(),
-      LCommandCategoriesAdd::fromProperties
+      LCommandCategoryTagsUnassign.class.getCanonicalName(),
+      LCommandCategoryTagsUnassign::fromProperties
     );
   }
 
-  private static LCommandCategoriesAdd fromProperties(
+  private static LCommandCategoryTagsUnassign fromProperties(
     final Properties p)
   {
-    final var c = new LCommandCategoriesAdd();
+    final var c = new LCommandCategoryTagsUnassign();
 
     for (int index = 0; index < Integer.MAX_VALUE; ++index) {
-      final var idKey =
+      final var categoryIdKey =
         "category.%d.id".formatted(Integer.valueOf(index));
-      final var textKey =
-        "category.%d.text".formatted(Integer.valueOf(index));
+      final var categoryTagKey =
+        "category.%d.tag".formatted(Integer.valueOf(index));
 
-      if (!p.containsKey(idKey)) {
+      if (!p.containsKey(categoryIdKey)) {
         break;
       }
 
       final var data =
         new SavedData(
-          Long.parseUnsignedLong(p.getProperty(idKey)),
-          p.getProperty(textKey)
+          Long.parseUnsignedLong(p.getProperty(categoryIdKey)),
+          Long.parseUnsignedLong(p.getProperty(categoryTagKey))
         );
 
       c.savedData.add(data);
@@ -97,29 +99,69 @@ public final class LCommandCategoriesAdd
   protected LCommandUndoable onExecute(
     final LFileModel model,
     final LDatabaseTransactionType transaction,
-    final List<LCategory> categories)
+    final List<LCategoryAndTags> categories)
   {
     final var context =
       transaction.get(DSLContext.class);
 
-    final var max = categories.size();
-    for (int index = 0; index < max; ++index) {
-      final var category = categories.get(index);
-      model.eventWithProgressCurrentMax(index, max, "Adding category '%s'", category);
+    final var max =
+      categories.stream()
+        .mapToInt(c -> c.tags().size())
+        .sum();
+
+    final var entries =
+      categories.stream()
+        .flatMap(c -> {
+          return c.tags()
+            .stream()
+            .map(t -> Map.entry(c.category(), t));
+        })
+        .toList();
+
+    int index = 0;
+    for (final var entry : entries) {
+      final var category =
+        entry.getKey();
+      final var tag =
+        entry.getValue();
+
+      model.eventWithProgressCurrentMax(
+        index,
+        max,
+        "Unassigning tag '%s' from category '%s'.",
+        tag,
+        category
+      );
+
+      final var categoryId =
+        context.select(CATEGORIES.CATEGORY_ID)
+          .from(CATEGORIES)
+          .where(CATEGORIES.CATEGORY_TEXT.eq(category.text()));
+
+      final var tagId =
+        context.select(TAGS.TAG_ID)
+          .from(TAGS)
+          .where(TAGS.TAG_TEXT.eq(tag.text()));
+
+      final var matches =
+        TAG_CATEGORIES.TAG_CATEGORY_ID.eq(categoryId)
+          .and(TAG_CATEGORIES.TAG_TAG_ID.eq(tagId));
 
       final var recOpt =
-        context.insertInto(CATEGORIES)
-          .set(CATEGORIES.CATEGORY_TEXT, category.text())
-          .set(CATEGORIES.CATEGORY_REQUIRED, 0L)
-          .onDuplicateKeyIgnore()
-          .returning(CATEGORIES.CATEGORY_ID)
+        context.deleteFrom(TAG_CATEGORIES)
+          .where(matches)
+          .returning(
+            TAG_CATEGORIES.TAG_CATEGORY_ID,
+            TAG_CATEGORIES.TAG_TAG_ID)
           .fetchOptional();
+
+      ++index;
 
       if (recOpt.isEmpty()) {
         model.eventWithProgressCurrentMax(
           index,
           max,
-          "Category '%s' already existed.",
+          "Category/tag either did not exist or was not assigned.",
           category
         );
         continue;
@@ -128,14 +170,14 @@ public final class LCommandCategoriesAdd
       final var rec = recOpt.get();
       this.savedData.add(
         new SavedData(
-          rec.get(CATEGORIES.CATEGORY_ID).longValue(),
-          category.text()
+          rec.get(TAG_CATEGORIES.TAG_CATEGORY_ID).longValue(),
+          rec.get(TAG_CATEGORIES.TAG_TAG_ID).longValue()
         )
       );
     }
 
+    model.eventWithoutProgress("Unassigned %d tags.", this.savedData.size());
     LCommandModelUpdates.updateTagsAndCategories(context, model);
-    model.eventWithoutProgress("Added %d categories.", this.savedData.size());
 
     if (!this.savedData.isEmpty()) {
       return LCommandUndoable.COMMAND_UNDOABLE;
@@ -155,19 +197,22 @@ public final class LCommandCategoriesAdd
     final var max = this.savedData.size();
     for (int index = 0; index < max; ++index) {
       final var data = this.savedData.get(index);
+
       model.eventWithProgressCurrentMax(
         index,
         max,
-        "Removing category '%s'",
-        data.text
+        "Reassigning tag to category."
       );
-      context.deleteFrom(CATEGORIES)
-        .where(CATEGORIES.CATEGORY_ID.eq(data.id))
+
+      context.insertInto(TAG_CATEGORIES)
+        .set(TAG_CATEGORIES.TAG_CATEGORY_ID, data.categoryId())
+        .set(TAG_CATEGORIES.TAG_TAG_ID, data.tagId())
+        .onConflictDoNothing()
         .execute();
     }
 
+    model.eventWithoutProgress("Reassigned %d tags.", Integer.valueOf(max));
     LCommandModelUpdates.updateTagsAndCategories(context, model);
-    model.eventWithoutProgress("Removed %d categories.", Integer.valueOf(max));
   }
 
   @Override
@@ -181,23 +226,24 @@ public final class LCommandCategoriesAdd
     final var max = this.savedData.size();
     for (int index = 0; index < max; ++index) {
       final var data = this.savedData.get(index);
+
       model.eventWithProgressCurrentMax(
         index,
         max,
-        "Adding category '%s'",
-        data.text
+        "Unassigning tag from category."
       );
-      context.insertInto(CATEGORIES)
-        .set(CATEGORIES.CATEGORY_ID, data.id)
-        .set(CATEGORIES.CATEGORY_TEXT, data.text)
-        .set(CATEGORIES.CATEGORY_REQUIRED, 0L)
-        .onDuplicateKeyUpdate()
-        .set(CATEGORIES.CATEGORY_TEXT, data.text)
+
+      final var matches =
+        TAG_CATEGORIES.TAG_CATEGORY_ID.eq(data.categoryId())
+          .and(TAG_CATEGORIES.TAG_TAG_ID.eq(data.tagId()));
+
+      context.deleteFrom(TAG_CATEGORIES)
+        .where(matches)
         .execute();
     }
 
+    model.eventWithoutProgress("Unassigned %d tags.", Integer.valueOf(max));
     LCommandModelUpdates.updateTagsAndCategories(context, model);
-    model.eventWithoutProgress("Added %d categories.", Integer.valueOf(max));
   }
 
   @Override
@@ -206,14 +252,14 @@ public final class LCommandCategoriesAdd
     final var p = new Properties();
 
     for (int index = 0; index < this.savedData.size(); ++index) {
-      final var idKey =
+      final var categoryIdKey =
         "category.%d.id".formatted(Integer.valueOf(index));
-      final var textKey =
-        "category.%d.text".formatted(Integer.valueOf(index));
+      final var categoryTagKey =
+        "category.%d.tag".formatted(Integer.valueOf(index));
 
       final var data = this.savedData.get(index);
-      p.setProperty(idKey, Long.toUnsignedString(data.id));
-      p.setProperty(textKey, data.text);
+      p.setProperty(categoryIdKey, Long.toUnsignedString(data.categoryId));
+      p.setProperty(categoryTagKey, Long.toUnsignedString(data.tagId));
     }
 
     return p;
@@ -222,7 +268,7 @@ public final class LCommandCategoriesAdd
   @Override
   public String describe()
   {
-    return "Add categories";
+    return "Assign tags to categories";
   }
-  
+
 }

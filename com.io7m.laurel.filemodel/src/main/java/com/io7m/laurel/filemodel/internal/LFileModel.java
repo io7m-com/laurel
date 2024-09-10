@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,6 +52,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Properties;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SubmissionPublisher;
@@ -79,6 +81,7 @@ public final class LFileModel implements LFileModelType
   private final AttributeType<List<LImage>> imagesAll;
   private final AttributeType<List<LTag>> tagsAll;
   private final AttributeType<List<LTag>> tagsAssigned;
+  private final AttributeType<SortedMap<LCategory, List<LTag>>> categoryTags;
   private final AttributeType<Optional<? extends LCommandType<?>>> redo;
   private final AttributeType<Optional<? extends LCommandType<?>>> undo;
   private final AttributeType<Optional<LImage>> imageSelected;
@@ -99,6 +102,8 @@ public final class LFileModel implements LFileModelType
       ATTRIBUTES.create(List.of());
     this.categoriesRequired =
       ATTRIBUTES.create(List.of());
+    this.categoryTags =
+      ATTRIBUTES.create(Collections.emptySortedMap());
     this.tagsAll =
       ATTRIBUTES.create(List.of());
     this.tagsAssigned =
@@ -393,6 +398,30 @@ public final class LFileModel implements LFileModelType
     );
   }
 
+  @Override
+  public CompletableFuture<?> categoryTagsAssign(
+    final List<LCategoryAndTags> categories)
+  {
+    Objects.requireNonNull(categories, "categories");
+
+    return this.runCommand(
+      new LCommandCategoryTagsAssign(),
+      categories
+    );
+  }
+
+  @Override
+  public CompletableFuture<?> categoryTagsUnassign(
+    final List<LCategoryAndTags> categories)
+  {
+    Objects.requireNonNull(categories, "categories");
+
+    return this.runCommand(
+      new LCommandCategoryTagsUnassign(),
+      categories
+    );
+  }
+
   private <P, C extends LCommandType<P>>
   CompletableFuture<?>
   runCommand(
@@ -625,6 +654,12 @@ public final class LFileModel implements LFileModelType
     return this.categoriesAll;
   }
 
+  @Override
+  public AttributeReadableType<SortedMap<LCategory, List<LTag>>> categoryTags()
+  {
+    return this.categoryTags;
+  }
+
   private void executeRedo()
     throws Exception
   {
@@ -670,12 +705,6 @@ public final class LFileModel implements LFileModelType
     final List<LImage> images)
   {
     this.imagesAll.set(Objects.requireNonNull(images, "images"));
-  }
-
-  void setTagsAll(
-    final List<LTag> tags)
-  {
-    this.tagsAll.set(Objects.requireNonNull(tags, "tags"));
   }
 
   Map<String, String> attributes()
@@ -731,15 +760,15 @@ public final class LFileModel implements LFileModelType
     ));
   }
 
-  void setCategoriesAll(
-    final List<LCategory> categories)
-  {
-    this.categoriesAll.set(categories);
-  }
-
-  void setCategoriesRequired(
-    final List<LCategory> categories)
-  {
-    this.categoriesRequired.set(categories);
+  void setCategoriesAndTags(
+    final List<LTag> newTagsAll,
+    final List<LCategory> newCategoriesAll,
+    final List<LCategory> newCategoriesRequired,
+    final SortedMap<LCategory, List<LTag>> newCategoryTags
+  ) {
+    this.tagsAll.set(newTagsAll);
+    this.categoriesAll.set(newCategoriesAll);
+    this.categoriesRequired.set(newCategoriesRequired);
+    this.categoryTags.set(newCategoryTags);
   }
 }

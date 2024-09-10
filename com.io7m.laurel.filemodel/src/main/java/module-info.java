@@ -17,6 +17,8 @@
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesSetRequired;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesUnsetRequired;
+import com.io7m.laurel.filemodel.internal.LCommandCategoryTagsAssign;
+import com.io7m.laurel.filemodel.internal.LCommandCategoryTagsUnassign;
 import com.io7m.laurel.filemodel.internal.LCommandFactoryType;
 import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
 import com.io7m.laurel.filemodel.internal.LCommandImagesAdd;
@@ -49,11 +51,13 @@ module com.io7m.laurel.filemodel
 
   provides LCommandFactoryType with
     LCommandCategoriesAdd,
-    LCommandImagesAdd,
-    LCommandImageSelect,
-    LCommandTagsAdd,
     LCommandCategoriesSetRequired,
-    LCommandCategoriesUnsetRequired;
+    LCommandCategoriesUnsetRequired,
+    LCommandCategoryTagsAssign,
+    LCommandCategoryTagsUnassign,
+    LCommandImageSelect,
+    LCommandImagesAdd,
+    LCommandTagsAdd;
 
   exports com.io7m.laurel.filemodel;
   exports com.io7m.laurel.filemodel.internal

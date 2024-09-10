@@ -139,8 +139,7 @@ public final class LCommandCategoriesUnsetRequired
     }
 
     model.eventWithoutProgress("Updated %d categories.", this.savedData.size());
-    model.setCategoriesRequired(listRequired(transaction));
-
+    LCommandModelUpdates.updateTagsAndCategories(context, model);
 
     if (!this.savedData.isEmpty()) {
       return LCommandUndoable.COMMAND_UNDOABLE;
@@ -173,8 +172,7 @@ public final class LCommandCategoriesUnsetRequired
     }
 
     model.eventWithoutProgress("Updated %d categories.", Integer.valueOf(max));
-    model.setCategoriesRequired(listRequired(transaction));
-
+    LCommandModelUpdates.updateTagsAndCategories(context, model);
   }
 
   @Override
@@ -201,22 +199,7 @@ public final class LCommandCategoriesUnsetRequired
     }
 
     model.eventWithoutProgress("Updated %d categories.", Integer.valueOf(max));
-    model.setCategoriesRequired(listRequired(transaction));
-  }
-
-  private static List<LCategory> listRequired(
-    final LDatabaseTransactionType transaction)
-  {
-    final var context =
-      transaction.get(DSLContext.class);
-
-    return context.select(CATEGORIES.CATEGORY_TEXT)
-      .from(CATEGORIES)
-      .where(CATEGORIES.CATEGORY_REQUIRED.eq(1L))
-      .orderBy(CATEGORIES.CATEGORY_TEXT.asc())
-      .stream()
-      .map(r -> new LCategory(r.get(CATEGORIES.CATEGORY_TEXT)))
-      .toList();
+    LCommandModelUpdates.updateTagsAndCategories(context, model);
   }
 
   @Override

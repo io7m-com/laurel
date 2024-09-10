@@ -93,20 +93,6 @@ public final class LCommandTagsAdd
     return c;
   }
 
-  private static List<LTag> listTags(
-    final LDatabaseTransactionType transaction)
-  {
-    final var context =
-      transaction.get(DSLContext.class);
-
-    return context.select(TAGS.TAG_TEXT)
-      .from(TAGS)
-      .orderBy(TAGS.TAG_TEXT.asc())
-      .stream()
-      .map(r -> new LTag(r.get(TAGS.TAG_TEXT)))
-      .toList();
-  }
-
   @Override
   protected LCommandUndoable onExecute(
     final LFileModel model,
@@ -147,8 +133,8 @@ public final class LCommandTagsAdd
       );
     }
 
-    model.setTagsAll(listTags(transaction));
     model.eventWithoutProgress("Added %d tags.", this.savedData.size());
+    LCommandModelUpdates.updateTagsAndCategories(context, model);
 
     if (!this.savedData.isEmpty()) {
       return LCommandUndoable.COMMAND_UNDOABLE;
@@ -179,8 +165,8 @@ public final class LCommandTagsAdd
         .execute();
     }
 
-    model.setTagsAll(listTags(transaction));
     model.eventWithoutProgress("Removed %d tags.", Integer.valueOf(max));
+    LCommandModelUpdates.updateTagsAndCategories(context, model);
   }
 
   @Override
@@ -208,8 +194,8 @@ public final class LCommandTagsAdd
         .execute();
     }
 
-    model.setTagsAll(listTags(transaction));
     model.eventWithoutProgress("Added %d tags.", Integer.valueOf(max));
+    LCommandModelUpdates.updateTagsAndCategories(context, model);
   }
 
   @Override

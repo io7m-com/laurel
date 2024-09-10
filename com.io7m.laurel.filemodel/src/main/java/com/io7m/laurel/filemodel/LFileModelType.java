@@ -18,6 +18,7 @@
 package com.io7m.laurel.filemodel;
 
 import com.io7m.jattribute.core.AttributeReadableType;
+import com.io7m.laurel.filemodel.internal.LCategoryAndTags;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LImage;
@@ -28,6 +29,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Flow;
 
@@ -115,6 +117,28 @@ public interface LFileModelType
   CompletableFuture<?> imageSelect(
     Optional<String> name);
 
+  /**
+   * Assign the given tags to the given categories.
+   *
+   * @param categories The categories/tags
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> categoryTagsAssign(
+    List<LCategoryAndTags> categories);
+
+  /**
+   * Unassign the given tags from the given categories.
+   *
+   * @param categories The categories/tags
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> categoryTagsUnassign(
+    List<LCategoryAndTags> categories);
+
   @Override
   void close()
     throws LException;
@@ -191,4 +215,10 @@ public interface LFileModelType
    */
 
   AttributeReadableType<List<LCategory>> categoryList();
+
+  /**
+   * @return The tags for every available category
+   */
+
+  AttributeReadableType<SortedMap<LCategory, List<LTag>>> categoryTags();
 }

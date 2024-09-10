@@ -19,6 +19,7 @@ package com.io7m.laurel.tests;
 
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LFileModels;
+import com.io7m.laurel.filemodel.internal.LCategoryAndTags;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LException;
@@ -476,5 +477,87 @@ public final class LFileModelTest
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(tc), this.model.categoriesRequired().get());
+  }
+
+  @Test
+  public void testCategoryTagAssign()
+    throws Exception
+  {
+    final var ca = new LCategory("A");
+    final var cb = new LCategory("B");
+
+    final var tx = new LTag("TX");
+    final var ty = new LTag("TY");
+    final var tz = new LTag("TZ");
+
+    assertEquals(List.of(), this.model.categoriesRequired().get());
+    assertEquals(Optional.empty(), this.model.undoText().get());
+
+    this.model.categoryAdd(ca).get(TIMEOUT, SECONDS);
+    this.model.categoryAdd(cb).get(TIMEOUT, SECONDS);
+
+    this.model.tagAdd(tx).get(TIMEOUT, SECONDS);
+    this.model.tagAdd(ty).get(TIMEOUT, SECONDS);
+    this.model.tagAdd(tz).get(TIMEOUT, SECONDS);
+
+    this.model.categoryTagsAssign(List.of(
+      new LCategoryAndTags(ca, List.of(tx, ty))
+    )).get(TIMEOUT, SECONDS);
+
+    assertEquals(List.of(tx, ty), this.model.categoryTags().get().get(ca));
+    assertEquals(null, this.model.categoryTags().get().get(cb));
+
+    this.model.categoryTagsAssign(List.of(
+      new LCategoryAndTags(cb, List.of(ty, tz))
+    )).get(TIMEOUT, SECONDS);
+
+    assertEquals(List.of(tx, ty), this.model.categoryTags().get().get(ca));
+    assertEquals(List.of(ty, tz), this.model.categoryTags().get().get(cb));
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx, ty), this.model.categoryTags().get().get(ca));
+    assertEquals(null, this.model.categoryTags().get().get(cb));
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(null, this.model.categoryTags().get().get(ca));
+    assertEquals(null, this.model.categoryTags().get().get(cb));
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx, ty), this.model.categoryTags().get().get(ca));
+    assertEquals(null, this.model.categoryTags().get().get(cb));
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx, ty), this.model.categoryTags().get().get(ca));
+    assertEquals(List.of(ty, tz), this.model.categoryTags().get().get(cb));
+
+    this.model.categoryTagsUnassign(
+      List.of(new LCategoryAndTags(ca, List.of(tx)))
+    ).get(TIMEOUT, SECONDS);
+
+    assertEquals(List.of(ty), this.model.categoryTags().get().get(ca));
+    assertEquals(List.of(ty, tz), this.model.categoryTags().get().get(cb));
+
+    this.model.categoryTagsUnassign(
+      List.of(new LCategoryAndTags(cb, List.of(tz)))
+    ).get(TIMEOUT, SECONDS);
+
+    assertEquals(List.of(ty), this.model.categoryTags().get().get(ca));
+    assertEquals(List.of(ty), this.model.categoryTags().get().get(cb));
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ty), this.model.categoryTags().get().get(ca));
+    assertEquals(List.of(ty, tz), this.model.categoryTags().get().get(cb));
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx, ty), this.model.categoryTags().get().get(ca));
+    assertEquals(List.of(ty, tz), this.model.categoryTags().get().get(cb));
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ty), this.model.categoryTags().get().get(ca));
+    assertEquals(List.of(ty, tz), this.model.categoryTags().get().get(cb));
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ty), this.model.categoryTags().get().get(ca));
+    assertEquals(List.of(ty), this.model.categoryTags().get().get(cb));
   }
 }
