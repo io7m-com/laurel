@@ -22,6 +22,7 @@ import com.io7m.laurel.filemodel.LFileModels;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
 import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
+import com.io7m.laurel.model.LCaptionID;
 import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LCategoryID;
@@ -829,6 +830,64 @@ public final class LFileModelTest
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(meta3), this.model.metadataList().get());
+  }
+
+  @Test
+  public void testGlobalCaptions()
+    throws Exception
+  {
+    final var txn = new LCaptionName("TX");
+    final var tyn = new LCaptionName("TY");
+    final var tzn = new LCaptionName("TZ");
+
+    assertEquals(List.of(), this.globalCaptionsNow());
+
+    this.model.globalCaptionAdd(txn).get(TIMEOUT, SECONDS);
+    final var tx = this.findGlobalCaption(txn);
+    assertEquals(List.of(tx.id()), this.globalCaptionsNow());
+
+    this.model.globalCaptionAdd(tyn).get(TIMEOUT, SECONDS);
+    final var ty = this.findGlobalCaption(tyn);
+    assertEquals(List.of(tx.id(), ty.id()), this.globalCaptionsNow());
+
+    this.model.globalCaptionAdd(tzn).get(TIMEOUT, SECONDS);
+    final var tz = this.findGlobalCaption(tzn);
+    assertEquals(List.of(tx.id(), ty.id(), tz.id()), this.globalCaptionsNow());
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id()), this.globalCaptionsNow());
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id(), tz.id()), this.globalCaptionsNow());
+
+    this.model.globalCaptionRemove(tz.id()).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id()), this.globalCaptionsNow());
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id(), tz.id()), this.globalCaptionsNow());
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id()), this.globalCaptionsNow());
+  }
+
+  private List<LCaptionID> globalCaptionsNow()
+  {
+    return this.model.globalCaptionList()
+      .get()
+      .stream()
+      .map(LCaption::id)
+      .toList();
+  }
+
+  private LCaption findGlobalCaption(
+    final LCaptionName name)
+  {
+    return this.model.globalCaptionList()
+      .get()
+      .stream()
+      .filter(x -> Objects.equals(x.name(), name))
+      .findFirst()
+      .orElseThrow();
   }
 
   private LCategoryID findCategoryID(

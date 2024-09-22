@@ -55,16 +55,6 @@ abstract class LAbstractViewWithModel implements LViewType
     this.onInitialize();
 
     this.fileModel.subscribe((oldValue, newValue) -> {
-      if (oldValue.isEmpty() && newValue.isPresent()) {
-        this.fileModelSubscriptions =
-          CloseableCollection.create();
-        this.onFileBecameAvailable(
-          this.fileModelSubscriptions,
-          newValue.get()
-        );
-        return;
-      }
-
       if (oldValue.isPresent() && newValue.isEmpty()) {
         this.onFileBecameUnavailable();
         try {
@@ -73,6 +63,17 @@ abstract class LAbstractViewWithModel implements LViewType
           LOG.debug("Failed to close subscriptions: ", e);
         }
         return;
+      }
+
+      if (oldValue.isEmpty() && newValue.isPresent()) {
+        this.fileModelSubscriptions = CloseableCollection.create();
+      }
+
+      if (newValue.isPresent()) {
+        this.onFileBecameAvailable(
+          this.fileModelSubscriptions,
+          newValue.get()
+        );
       }
     });
   }

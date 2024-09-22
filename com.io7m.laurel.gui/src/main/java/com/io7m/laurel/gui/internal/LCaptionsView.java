@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -578,15 +579,22 @@ public final class LCaptionsView extends LAbstractViewWithModel
       final var loader =
         new FXMLLoader(layout, this.strings.resources());
 
-      final var globals =
-        new LGlobalPrefixCaptions(
-          this.services,
-          this.fileModelScope(),
-          stage
+      final LViewControllerFactoryType<LViewType> controllers =
+        LViewControllerFactoryMapped.create(
+          Map.entry(
+            LGlobalPrefixCaptions.class,
+            () -> {
+              return new LGlobalPrefixCaptions(
+                this.services,
+                this.fileModelScope(),
+                stage
+              );
+            }
+          )
         );
 
       loader.setControllerFactory(param -> {
-        return globals;
+        return controllers.call((Class<? extends LViewType>) param);
       });
 
       final Pane pane = loader.load();

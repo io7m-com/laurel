@@ -32,6 +32,7 @@ import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
 import com.io7m.laurel.model.LCaption;
+import com.io7m.laurel.model.LCaptionID;
 import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LCategoryID;
@@ -88,6 +89,7 @@ public final class LFileModel implements LFileModelType
       LOG.error("Uncaught attribute exception: ", throwable);
     });
 
+  private final AttributeType<List<LCaption>> globalCaptions;
   private final AttributeType<List<LCaption>> categoryCaptionsAssigned;
   private final AttributeType<List<LCaption>> categoryCaptionsUnassigned;
   private final AttributeType<List<LCaption>> imageCaptionsAssigned;
@@ -123,6 +125,8 @@ public final class LFileModel implements LFileModelType
       ATTRIBUTES.withValue(List.of());
     this.categoryCaptions =
       ATTRIBUTES.withValue(Collections.emptySortedMap());
+    this.globalCaptions =
+      ATTRIBUTES.withValue(List.of());
     this.tagsAll =
       ATTRIBUTES.withValue(List.of());
     this.imageCaptionsAssigned =
@@ -424,6 +428,30 @@ public final class LFileModel implements LFileModelType
   public SubmissionPublisher<LFileModelEvent> events()
   {
     return this.events;
+  }
+
+  @Override
+  public CompletableFuture<?> globalCaptionAdd(
+    final LCaptionName text)
+  {
+    Objects.requireNonNull(text, "text");
+
+    return this.runCommand(
+      new LCommandGlobalCaptionsAdd(),
+      List.of(text)
+    );
+  }
+
+  @Override
+  public CompletableFuture<?> globalCaptionRemove(
+    final LCaptionID id)
+  {
+    Objects.requireNonNull(id, "id");
+
+    return this.runCommand(
+      new LCommandGlobalCaptionsRemove(),
+      List.of(id)
+    );
   }
 
   @Override
@@ -859,6 +887,12 @@ public final class LFileModel implements LFileModelType
     return future;
   }
 
+  @Override
+  public AttributeReadableType<List<LCaption>> globalCaptionList()
+  {
+    return this.globalCaptions;
+  }
+
   private Optional<InputStream> executeImageStream(
     final LImageID id)
     throws LException
@@ -1013,5 +1047,11 @@ public final class LFileModel implements LFileModelType
     final List<LMetadataValue> meta)
   {
     this.metadata.set(meta);
+  }
+
+  void setGlobalCaptions(
+    final List<LCaption> captions)
+  {
+    this.globalCaptions.set(captions);
   }
 }

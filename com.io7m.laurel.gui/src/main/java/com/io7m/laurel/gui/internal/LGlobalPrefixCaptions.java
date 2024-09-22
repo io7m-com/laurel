@@ -19,10 +19,16 @@ package com.io7m.laurel.gui.internal;
 
 import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.laurel.filemodel.LFileModelType;
+import com.io7m.laurel.model.LCaption;
+import com.io7m.laurel.model.LCaptionName;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.stage.Stage;
 
 import java.util.Objects;
@@ -42,7 +48,7 @@ public final class LGlobalPrefixCaptions
   @FXML private Button delete;
   @FXML private Button up;
   @FXML private Button down;
-  @FXML private ListView<String> captions;
+  @FXML private ListView<LCaption> captions;
 
   /**
    * The global prefix captions editor.
@@ -73,6 +79,10 @@ public final class LGlobalPrefixCaptions
     this.modify.setDisable(true);
     this.up.setDisable(true);
 
+    this.captions.setCellFactory(v -> new LCaptionListCell());
+    this.captions.getSelectionModel()
+      .setSelectionMode(SelectionMode.SINGLE);
+
     this.captions.getSelectionModel()
       .selectedItemProperty()
       .addListener((o, oldCap, newCap) -> {
@@ -91,11 +101,18 @@ public final class LGlobalPrefixCaptions
     final CloseableCollectionType<?> subscriptions,
     final LFileModelType fileModel)
   {
-
+    subscriptions.add(
+      fileModel.globalCaptionList()
+        .subscribe((oldValue, newValue) -> {
+          Platform.runLater(() -> {
+            this.captions.setItems(FXCollections.observableList(newValue));
+          });
+        })
+    );
   }
 
   private void onCaptionSelectionChanged(
-    final String caption)
+    final LCaption caption)
   {
     if (caption != null) {
       this.delete.setDisable(false);
@@ -121,37 +138,24 @@ public final class LGlobalPrefixCaptions
     final var result = editor.result();
     if (result.isPresent()) {
       final var text = result.get();
-      // this.controller.globalPrefixCaptionNew(text);
+      this.fileModelNow().globalCaptionAdd(new LCaptionName(text));
     }
   }
 
   @FXML
   private void onDeleteCaptionSelected()
   {
-    //    this.controller.globalPrefixCaptionDelete(
-    //      this.captions.getSelectionModel()
-    //        .getSelectedIndex()
-    //    );
+    this.fileModelNow().globalCaptionRemove(
+      this.captions.getSelectionModel()
+        .getSelectedItem()
+        .id()
+    );
   }
 
   @FXML
   private void onModifyCaptionSelected()
   {
-    final var editor =
-      this.editors.open(
-        this.captions.getSelectionModel()
-          .getSelectedItem()
-      );
 
-    final var result = editor.result();
-    if (result.isPresent()) {
-      final var text = result.get();
-      //      this.controller.globalPrefixCaptionModify(
-      //        this.captions.getSelectionModel()
-      //          .getSelectedIndex(),
-      //        text
-      //      );
-    }
   }
 
   @FXML
@@ -164,5 +168,27 @@ public final class LGlobalPrefixCaptions
   private void onCaptionDownSelected()
   {
 
+  }
+
+  private static final class LCaptionListCell
+    extends ListCell<LCaption>
+  {
+    LCaptionListCell()
+    {
+
+    }
+
+    @Override
+    protected void updateItem(
+      final LCaption caption,
+      final boolean isEmpty)
+    {
+      super.updateItem(caption, isEmpty);
+      this.setGraphic(null);
+      this.setText(null);
+      if (caption != null) {
+        this.setText(caption.name().text());
+      }
+    }
   }
 }

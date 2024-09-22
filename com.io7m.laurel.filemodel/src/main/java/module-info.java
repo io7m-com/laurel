@@ -20,6 +20,8 @@ import com.io7m.laurel.filemodel.internal.LCommandCategoriesUnsetRequired;
 import com.io7m.laurel.filemodel.internal.LCommandCategoryCaptionsAssign;
 import com.io7m.laurel.filemodel.internal.LCommandCategoryCaptionsUnassign;
 import com.io7m.laurel.filemodel.internal.LCommandFactoryType;
+import com.io7m.laurel.filemodel.internal.LCommandGlobalCaptionsAdd;
+import com.io7m.laurel.filemodel.internal.LCommandGlobalCaptionsRemove;
 import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
 import com.io7m.laurel.filemodel.internal.LCommandImageCaptionsAssign;
 import com.io7m.laurel.filemodel.internal.LCommandImageCaptionsUnassign;
@@ -61,6 +63,8 @@ module com.io7m.laurel.filemodel
     LCommandCategoriesUnsetRequired,
     LCommandCategoryCaptionsAssign,
     LCommandCategoryCaptionsUnassign,
+    LCommandGlobalCaptionsAdd,
+    LCommandGlobalCaptionsRemove,
     LCommandImageCaptionsAssign,
     LCommandImageCaptionsUnassign,
     LCommandImageSelect,

@@ -18,8 +18,9 @@
 package com.io7m.laurel.filemodel;
 
 import com.io7m.jattribute.core.AttributeReadableType;
-import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCaption;
+import com.io7m.laurel.model.LCaptionID;
+import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LCategoryID;
 import com.io7m.laurel.model.LCategoryName;
@@ -50,6 +51,28 @@ public interface LFileModelType
    */
 
   Flow.Publisher<LFileModelEvent> events();
+
+  /**
+   * Add a global caption.
+   *
+   * @param text The caption
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> globalCaptionAdd(
+    LCaptionName text);
+
+  /**
+   * Remove a global caption.
+   *
+   * @param id The caption
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> globalCaptionRemove(
+    LCaptionID id);
 
   /**
    * Set categories as required.
@@ -331,4 +354,10 @@ public interface LFileModelType
    */
 
   CompletableFuture<Optional<InputStream>> imageStream(LImageID id);
+
+  /**
+   * @return The current complete list of global captions
+   */
+
+  AttributeReadableType<List<LCaption>> globalCaptionList();
 }

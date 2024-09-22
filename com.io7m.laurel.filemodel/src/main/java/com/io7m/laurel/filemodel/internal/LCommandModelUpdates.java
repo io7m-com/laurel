@@ -44,6 +44,7 @@ import java.util.TreeMap;
 import static com.io7m.laurel.filemodel.internal.Tables.CAPTIONS;
 import static com.io7m.laurel.filemodel.internal.Tables.CAPTION_CATEGORIES;
 import static com.io7m.laurel.filemodel.internal.Tables.CATEGORIES;
+import static com.io7m.laurel.filemodel.internal.Tables.GLOBAL_CAPTIONS;
 import static com.io7m.laurel.filemodel.internal.Tables.IMAGES;
 import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_BLOBS;
 import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_CAPTIONS;
@@ -323,5 +324,26 @@ public final class LCommandModelUpdates
           x.get(METADATA.META_VALUE)
         );
       }).toList();
+  }
+
+  static List<LCaption> listGlobalCaptions(
+    final DSLContext context)
+  {
+    return context.select(
+      GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID,
+      GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT)
+      .from(GLOBAL_CAPTIONS)
+      .orderBy(
+        GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT.asc(),
+        GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID.asc())
+      .stream()
+      .map(r -> {
+        return new LCaption(
+          new LCaptionID(r.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID)),
+          new LCaptionName(r.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT)),
+          1L
+        );
+      })
+      .toList();
   }
 }

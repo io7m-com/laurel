@@ -24,6 +24,7 @@ import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LCategoryName;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -35,6 +36,7 @@ import javafx.scene.control.TableView;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * The categories view.
@@ -51,6 +53,8 @@ public final class LCategoriesView extends LAbstractViewWithModel
   @FXML private Button categoryRemove;
   @FXML private Button captionAssign;
   @FXML private Button captionUnassign;
+  @FXML private Button categoryRequire;
+  @FXML private Button categoryUnrequire;
 
   LCategoriesView(
     final RPServiceDirectoryType services,
@@ -80,6 +84,28 @@ public final class LCategoriesView extends LAbstractViewWithModel
   private void onCategoryRemoveSelected()
   {
 
+  }
+
+  @FXML
+  private void onCategoryRequireSelected()
+  {
+    final var category =
+      this.categoryList.getSelectionModel()
+        .getSelectedItem();
+
+    this.fileModelNow()
+      .categorySetRequired(Set.of(category.id()));
+  }
+
+  @FXML
+  private void onCategoryUnrequireSelected()
+  {
+    final var category =
+      this.categoryList.getSelectionModel()
+        .getSelectedItem();
+
+    this.fileModelNow()
+      .categorySetNotRequired(Set.of(category.id()));
   }
 
   @FXML
@@ -195,11 +221,18 @@ public final class LCategoriesView extends LAbstractViewWithModel
     final var columns =
       this.categoryList.getColumns();
 
-    final var colText = (TableColumn<LCategory, String>) columns.get(0);
-    colText.setSortable(true);
-    colText.setReorderable(false);
-    colText.setCellValueFactory(param -> {
+    final var colName = (TableColumn<LCategory, String>) columns.get(0);
+    colName.setSortable(true);
+    colName.setReorderable(false);
+    colName.setCellValueFactory(param -> {
       return new ReadOnlyStringWrapper(param.getValue().name().text());
+    });
+
+    final var colReq = (TableColumn<LCategory, Boolean>) columns.get(1);
+    colReq.setSortable(true);
+    colReq.setReorderable(false);
+    colReq.setCellValueFactory(param -> {
+      return new ReadOnlyObjectWrapper<>(param.getValue().required());
     });
 
     this.categoryList.getSelectionModel()
@@ -209,7 +242,7 @@ public final class LCategoriesView extends LAbstractViewWithModel
       .subscribe(this::onCategorySelectionChanged);
 
     this.categoryList.setPlaceholder(new Label(""));
-    this.categoryList.getSortOrder().add(colText);
+    this.categoryList.getSortOrder().add(colName);
     this.categoryList.sort();
   }
 
@@ -223,6 +256,8 @@ public final class LCategoriesView extends LAbstractViewWithModel
 
     this.fileModelNow().categorySelect(selected);
     this.categoryRemove.setDisable(selected.isEmpty());
+    this.categoryRequire.setDisable(selected.isEmpty());
+    this.categoryUnrequire.setDisable(selected.isEmpty());
   }
 
   private void onCaptionsUnassignedSelectionChanged()

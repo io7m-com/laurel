@@ -73,6 +73,7 @@ public final class LCommandLoad
       LCommandModelUpdates.listCategoriesCaptions(context)
     );
     model.setMetadata(LCommandModelUpdates.listMetadata(context));
+    model.setGlobalCaptions(LCommandModelUpdates.listGlobalCaptions(context));
     return LCommandUndoable.COMMAND_NOT_UNDOABLE;
   }
 

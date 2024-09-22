@@ -110,6 +110,26 @@ STRICT
 ]]></Statement>
 
     <Comment>
+      The global_captions table stores the complete set of available global captions.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE global_captions (
+  global_caption_id    INTEGER PRIMARY KEY NOT NULL,
+  global_caption_text  TEXT                NOT NULL
+
+-- [jooq ignore start]
+  ,
+  CONSTRAINT global_captions_text_unique
+    UNIQUE (global_caption_text)
+-- [jooq ignore stop]
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
       The categories table stores the categories for captions.
     </Comment>
 

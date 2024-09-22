@@ -3,13 +3,14 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox prefHeight="320.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.io7m.laurel.gui.internal.LGlobalPrefixCaptions">
+<VBox prefHeight="320.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.io7m.laurel.gui.internal.LGlobalPrefixCaptions">
    <children>
       <HBox maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0">
          <children>
@@ -21,6 +22,9 @@
                      </image>
                   </ImageView>
                </graphic>
+               <tooltip>
+                  <Tooltip text="%captions.tooltip.add" />
+               </tooltip>
             </Button>
             <Button fx:id="delete" layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onDeleteCaptionSelected" prefHeight="32.0" prefWidth="32.0">
                <graphic>
@@ -30,6 +34,9 @@
                      </image>
                   </ImageView>
                </graphic>
+               <tooltip>
+                  <Tooltip text="%captions.tooltip.delete" />
+               </tooltip>
             </Button>
             <Button fx:id="modify" layoutX="42.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onModifyCaptionSelected" prefHeight="32.0" prefWidth="32.0">
                <graphic>
@@ -39,6 +46,9 @@
                      </image>
                   </ImageView>
                </graphic>
+               <tooltip>
+                  <Tooltip text="%captions.tooltip.modify" />
+               </tooltip>
             </Button>
             <Region HBox.hgrow="ALWAYS" />
             <Button fx:id="up" layoutX="74.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onCaptionUpSelected" prefHeight="32.0" prefWidth="32.0">
