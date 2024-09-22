@@ -17,56 +17,43 @@
 
 package com.io7m.laurel.model;
 
-
 import java.util.Comparator;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 /**
- * A category.
+ * A caption along with its ID.
  *
- * @param text The caption text
+ * @param id       The ID
+ * @param name     The caption
+ * @param required The category is required
  */
 
-public record LCategory(String text)
+public record LCategory(
+  LCategoryID id,
+  LCategoryName name,
+  boolean required)
   implements Comparable<LCategory>
 {
   /**
-   * The pattern that defines a valid category.
-   */
-
-  public static final Pattern VALID_CATEGORY =
-    Pattern.compile("[a-z0-9A-Z_-][a-z0-9A-Z_ \\-']*");
-
-  /**
-   * A category.
+   * A caption along with its ID.
    *
-   * @param text The caption text
+   * @param id       The ID
+   * @param name     The caption
+   * @param required The category is required
    */
 
   public LCategory
   {
-    Objects.requireNonNull(text, "text");
-    text = text.trim();
-
-    if (!VALID_CATEGORY.matcher(text).matches()) {
-      throw new IllegalArgumentException(
-        "Category must match %s".formatted(VALID_CATEGORY)
-      );
-    }
-  }
-
-  @Override
-  public String toString()
-  {
-    return this.text;
+    Objects.requireNonNull(id, "id");
+    Objects.requireNonNull(name, "tag");
   }
 
   @Override
   public int compareTo(
     final LCategory other)
   {
-    return Comparator.comparing(LCategory::text)
+    return Comparator.comparing(LCategory::name)
+      .thenComparing(LCategory::id)
       .compare(this, other);
   }
 }

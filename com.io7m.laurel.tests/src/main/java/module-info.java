@@ -49,12 +49,4 @@ open module com.io7m.laurel.tests
 
   exports com.io7m.laurel.tests.arbitraries;
   exports com.io7m.laurel.tests;
-
-  provides ArbitraryProvider
-    with
-      com.io7m.laurel.tests.arbitraries.LArbImageCaption,
-      com.io7m.laurel.tests.arbitraries.LArbImageCaptionID,
-      com.io7m.laurel.tests.arbitraries.LArbImageID,
-      com.io7m.laurel.tests.arbitraries.LArbImageSet
-    ;
 }

@@ -17,39 +17,25 @@
 
 package com.io7m.laurel.model;
 
-import java.util.Objects;
-import java.util.UUID;
-
 /**
- * The unique ID of an image.
+ * An ID of an image.
  *
- * @param id The id
+ * @param value The value
  */
 
-public record LImageID(UUID id)
+public record LImageID(long value)
   implements Comparable<LImageID>
 {
-  /**
-   * The unique ID of an image.
-   *
-   * @param id The id
-   */
-
-  public LImageID
-  {
-    Objects.requireNonNull(id, "id");
-  }
-
   @Override
   public String toString()
   {
-    return this.id.toString();
+    return Long.toUnsignedString(this.value);
   }
 
   @Override
   public int compareTo(
     final LImageID other)
   {
-    return this.id.compareTo(other.id);
+    return Long.compareUnsigned(this.value, other.value);
   }
 }

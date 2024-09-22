@@ -17,12 +17,17 @@
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesSetRequired;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesUnsetRequired;
-import com.io7m.laurel.filemodel.internal.LCommandCategoryTagsAssign;
-import com.io7m.laurel.filemodel.internal.LCommandCategoryTagsUnassign;
+import com.io7m.laurel.filemodel.internal.LCommandCategoryCaptionsAssign;
+import com.io7m.laurel.filemodel.internal.LCommandCategoryCaptionsUnassign;
 import com.io7m.laurel.filemodel.internal.LCommandFactoryType;
 import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
+import com.io7m.laurel.filemodel.internal.LCommandImageCaptionsAssign;
+import com.io7m.laurel.filemodel.internal.LCommandImageCaptionsUnassign;
 import com.io7m.laurel.filemodel.internal.LCommandImagesAdd;
-import com.io7m.laurel.filemodel.internal.LCommandTagsAdd;
+import com.io7m.laurel.filemodel.internal.LCommandCaptionsAdd;
+import com.io7m.laurel.filemodel.internal.LCommandImagesDelete;
+import com.io7m.laurel.filemodel.internal.LCommandMetadataAdd;
+import com.io7m.laurel.filemodel.internal.LCommandMetadataRemove;
 
 /**
  * Image caption management (File model)
@@ -50,14 +55,20 @@ module com.io7m.laurel.filemodel
   requires org.xerial.sqlitejdbc;
 
   provides LCommandFactoryType with
+    LCommandCaptionsAdd,
     LCommandCategoriesAdd,
     LCommandCategoriesSetRequired,
     LCommandCategoriesUnsetRequired,
-    LCommandCategoryTagsAssign,
-    LCommandCategoryTagsUnassign,
+    LCommandCategoryCaptionsAssign,
+    LCommandCategoryCaptionsUnassign,
+    LCommandImageCaptionsAssign,
+    LCommandImageCaptionsUnassign,
     LCommandImageSelect,
     LCommandImagesAdd,
-    LCommandTagsAdd;
+    LCommandImagesDelete,
+    LCommandMetadataAdd,
+    LCommandMetadataRemove
+    ;
 
   exports com.io7m.laurel.filemodel;
   exports com.io7m.laurel.filemodel.internal

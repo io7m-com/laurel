@@ -17,34 +17,81 @@
 
 package com.io7m.laurel.gui.internal;
 
+import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
+import com.io7m.jwheatsheaf.api.JWFileChooserFilterType;
+import com.io7m.jwheatsheaf.api.JWFileChooserType;
 import com.io7m.jwheatsheaf.api.JWFileChoosersType;
+import com.io7m.jwheatsheaf.oxygen.JWOxygenIconSet;
 import com.io7m.jwheatsheaf.ui.JWFileChoosers;
-import com.io7m.repetoir.core.RPServiceType;
+import com.io7m.repetoir.core.RPServiceDirectoryType;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.Executors;
 
 /**
- * A service providing file choosers.
+ * The file chooser service.
  */
 
-public final class LFileChoosers implements RPServiceType, AutoCloseable
+public final class LFileChoosers implements LFileChoosersType
 {
-  private final JWFileChoosersType fileChoosers;
+  private static final JWOxygenIconSet OXYGEN_ICON_SET =
+    new JWOxygenIconSet();
+
+  private final JWFileChoosersType choosers;
+  private Path mostRecentDirectory;
 
   /**
-   * A service providing file choosers.
+   * The file chooser service.
+   *
+   * @param services The service directory
    */
 
-  public LFileChoosers()
+  public LFileChoosers(
+    final RPServiceDirectoryType services)
   {
-    this.fileChoosers = JWFileChoosers.create();
+    this.choosers =
+      JWFileChoosers.createWith(
+        Executors.newVirtualThreadPerTaskExecutor(),
+        Locale.getDefault()
+      );
   }
 
-  /**
-   * @return The file choosers
-   */
-
-  public JWFileChoosersType fileChoosers()
+  @Override
+  public JWFileChooserType create(
+    final JWFileChooserConfiguration configuration)
   {
-    return this.fileChoosers;
+    final var builder =
+      JWFileChooserConfiguration.builder()
+        .from(configuration)
+        .setFileImageSet(OXYGEN_ICON_SET);
+
+    if (this.mostRecentDirectory != null) {
+      builder.setInitialDirectory(this.mostRecentDirectory);
+    }
+
+    try {
+      builder.setCssStylesheet(LCSS.defaultCSS().toURL());
+    } catch (final MalformedURLException e) {
+      throw new IllegalStateException(e);
+    }
+
+    return this.choosers.create(builder.build());
+  }
+
+  @Override
+  public JWFileChooserFilterType filterForAllFiles()
+  {
+    return this.choosers.filterForAllFiles();
+  }
+
+  @Override
+  public JWFileChooserFilterType filterForOnlyDirectories()
+  {
+    return this.choosers.filterForOnlyDirectories();
   }
 
   @Override
@@ -55,17 +102,25 @@ public final class LFileChoosers implements RPServiceType, AutoCloseable
 
   @Override
   public void close()
-    throws Exception
+    throws IOException
   {
-    this.fileChoosers.close();
+    this.choosers.close();
   }
 
   @Override
   public String toString()
   {
     return String.format(
-      "[LFileChoosers 0x%08x]",
+      "[%s 0x%08x]",
+      this.getClass().getName(),
       Integer.valueOf(this.hashCode())
     );
+  }
+
+  @Override
+  public void setMostRecentDirectory(
+    final Path file)
+  {
+    this.mostRecentDirectory = Objects.requireNonNull(file, "file");
   }
 }

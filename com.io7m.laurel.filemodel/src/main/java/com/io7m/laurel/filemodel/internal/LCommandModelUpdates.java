@@ -17,19 +17,38 @@
 
 package com.io7m.laurel.filemodel.internal;
 
+import com.io7m.laurel.model.LCaption;
+import com.io7m.laurel.model.LCaptionID;
+import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
-import com.io7m.laurel.model.LTag;
+import com.io7m.laurel.model.LCategoryID;
+import com.io7m.laurel.model.LCategoryName;
+import com.io7m.laurel.model.LHashSHA256;
+import com.io7m.laurel.model.LImage;
+import com.io7m.laurel.model.LImageID;
+import com.io7m.laurel.model.LImageWithID;
+import com.io7m.laurel.model.LMetadataValue;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.impl.DSL;
 
+import java.net.URI;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import static com.io7m.laurel.filemodel.internal.Tables.CAPTIONS;
+import static com.io7m.laurel.filemodel.internal.Tables.CAPTION_CATEGORIES;
 import static com.io7m.laurel.filemodel.internal.Tables.CATEGORIES;
-import static com.io7m.laurel.filemodel.internal.Tables.TAGS;
-import static com.io7m.laurel.filemodel.internal.Tables.TAG_CATEGORIES;
+import static com.io7m.laurel.filemodel.internal.Tables.IMAGES;
+import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_BLOBS;
+import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_CAPTIONS;
+import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_CAPTIONS_COUNTS;
+import static com.io7m.laurel.filemodel.internal.Tables.METADATA;
 
 /**
  * Functions to perform model updates on database changes.
@@ -37,87 +56,272 @@ import static com.io7m.laurel.filemodel.internal.Tables.TAG_CATEGORIES;
 
 public final class LCommandModelUpdates
 {
+  static final Field<Long> COUNT_FIELD =
+    DSL.coalesce(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_COUNT, 0L)
+      .as(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_COUNT);
+
   private LCommandModelUpdates()
   {
 
   }
 
-  private static List<LTag> listTags(
+  static List<LImageWithID> listImages(
     final DSLContext context)
   {
-    return context.select(TAGS.TAG_TEXT)
-      .from(TAGS)
-      .orderBy(TAGS.TAG_TEXT.asc())
+    return context.select(
+        IMAGES.IMAGE_ID,
+        IMAGES.IMAGE_SOURCE,
+        IMAGES.IMAGE_NAME,
+        IMAGES.IMAGE_FILE,
+        IMAGE_BLOBS.IMAGE_BLOB_SHA256
+      )
+      .from(IMAGES)
+      .join(IMAGE_BLOBS)
+      .on(IMAGE_BLOBS.IMAGE_BLOB_ID.eq(IMAGES.IMAGE_BLOB))
+      .orderBy(IMAGES.IMAGE_NAME)
       .stream()
-      .map(r -> new LTag(r.get(TAGS.TAG_TEXT)))
+      .map(LCommandModelUpdates::mapImageRecord)
       .toList();
   }
 
-  private static SortedMap<LCategory, List<LTag>> listCategoriesTags(
+  private static LImageWithID mapImageRecord(
+    final org.jooq.Record r)
+  {
+    return new LImageWithID(
+      new LImageID(r.<Long>get(IMAGES.IMAGE_ID).longValue()),
+      new LImage(
+        r.get(IMAGES.IMAGE_NAME),
+        Optional.ofNullable(r.get(IMAGES.IMAGE_FILE)).map(Paths::get),
+        Optional.ofNullable(r.get(IMAGES.IMAGE_SOURCE)).map(URI::create),
+        new LHashSHA256(r.get(IMAGE_BLOBS.IMAGE_BLOB_SHA256))
+      )
+    );
+  }
+
+  static List<LCaption> listCaptionsAll(
+    final DSLContext context)
+  {
+    return context.select(
+        CAPTIONS.CAPTION_ID,
+        CAPTIONS.CAPTION_TEXT,
+        COUNT_FIELD)
+      .from(CAPTIONS)
+      .leftJoin(IMAGE_CAPTIONS_COUNTS)
+      .on(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_ID.eq(CAPTIONS.CAPTION_ID))
+      .orderBy(CAPTIONS.CAPTION_TEXT.asc())
+      .stream()
+      .map(r -> {
+        return new LCaption(
+          new LCaptionID(r.<Long>get(CAPTIONS.CAPTION_ID).longValue()),
+          new LCaptionName(r.get(CAPTIONS.CAPTION_TEXT)),
+          r.<Long>get(COUNT_FIELD).longValue()
+        );
+      })
+      .toList();
+  }
+
+
+  static List<LCaption> listCategoryCaptionsAssigned(
+    final DSLContext context,
+    final LCategoryID id)
+  {
+    return context.select(
+        CAPTIONS.CAPTION_ID,
+        CAPTIONS.CAPTION_TEXT,
+        COUNT_FIELD)
+      .from(CAPTIONS)
+      .join(CAPTION_CATEGORIES)
+      .on(CAPTION_CATEGORIES.CAPTION_CAPTION_ID.eq(CAPTIONS.CAPTION_ID))
+      .leftJoin(IMAGE_CAPTIONS_COUNTS)
+      .on(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_ID.eq(CAPTIONS.CAPTION_ID))
+      .where(CAPTION_CATEGORIES.CAPTION_CATEGORY_ID.eq(id.value()))
+      .orderBy(CAPTIONS.CAPTION_TEXT.asc())
+      .stream()
+      .map(r -> {
+        return new LCaption(
+          new LCaptionID(r.<Long>get(CAPTIONS.CAPTION_ID).longValue()),
+          new LCaptionName(r.get(CAPTIONS.CAPTION_TEXT)),
+          r.<Long>get(COUNT_FIELD).longValue()
+        );
+      })
+      .toList();
+  }
+
+  static List<LCaption> listImageCaptionsAssigned(
+    final DSLContext context,
+    final LImageID id)
+  {
+    return context.select(
+        CAPTIONS.CAPTION_ID,
+        CAPTIONS.CAPTION_TEXT,
+        COUNT_FIELD)
+      .from(CAPTIONS)
+      .join(IMAGE_CAPTIONS)
+      .on(IMAGE_CAPTIONS.IMAGE_CAPTION_CAPTION.eq(CAPTIONS.CAPTION_ID))
+      .join(IMAGE_CAPTIONS_COUNTS)
+      .on(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_ID.eq(CAPTIONS.CAPTION_ID))
+      .where(IMAGE_CAPTIONS.IMAGE_CAPTION_IMAGE.eq(id.value()))
+      .orderBy(CAPTIONS.CAPTION_TEXT.asc())
+      .stream()
+      .map(r -> {
+        return new LCaption(
+          new LCaptionID(r.<Long>get(CAPTIONS.CAPTION_ID).longValue()),
+          new LCaptionName(r.get(CAPTIONS.CAPTION_TEXT)),
+          r.<Long>get(COUNT_FIELD).longValue()
+        );
+      })
+      .toList();
+  }
+
+  static SortedMap<LCategoryID, List<LCaption>> listCategoriesCaptions(
     final DSLContext context)
   {
     final var map =
-      new TreeMap<LCategory, ArrayList<LTag>>();
+      new TreeMap<LCategoryID, ArrayList<LCaption>>();
 
     final var results =
-      context.select(CATEGORIES.CATEGORY_TEXT, TAGS.TAG_TEXT)
-        .from(TAG_CATEGORIES)
-        .join(TAGS)
-        .on(TAG_CATEGORIES.TAG_TAG_ID.eq(TAGS.TAG_ID))
+      context.select(
+          CATEGORIES.CATEGORY_ID,
+          CATEGORIES.CATEGORY_TEXT,
+          CAPTIONS.CAPTION_ID,
+          CAPTIONS.CAPTION_TEXT,
+          COUNT_FIELD)
+        .from(CAPTION_CATEGORIES)
+        .join(CAPTIONS)
+        .on(CAPTION_CATEGORIES.CAPTION_CAPTION_ID.eq(CAPTIONS.CAPTION_ID))
         .join(CATEGORIES)
-        .on(TAG_CATEGORIES.TAG_CATEGORY_ID.eq(CATEGORIES.CATEGORY_ID))
-        .orderBy(CATEGORIES.CATEGORY_TEXT, TAGS.TAG_TEXT)
+        .on(CAPTION_CATEGORIES.CAPTION_CATEGORY_ID.eq(CATEGORIES.CATEGORY_ID))
+        .leftJoin(IMAGE_CAPTIONS_COUNTS)
+        .on(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_ID.eq(CAPTIONS.CAPTION_ID))
+        .orderBy(CATEGORIES.CATEGORY_TEXT, CAPTIONS.CAPTION_TEXT)
         .fetch();
 
     for (final var rec : results) {
       final var category =
-        new LCategory(rec.get(CATEGORIES.CATEGORY_TEXT));
-      final var tag =
-        new LTag(rec.get(TAGS.TAG_TEXT));
+        new LCategoryID(rec.get(CATEGORIES.CATEGORY_ID));
+      final var caption =
+        new LCaptionName(rec.get(CAPTIONS.CAPTION_TEXT));
+      final var tagWithId =
+        new LCaption(
+          new LCaptionID(rec.<Long>get(CAPTIONS.CAPTION_ID).longValue()),
+          caption,
+          rec.<Long>get(COUNT_FIELD).longValue()
+        );
 
       var existing = map.get(category);
       if (existing == null) {
         existing = new ArrayList<>();
       }
-      existing.add(tag);
+      existing.add(tagWithId);
       map.put(category, existing);
     }
 
     return Collections.unmodifiableSortedMap(map);
   }
 
-  private static List<LCategory> listCategoriesAll(
+  static List<LCategory> listCategoriesAll(
     final DSLContext context)
   {
-    return context.select(CATEGORIES.CATEGORY_TEXT)
+    return context.select(
+        CATEGORIES.CATEGORY_ID,
+        CATEGORIES.CATEGORY_REQUIRED,
+        CATEGORIES.CATEGORY_TEXT)
       .from(CATEGORIES)
       .orderBy(CATEGORIES.CATEGORY_TEXT.asc())
       .stream()
-      .map(r -> new LCategory(r.get(CATEGORIES.CATEGORY_TEXT)))
+      .map(r -> {
+        return new LCategory(
+          new LCategoryID(r.<Long>get(CATEGORIES.CATEGORY_ID).longValue()),
+          new LCategoryName(r.get(CATEGORIES.CATEGORY_TEXT)),
+          booleanOf(r.get(CATEGORIES.CATEGORY_REQUIRED))
+        );
+      })
       .toList();
   }
 
-  private static List<LCategory> listCategoriesRequired(
+  private static boolean booleanOf(
+    final Long x)
+  {
+    return x.longValue() != 0L;
+  }
+
+  static List<LCategory> listCategoriesRequired(
     final DSLContext context)
   {
-    return context.select(CATEGORIES.CATEGORY_TEXT)
+    return context.select(
+      CATEGORIES.CATEGORY_TEXT,
+      CATEGORIES.CATEGORY_ID,
+      CATEGORIES.CATEGORY_REQUIRED)
       .from(CATEGORIES)
       .where(CATEGORIES.CATEGORY_REQUIRED.eq(1L))
       .orderBy(CATEGORIES.CATEGORY_TEXT.asc())
       .stream()
-      .map(r -> new LCategory(r.get(CATEGORIES.CATEGORY_TEXT)))
+      .map(r -> {
+        return new LCategory(
+          new LCategoryID(r.<Long>get(CATEGORIES.CATEGORY_ID).longValue()),
+          new LCategoryName(r.get(CATEGORIES.CATEGORY_TEXT)),
+          booleanOf(r.get(CATEGORIES.CATEGORY_REQUIRED))
+        );
+      })
       .toList();
   }
 
-  static void updateTagsAndCategories(
+  static void updateCaptionsAndCategories(
     final DSLContext context,
     final LFileModel model)
   {
-    model.setCategoriesAndTags(
-      listTags(context),
+    final var imageSelectedOpt =
+      model.imageSelected().get();
+    if (imageSelectedOpt.isPresent()) {
+      model.setImageCaptionsAssigned(
+        listImageCaptionsAssigned(context, imageSelectedOpt.get().id())
+      );
+    } else {
+      model.setImageCaptionsAssigned(List.of());
+    }
+
+    final var categorySelectedOpt =
+      model.categorySelected().get();
+    if (categorySelectedOpt.isPresent()) {
+      model.setCategoryCaptionsAssigned(
+        listCategoryCaptionsAssigned(context, categorySelectedOpt.get().id())
+      );
+    } else {
+      model.setCategoryCaptionsAssigned(List.of());
+    }
+
+    model.setCategoriesAndCaptions(
+      listCaptionsAll(context),
       listCategoriesAll(context),
       listCategoriesRequired(context),
-      listCategoriesTags(context)
+      listCategoriesCaptions(context)
     );
+  }
+
+  static List<LCaptionID> listImageCaptions(
+    final DSLContext context,
+    final LImageID id)
+  {
+    return context.select(IMAGE_CAPTIONS.IMAGE_CAPTION_CAPTION)
+      .from(IMAGE_CAPTIONS)
+      .where(IMAGE_CAPTIONS.IMAGE_CAPTION_IMAGE.eq(id.value()))
+      .stream()
+      .map(x -> new LCaptionID(x.value1().longValue()))
+      .toList();
+  }
+
+  static List<LMetadataValue> listMetadata(
+    final DSLContext context)
+  {
+    return context.select(METADATA.META_NAME, METADATA.META_VALUE)
+      .from(METADATA)
+      .orderBy(METADATA.META_NAME.asc(), METADATA.META_VALUE.asc())
+      .stream()
+      .map(x -> {
+        return new LMetadataValue(
+          x.get(METADATA.META_NAME),
+          x.get(METADATA.META_VALUE)
+        );
+      }).toList();
   }
 }

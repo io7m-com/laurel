@@ -27,12 +27,19 @@ import com.io7m.jattribute.core.AttributeType;
 import com.io7m.jattribute.core.Attributes;
 import com.io7m.jmulticlose.core.CloseableCollection;
 import com.io7m.jmulticlose.core.CloseableCollectionType;
+import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
 import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
+import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
+import com.io7m.laurel.model.LCaption;
+import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
+import com.io7m.laurel.model.LCategoryID;
+import com.io7m.laurel.model.LCategoryName;
 import com.io7m.laurel.model.LException;
-import com.io7m.laurel.model.LImage;
-import com.io7m.laurel.model.LTag;
+import com.io7m.laurel.model.LImageID;
+import com.io7m.laurel.model.LImageWithID;
+import com.io7m.laurel.model.LMetadataValue;
 import com.io7m.seltzer.api.SStructuredErrorType;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -41,10 +48,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,11 +62,14 @@ import java.util.OptionalDouble;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.io7m.laurel.filemodel.internal.Tables.IMAGES;
+import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_BLOBS;
 import static com.io7m.laurel.filemodel.internal.Tables.REDO;
 import static com.io7m.laurel.filemodel.internal.Tables.UNDO;
 import static java.time.ZoneOffset.UTC;
@@ -76,17 +88,22 @@ public final class LFileModel implements LFileModelType
       LOG.error("Uncaught attribute exception: ", throwable);
     });
 
+  private final AttributeType<List<LCaption>> categoryCaptionsAssigned;
+  private final AttributeType<List<LCaption>> categoryCaptionsUnassigned;
+  private final AttributeType<List<LCaption>> imageCaptionsAssigned;
+  private final AttributeType<List<LCaption>> imageCaptionsUnassigned;
+  private final AttributeType<List<LCaption>> tagsAll;
   private final AttributeType<List<LCategory>> categoriesAll;
   private final AttributeType<List<LCategory>> categoriesRequired;
-  private final AttributeType<List<LImage>> imagesAll;
-  private final AttributeType<List<LTag>> tagsAll;
-  private final AttributeType<List<LTag>> tagsAssigned;
-  private final AttributeType<SortedMap<LCategory, List<LTag>>> categoryTags;
+  private final AttributeType<List<LImageWithID>> imagesAll;
+  private final AttributeType<List<LMetadataValue>> metadata;
   private final AttributeType<Optional<? extends LCommandType<?>>> redo;
   private final AttributeType<Optional<? extends LCommandType<?>>> undo;
-  private final AttributeType<Optional<LImage>> imageSelected;
+  private final AttributeType<Optional<LCategory>> categorySelected;
+  private final AttributeType<Optional<LImageWithID>> imageSelected;
   private final AttributeType<Optional<String>> redoText;
   private final AttributeType<Optional<String>> undoText;
+  private final AttributeType<SortedMap<LCategoryID, List<LCaption>>> categoryCaptions;
   private final CloseableCollectionType<LException> resources;
   private final ConcurrentHashMap<String, String> attributes;
   private final LDatabaseType database;
@@ -98,26 +115,36 @@ public final class LFileModel implements LFileModelType
   {
     this.database =
       Objects.requireNonNull(inDatabase, "database");
+    this.metadata =
+      ATTRIBUTES.withValue(List.of());
     this.categoriesAll =
-      ATTRIBUTES.create(List.of());
+      ATTRIBUTES.withValue(List.of());
     this.categoriesRequired =
-      ATTRIBUTES.create(List.of());
-    this.categoryTags =
-      ATTRIBUTES.create(Collections.emptySortedMap());
+      ATTRIBUTES.withValue(List.of());
+    this.categoryCaptions =
+      ATTRIBUTES.withValue(Collections.emptySortedMap());
     this.tagsAll =
-      ATTRIBUTES.create(List.of());
-    this.tagsAssigned =
-      ATTRIBUTES.create(List.of());
+      ATTRIBUTES.withValue(List.of());
+    this.imageCaptionsAssigned =
+      ATTRIBUTES.withValue(List.of());
+    this.imageCaptionsUnassigned =
+      ATTRIBUTES.withValue(List.of());
+    this.categoryCaptionsAssigned =
+      ATTRIBUTES.withValue(List.of());
+    this.categoryCaptionsUnassigned =
+      ATTRIBUTES.withValue(List.of());
     this.imagesAll =
-      ATTRIBUTES.create(List.of());
+      ATTRIBUTES.withValue(List.of());
     this.imageSelected =
-      ATTRIBUTES.create(Optional.empty());
+      ATTRIBUTES.withValue(Optional.empty());
+    this.categorySelected =
+      ATTRIBUTES.withValue(Optional.empty());
     this.undo =
-      ATTRIBUTES.create(Optional.empty());
+      ATTRIBUTES.withValue(Optional.empty());
     this.undoText =
       this.undo.map(o -> o.map(LCommandType::describe));
     this.redo =
-      ATTRIBUTES.create(Optional.empty());
+      ATTRIBUTES.withValue(Optional.empty());
     this.redoText =
       this.redo.map(o -> o.map(LCommandType::describe));
     this.commandLock =
@@ -136,8 +163,25 @@ public final class LFileModel implements LFileModelType
       });
 
     this.resources.add(this.database);
-    this.events =
-      this.resources.add(new SubmissionPublisher<>());
+    this.events = this.resources.add(new SubmissionPublisher<>());
+
+    this.resources.add(
+      this.tagsAll.subscribe(
+        (_0, _1) -> this.onImageCaptionsUnassignedRecalculate())
+    );
+    this.resources.add(
+      this.imageCaptionsAssigned.subscribe(
+        (_0, _1) -> this.onImageCaptionsUnassignedRecalculate())
+    );
+
+    this.resources.add(
+      this.tagsAll.subscribe(
+        (_0, _1) -> this.onCategoryCaptionsUnassignedRecalculate())
+    );
+    this.resources.add(
+      this.categoryCaptionsAssigned.subscribe(
+        (_0, _1) -> this.onCategoryCaptionsUnassignedRecalculate())
+    );
   }
 
   /**
@@ -152,6 +196,16 @@ public final class LFileModel implements LFileModelType
    */
 
   public static LFileModelType open(
+    final Path file,
+    final boolean readOnly)
+    throws LException
+  {
+    final var model = openModel(file, readOnly);
+    model.load();
+    return model;
+  }
+
+  private static LFileModel openModel(
     final Path file,
     final boolean readOnly)
     throws LException
@@ -317,6 +371,38 @@ public final class LFileModel implements LFileModelType
       .map(x -> x);
   }
 
+  private void onImageCaptionsUnassignedRecalculate()
+  {
+    final var unassigned =
+      new TreeSet<>(this.tagsAll.get());
+    final var assigned =
+      new HashSet<>(this.imageCaptionsAssigned.get());
+
+    unassigned.removeAll(assigned);
+
+    this.imageCaptionsUnassigned.set(unassigned.stream().toList());
+  }
+
+  private void onCategoryCaptionsUnassignedRecalculate()
+  {
+    final var unassigned =
+      new TreeSet<>(this.tagsAll.get());
+    final var assigned =
+      new HashSet<>(this.categoryCaptionsAssigned.get());
+
+    unassigned.removeAll(assigned);
+
+    this.categoryCaptionsUnassigned.set(unassigned.stream().toList());
+  }
+
+  private void load()
+  {
+    this.runCommand(
+      new LCommandLoad(),
+      DDatabaseUnit.UNIT
+    );
+  }
+
   void setAttribute(
     final String name,
     final String value)
@@ -342,21 +428,21 @@ public final class LFileModel implements LFileModelType
 
   @Override
   public CompletableFuture<?> categoryAdd(
-    final LCategory text)
+    final LCategoryName text)
   {
     return this.runCommand(new LCommandCategoriesAdd(), List.of(text));
   }
 
   @Override
-  public CompletableFuture<?> tagAdd(
-    final LTag text)
+  public CompletableFuture<?> captionAdd(
+    final LCaptionName text)
   {
-    return this.runCommand(new LCommandTagsAdd(), List.of(text));
+    return this.runCommand(new LCommandCaptionsAdd(), List.of(text));
   }
 
   @Override
   public CompletableFuture<?> categorySetRequired(
-    final Set<LCategory> categories)
+    final Set<LCategoryID> categories)
   {
     return this.runCommand(
       new LCommandCategoriesSetRequired(), List.copyOf(categories));
@@ -364,7 +450,7 @@ public final class LFileModel implements LFileModelType
 
   @Override
   public CompletableFuture<?> categorySetNotRequired(
-    final Set<LCategory> categories)
+    final Set<LCategoryID> categories)
   {
     return this.runCommand(
       new LCommandCategoriesUnsetRequired(), List.copyOf(categories));
@@ -387,8 +473,38 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public CompletableFuture<?> imagesDelete(
+    final List<LImageID> ids)
+  {
+    Objects.requireNonNull(ids, "ids");
+
+    return this.runCommand(
+      new LCommandImagesDelete(),
+      ids
+    );
+  }
+
+  @Override
+  public CompletableFuture<?> imageCaptionsAssign(
+    final List<LImageCaptionsAssignment> assignments)
+  {
+    Objects.requireNonNull(assignments, "assignments");
+
+    return this.runCommand(new LCommandImageCaptionsAssign(), assignments);
+  }
+
+  @Override
+  public CompletableFuture<?> imageCaptionsUnassign(
+    final List<LImageCaptionsAssignment> assignments)
+  {
+    Objects.requireNonNull(assignments, "assignments");
+
+    return this.runCommand(new LCommandImageCaptionsUnassign(), assignments);
+  }
+
+  @Override
   public CompletableFuture<?> imageSelect(
-    final Optional<String> name)
+    final Optional<LImageID> name)
   {
     Objects.requireNonNull(name, "name");
 
@@ -399,26 +515,62 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
-  public CompletableFuture<?> categoryTagsAssign(
-    final List<LCategoryAndTags> categories)
+  public CompletableFuture<?> categoryCaptionsAssign(
+    final List<LCategoryCaptionsAssignment> categories)
   {
     Objects.requireNonNull(categories, "categories");
 
     return this.runCommand(
-      new LCommandCategoryTagsAssign(),
+      new LCommandCategoryCaptionsAssign(),
       categories
     );
   }
 
   @Override
-  public CompletableFuture<?> categoryTagsUnassign(
-    final List<LCategoryAndTags> categories)
+  public CompletableFuture<?> categoryCaptionsUnassign(
+    final List<LCategoryCaptionsAssignment> categories)
   {
     Objects.requireNonNull(categories, "categories");
 
     return this.runCommand(
-      new LCommandCategoryTagsUnassign(),
+      new LCommandCategoryCaptionsUnassign(),
       categories
+    );
+  }
+
+  @Override
+  public CompletableFuture<?> categorySelect(
+    final Optional<LCategoryID> id)
+  {
+    Objects.requireNonNull(id, "id");
+
+    return this.runCommand(
+      new LCommandCategorySelect(),
+      id
+    );
+  }
+
+  @Override
+  public CompletableFuture<?> metadataPut(
+    final List<LMetadataValue> values)
+  {
+    Objects.requireNonNull(values, "metadata");
+
+    return this.runCommand(
+      new LCommandMetadataAdd(),
+      values
+    );
+  }
+
+  @Override
+  public CompletableFuture<?> metadataRemove(
+    final List<LMetadataValue> values)
+  {
+    Objects.requireNonNull(values, "metadata");
+
+    return this.runCommand(
+      new LCommandMetadataRemove(),
+      values
     );
   }
 
@@ -486,6 +638,7 @@ public final class LFileModel implements LFileModelType
           }
         }
       } catch (final Throwable e) {
+        LOG.debug("Exception: ", e);
         throw this.handleThrowable(e);
       }
     } finally {
@@ -524,13 +677,25 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
-  public AttributeReadableType<Optional<LImage>> imageSelected()
+  public AttributeReadableType<List<LMetadataValue>> metadataList()
+  {
+    return this.metadata;
+  }
+
+  @Override
+  public AttributeReadableType<Optional<LCategory>> categorySelected()
+  {
+    return this.categorySelected;
+  }
+
+  @Override
+  public AttributeReadableType<Optional<LImageWithID>> imageSelected()
   {
     return this.imageSelected;
   }
 
   @Override
-  public AttributeReadableType<List<LImage>> imageList()
+  public AttributeReadableType<List<LImageWithID>> imageList()
   {
     return this.imagesAll;
   }
@@ -542,21 +707,39 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
-  public AttributeReadableType<List<LTag>> tagList()
+  public AttributeReadableType<List<LCaption>> captionList()
   {
     return this.tagsAll;
   }
 
   @Override
-  public AttributeReadableType<List<LTag>> tagsAssigned()
+  public AttributeReadableType<List<LCaption>> imageCaptionsAssigned()
   {
-    return this.tagsAssigned;
+    return this.imageCaptionsAssigned;
+  }
+
+  @Override
+  public AttributeReadableType<List<LCaption>> imageCaptionsUnassigned()
+  {
+    return this.imageCaptionsUnassigned;
   }
 
   @Override
   public AttributeReadableType<Optional<String>> undoText()
   {
     return this.undoText;
+  }
+
+  @Override
+  public AttributeReadableType<List<LCaption>> categoryCaptionsAssigned()
+  {
+    return this.categoryCaptionsAssigned;
+  }
+
+  @Override
+  public AttributeReadableType<List<LCaption>> categoryCaptionsUnassigned()
+  {
+    return this.categoryCaptionsUnassigned;
   }
 
   @Override
@@ -655,9 +838,51 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
-  public AttributeReadableType<SortedMap<LCategory, List<LTag>>> categoryTags()
+  public AttributeReadableType<SortedMap<LCategoryID, List<LCaption>>> categoryCaptions()
   {
-    return this.categoryTags;
+    return this.categoryCaptions;
+  }
+
+  @Override
+  public CompletableFuture<Optional<InputStream>> imageStream(
+    final LImageID id)
+  {
+    final var future = new CompletableFuture<Optional<InputStream>>();
+    Thread.ofVirtual()
+      .start(() -> {
+        try {
+          future.complete(this.executeImageStream(id));
+        } catch (final Throwable e) {
+          future.completeExceptionally(e);
+        }
+      });
+    return future;
+  }
+
+  private Optional<InputStream> executeImageStream(
+    final LImageID id)
+    throws LException
+  {
+    this.commandLock.lock();
+
+    try {
+      this.attributes.clear();
+
+      try (var t = this.database.openTransaction()) {
+        final var context = t.get(DSLContext.class);
+        return context.select(IMAGE_BLOBS.IMAGE_BLOB_DATA)
+          .from(IMAGE_BLOBS)
+          .join(IMAGES)
+          .on(IMAGES.IMAGE_BLOB.eq(IMAGE_BLOBS.IMAGE_BLOB_ID))
+          .where(IMAGES.IMAGE_ID.eq(id.value()))
+          .fetchOptional()
+          .map(rec -> new ByteArrayInputStream(rec.get(IMAGE_BLOBS.IMAGE_BLOB_DATA)));
+      } catch (final Throwable e) {
+        throw this.handleThrowable(e);
+      }
+    } finally {
+      this.commandLock.unlock();
+    }
   }
 
   private void executeRedo()
@@ -702,7 +927,7 @@ public final class LFileModel implements LFileModelType
   }
 
   void setImagesAll(
-    final List<LImage> images)
+    final List<LImageWithID> images)
   {
     this.imagesAll.set(Objects.requireNonNull(images, "images"));
   }
@@ -712,14 +937,14 @@ public final class LFileModel implements LFileModelType
     return Map.copyOf(this.attributes);
   }
 
-  void setTagsAssigned(
-    final List<LTag> tags)
+  void setImageCaptionsAssigned(
+    final List<LCaption> captions)
   {
-    this.tagsAssigned.set(tags);
+    this.imageCaptionsAssigned.set(captions);
   }
 
   void setImageSelected(
-    final Optional<LImage> image)
+    final Optional<LImageWithID> image)
   {
     this.imageSelected.set(image);
   }
@@ -760,15 +985,33 @@ public final class LFileModel implements LFileModelType
     ));
   }
 
-  void setCategoriesAndTags(
-    final List<LTag> newTagsAll,
+  void setCategoriesAndCaptions(
+    final List<LCaption> newCaptionsAll,
     final List<LCategory> newCategoriesAll,
     final List<LCategory> newCategoriesRequired,
-    final SortedMap<LCategory, List<LTag>> newCategoryTags
-  ) {
-    this.tagsAll.set(newTagsAll);
+    final SortedMap<LCategoryID, List<LCaption>> newCategoryCaptions)
+  {
+    this.tagsAll.set(newCaptionsAll);
     this.categoriesAll.set(newCategoriesAll);
     this.categoriesRequired.set(newCategoriesRequired);
-    this.categoryTags.set(newCategoryTags);
+    this.categoryCaptions.set(newCategoryCaptions);
+  }
+
+  void setCategorySelected(
+    final Optional<LCategory> category)
+  {
+    this.categorySelected.set(category);
+  }
+
+  void setCategoryCaptionsAssigned(
+    final List<LCaption> captions)
+  {
+    this.categoryCaptionsAssigned.set(captions);
+  }
+
+  void setMetadata(
+    final List<LMetadataValue> meta)
+  {
+    this.metadata.set(meta);
   }
 }

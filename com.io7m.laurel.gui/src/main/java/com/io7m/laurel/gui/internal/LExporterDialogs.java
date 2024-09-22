@@ -68,11 +68,16 @@ public final class LExporterDialogs implements RPServiceType
   /**
    * Open a dialog.
    *
+   * @param fileModel The file model
+   *
    * @return The dialog
    */
 
-  public LExporterView open()
+  public LExporterView open(
+    final LFileModelScope fileModel)
   {
+    Objects.requireNonNull(fileModel, "fileModel");
+
     try {
       final var stage = new Stage();
 
@@ -85,7 +90,14 @@ public final class LExporterDialogs implements RPServiceType
       final var loader =
         new FXMLLoader(layout, this.strings.resources());
 
-      final var exporter = new LExporterView(this, this.services, stage);
+      final var exporter =
+        new LExporterView(
+          this,
+          this.services,
+          fileModel,
+          stage
+        );
+
       loader.setControllerFactory(param -> {
         return exporter;
       });

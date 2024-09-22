@@ -17,7 +17,7 @@
 
 package com.io7m.laurel.filemodel.internal;
 
-import com.io7m.laurel.model.LCategory;
+import com.io7m.laurel.model.LCategoryName;
 import org.jooq.DSLContext;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import static com.io7m.laurel.filemodel.internal.Tables.CATEGORIES;
  */
 
 public final class LCommandCategoriesAdd
-  extends LCommandAbstract<List<LCategory>>
+  extends LCommandAbstract<List<LCategoryName>>
 {
   private final ArrayList<SavedData> savedData;
 
@@ -57,7 +57,7 @@ public final class LCommandCategoriesAdd
    * @return A command factory
    */
 
-  public static LCommandFactoryType<List<LCategory>> provider()
+  public static LCommandFactoryType<List<LCategoryName>> provider()
   {
     return new LCommandFactory<>(
       LCommandCategoriesAdd.class.getCanonicalName(),
@@ -97,7 +97,7 @@ public final class LCommandCategoriesAdd
   protected LCommandUndoable onExecute(
     final LFileModel model,
     final LDatabaseTransactionType transaction,
-    final List<LCategory> categories)
+    final List<LCategoryName> categories)
   {
     final var context =
       transaction.get(DSLContext.class);
@@ -134,7 +134,7 @@ public final class LCommandCategoriesAdd
       );
     }
 
-    LCommandModelUpdates.updateTagsAndCategories(context, model);
+    LCommandModelUpdates.updateCaptionsAndCategories(context, model);
     model.eventWithoutProgress("Added %d categories.", this.savedData.size());
 
     if (!this.savedData.isEmpty()) {
@@ -166,7 +166,7 @@ public final class LCommandCategoriesAdd
         .execute();
     }
 
-    LCommandModelUpdates.updateTagsAndCategories(context, model);
+    LCommandModelUpdates.updateCaptionsAndCategories(context, model);
     model.eventWithoutProgress("Removed %d categories.", Integer.valueOf(max));
   }
 
@@ -196,7 +196,7 @@ public final class LCommandCategoriesAdd
         .execute();
     }
 
-    LCommandModelUpdates.updateTagsAndCategories(context, model);
+    LCommandModelUpdates.updateCaptionsAndCategories(context, model);
     model.eventWithoutProgress("Added %d categories.", Integer.valueOf(max));
   }
 

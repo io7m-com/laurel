@@ -17,7 +17,7 @@
 
 package com.io7m.laurel.filemodel.internal;
 
-import com.io7m.laurel.model.LCategory;
+import com.io7m.laurel.model.LCategoryID;
 import org.jooq.DSLContext;
 
 import java.util.ArrayList;
@@ -31,13 +31,11 @@ import static com.io7m.laurel.filemodel.internal.Tables.CATEGORIES;
  */
 
 public final class LCommandCategoriesUnsetRequired
-  extends LCommandAbstract<List<LCategory>>
+  extends LCommandAbstract<List<LCategoryID>>
 {
   private final ArrayList<SavedData> savedData;
 
-  private record SavedData(
-    long id,
-    String text)
+  private record SavedData(long id)
   {
 
   }
@@ -57,7 +55,7 @@ public final class LCommandCategoriesUnsetRequired
    * @return A command factory
    */
 
-  public static LCommandFactoryType<List<LCategory>> provider()
+  public static LCommandFactoryType<List<LCategoryID>> provider()
   {
     return new LCommandFactory<>(
       LCommandCategoriesUnsetRequired.class.getCanonicalName(),
@@ -73,8 +71,6 @@ public final class LCommandCategoriesUnsetRequired
     for (int index = 0; index < Integer.MAX_VALUE; ++index) {
       final var idKey =
         "category.%d.id".formatted(Integer.valueOf(index));
-      final var textKey =
-        "category.%d.text".formatted(Integer.valueOf(index));
 
       if (!p.containsKey(idKey)) {
         break;
@@ -82,8 +78,7 @@ public final class LCommandCategoriesUnsetRequired
 
       final var data =
         new SavedData(
-          Long.parseUnsignedLong(p.getProperty(idKey)),
-          p.getProperty(textKey)
+          Long.parseUnsignedLong(p.getProperty(idKey))
         );
 
       c.savedData.add(data);
@@ -97,7 +92,7 @@ public final class LCommandCategoriesUnsetRequired
   protected LCommandUndoable onExecute(
     final LFileModel model,
     final LDatabaseTransactionType transaction,
-    final List<LCategory> categories)
+    final List<LCategoryID> categories)
   {
     final var context =
       transaction.get(DSLContext.class);
@@ -114,7 +109,7 @@ public final class LCommandCategoriesUnsetRequired
       final var recOpt =
         context.update(CATEGORIES)
           .set(CATEGORIES.CATEGORY_REQUIRED, 0L)
-          .where(CATEGORIES.CATEGORY_TEXT.eq(category.text())
+          .where(CATEGORIES.CATEGORY_ID.eq(category.value())
                    .and(CATEGORIES.CATEGORY_REQUIRED.eq(1L)))
           .returning(CATEGORIES.CATEGORY_ID)
           .fetchOptional();
@@ -132,14 +127,13 @@ public final class LCommandCategoriesUnsetRequired
       final var rec = recOpt.get();
       this.savedData.add(
         new SavedData(
-          rec.get(CATEGORIES.CATEGORY_ID).longValue(),
-          category.text()
+          rec.get(CATEGORIES.CATEGORY_ID).longValue()
         )
       );
     }
 
     model.eventWithoutProgress("Updated %d categories.", this.savedData.size());
-    LCommandModelUpdates.updateTagsAndCategories(context, model);
+    LCommandModelUpdates.updateCaptionsAndCategories(context, model);
 
     if (!this.savedData.isEmpty()) {
       return LCommandUndoable.COMMAND_UNDOABLE;
@@ -163,7 +157,7 @@ public final class LCommandCategoriesUnsetRequired
         index,
         max,
         "Updating category '%s'",
-        data.text
+        data.id
       );
       context.update(CATEGORIES)
         .set(CATEGORIES.CATEGORY_REQUIRED, 1L)
@@ -172,7 +166,7 @@ public final class LCommandCategoriesUnsetRequired
     }
 
     model.eventWithoutProgress("Updated %d categories.", Integer.valueOf(max));
-    LCommandModelUpdates.updateTagsAndCategories(context, model);
+    LCommandModelUpdates.updateCaptionsAndCategories(context, model);
   }
 
   @Override
@@ -190,7 +184,7 @@ public final class LCommandCategoriesUnsetRequired
         index,
         max,
         "Updating category '%s'",
-        data.text
+        data.id
       );
       context.update(CATEGORIES)
         .set(CATEGORIES.CATEGORY_REQUIRED, 0L)
@@ -199,7 +193,7 @@ public final class LCommandCategoriesUnsetRequired
     }
 
     model.eventWithoutProgress("Updated %d categories.", Integer.valueOf(max));
-    LCommandModelUpdates.updateTagsAndCategories(context, model);
+    LCommandModelUpdates.updateCaptionsAndCategories(context, model);
   }
 
   @Override
@@ -210,12 +204,9 @@ public final class LCommandCategoriesUnsetRequired
     for (int index = 0; index < this.savedData.size(); ++index) {
       final var idKey =
         "category.%d.id".formatted(Integer.valueOf(index));
-      final var textKey =
-        "category.%d.text".formatted(Integer.valueOf(index));
 
       final var data = this.savedData.get(index);
       p.setProperty(idKey, Long.toUnsignedString(data.id));
-      p.setProperty(textKey, data.text);
     }
 
     return p;
@@ -224,7 +215,7 @@ public final class LCommandCategoriesUnsetRequired
   @Override
   public String describe()
   {
-    return "Set categories as required";
+    return "Unset categories as required";
   }
 
 }

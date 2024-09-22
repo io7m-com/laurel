@@ -18,12 +18,17 @@
 package com.io7m.laurel.filemodel;
 
 import com.io7m.jattribute.core.AttributeReadableType;
-import com.io7m.laurel.filemodel.internal.LCategoryAndTags;
+import com.io7m.laurel.model.LCaptionName;
+import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LCategory;
+import com.io7m.laurel.model.LCategoryID;
+import com.io7m.laurel.model.LCategoryName;
 import com.io7m.laurel.model.LException;
-import com.io7m.laurel.model.LImage;
-import com.io7m.laurel.model.LTag;
+import com.io7m.laurel.model.LImageID;
+import com.io7m.laurel.model.LImageWithID;
+import com.io7m.laurel.model.LMetadataValue;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
@@ -55,7 +60,7 @@ public interface LFileModelType
    */
 
   CompletableFuture<?> categorySetRequired(
-    Set<LCategory> categories);
+    Set<LCategoryID> categories);
 
   /**
    * Set categories as not required.
@@ -66,7 +71,7 @@ public interface LFileModelType
    */
 
   CompletableFuture<?> categorySetNotRequired(
-    Set<LCategory> categories);
+    Set<LCategoryID> categories);
 
   /**
    * Add a category.
@@ -77,18 +82,18 @@ public interface LFileModelType
    */
 
   CompletableFuture<?> categoryAdd(
-    LCategory text);
+    LCategoryName text);
 
   /**
-   * Add a tag.
+   * Add a caption.
    *
-   * @param text The tag
+   * @param text The caption
    *
    * @return The operation in progress
    */
 
-  CompletableFuture<?> tagAdd(
-    LTag text);
+  CompletableFuture<?> captionAdd(
+    LCaptionName text);
 
   /**
    * Load an image and add it to the file.
@@ -107,6 +112,40 @@ public interface LFileModelType
   );
 
   /**
+   * Delete images.
+   *
+   * @param ids The ids
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> imagesDelete(
+    List<LImageID> ids
+  );
+
+  /**
+   * Assign captions to an image.
+   *
+   * @param assignments The assignments
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> imageCaptionsAssign(
+    List<LImageCaptionsAssignment> assignments);
+
+  /**
+   * Unassign captions from an image.
+   *
+   * @param assignments The assignments
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> imageCaptionsUnassign(
+    List<LImageCaptionsAssignment> assignments);
+
+  /**
    * Select an image.
    *
    * @param name The name
@@ -115,69 +154,132 @@ public interface LFileModelType
    */
 
   CompletableFuture<?> imageSelect(
-    Optional<String> name);
+    Optional<LImageID> name);
 
   /**
-   * Assign the given tags to the given categories.
+   * Assign the given captions to the given categories.
    *
-   * @param categories The categories/tags
+   * @param categories The categories/captions
    *
    * @return The operation in progress
    */
 
-  CompletableFuture<?> categoryTagsAssign(
-    List<LCategoryAndTags> categories);
+  CompletableFuture<?> categoryCaptionsAssign(
+    List<LCategoryCaptionsAssignment> categories);
 
   /**
-   * Unassign the given tags from the given categories.
+   * Unassign the given captions from the given categories.
    *
-   * @param categories The categories/tags
+   * @param categories The categories/captions
    *
    * @return The operation in progress
    */
 
-  CompletableFuture<?> categoryTagsUnassign(
-    List<LCategoryAndTags> categories);
+  CompletableFuture<?> categoryCaptionsUnassign(
+    List<LCategoryCaptionsAssignment> categories);
+
+  /**
+   * Select a category.
+   *
+   * @param id The id
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> categorySelect(
+    Optional<LCategoryID> id);
+
+  /**
+   * Add or update metadata.
+   *
+   * @param metadata The metadata values
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> metadataPut(
+    List<LMetadataValue> metadata);
+
+  /**
+   * Remove metadata.
+   *
+   * @param metadata The metadata values
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> metadataRemove(
+    List<LMetadataValue> metadata);
 
   @Override
   void close()
     throws LException;
 
   /**
+   * @return The current complete list of metadata
+   */
+
+  AttributeReadableType<List<LMetadataValue>> metadataList();
+
+  /**
+   * @return The currently selected category
+   */
+
+  AttributeReadableType<Optional<LCategory>> categorySelected();
+
+  /**
    * @return The currently selected image
    */
 
-  AttributeReadableType<Optional<LImage>> imageSelected();
+  AttributeReadableType<Optional<LImageWithID>> imageSelected();
 
   /**
    * @return The current complete list of images
    */
 
-  AttributeReadableType<List<LImage>> imageList();
+  AttributeReadableType<List<LImageWithID>> imageList();
 
   /**
-   * @return The current complete list of required tag categories
+   * @return The current complete list of required caption categories
    */
 
   AttributeReadableType<List<LCategory>> categoriesRequired();
 
   /**
-   * @return The current complete list of tags
+   * @return The current complete list of captions
    */
 
-  AttributeReadableType<List<LTag>> tagList();
+  AttributeReadableType<List<LCaption>> captionList();
 
   /**
-   * @return The list of tags assigned to the current image
+   * @return The list of captions assigned to the current image
    */
 
-  AttributeReadableType<List<LTag>> tagsAssigned();
+  AttributeReadableType<List<LCaption>> imageCaptionsAssigned();
+
+  /**
+   * @return The list of captions not assigned to the current image
+   */
+
+  AttributeReadableType<List<LCaption>> imageCaptionsUnassigned();
 
   /**
    * @return Text describing the top of the undo stack, if any
    */
 
   AttributeReadableType<Optional<String>> undoText();
+
+  /**
+   * @return The list of captions assigned to the current category
+   */
+
+  AttributeReadableType<List<LCaption>> categoryCaptionsAssigned();
+
+  /**
+   * @return The list of captions not assigned to the current category
+   */
+
+  AttributeReadableType<List<LCaption>> categoryCaptionsUnassigned();
 
   /**
    * Undo the operation on the top of the undo stack
@@ -217,8 +319,16 @@ public interface LFileModelType
   AttributeReadableType<List<LCategory>> categoryList();
 
   /**
-   * @return The tags for every available category
+   * @return The captions for every available category
    */
 
-  AttributeReadableType<SortedMap<LCategory, List<LTag>>> categoryTags();
+  AttributeReadableType<SortedMap<LCategoryID, List<LCaption>>> categoryCaptions();
+
+  /**
+   * @param id The image ID
+   *
+   * @return The image data stream
+   */
+
+  CompletableFuture<Optional<InputStream>> imageStream(LImageID id);
 }

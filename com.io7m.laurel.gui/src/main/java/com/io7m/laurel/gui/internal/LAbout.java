@@ -19,6 +19,7 @@ package com.io7m.laurel.gui.internal;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -37,7 +38,7 @@ import static javafx.stage.Modality.APPLICATION_MODAL;
  * The About screen.
  */
 
-public final class LAbout implements LScreenViewType
+public final class LAbout implements Initializable
 {
   private final Stage stage;
 

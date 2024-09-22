@@ -19,7 +19,6 @@ package com.io7m.laurel.filemodel.internal;
 
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LHashSHA256;
-import com.io7m.laurel.model.LImage;
 import org.jooq.DSLContext;
 
 import javax.imageio.ImageIO;
@@ -27,7 +26,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -175,42 +173,12 @@ public final class LCommandImagesAdd
       );
     }
 
-    model.setImagesAll(listImages(transaction));
+    model.setImagesAll(LCommandModelUpdates.listImages(context));
     model.eventWithoutProgress("Added %d images.", max);
     return LCommandUndoable.COMMAND_UNDOABLE;
   }
 
-  private static List<LImage> listImages(
-    final LDatabaseTransactionType transaction)
-  {
-    final var context =
-      transaction.get(DSLContext.class);
 
-    return context.select(
-        IMAGES.IMAGE_SOURCE,
-        IMAGES.IMAGE_NAME,
-        IMAGES.IMAGE_FILE,
-        IMAGE_BLOBS.IMAGE_BLOB_SHA256
-      )
-      .from(IMAGES)
-      .join(IMAGE_BLOBS)
-      .on(IMAGE_BLOBS.IMAGE_BLOB_ID.eq(IMAGES.IMAGE_BLOB))
-      .orderBy(IMAGES.IMAGE_NAME)
-      .stream()
-      .map(LCommandImagesAdd::mapRecord)
-      .toList();
-  }
-
-  private static LImage mapRecord(
-    final org.jooq.Record r)
-  {
-    return new LImage(
-      r.get(IMAGES.IMAGE_NAME),
-      Optional.ofNullable(r.get(IMAGES.IMAGE_FILE)).map(Paths::get),
-      Optional.ofNullable(r.get(IMAGES.IMAGE_SOURCE)).map(URI::create),
-      new LHashSHA256(r.get(IMAGE_BLOBS.IMAGE_BLOB_SHA256))
-    );
-  }
 
   private static LHashSHA256 hashOf(
     final byte[] imageBytes)
@@ -281,7 +249,7 @@ public final class LCommandImagesAdd
         .execute();
     }
 
-    model.setImagesAll(listImages(transaction));
+    model.setImagesAll(LCommandModelUpdates.listImages(context));
     model.eventWithoutProgress("Deleted %d images.", this.savedData.size());
   }
 
@@ -311,7 +279,7 @@ public final class LCommandImagesAdd
         .execute();
     }
 
-    model.setImagesAll(listImages(transaction));
+    model.setImagesAll(LCommandModelUpdates.listImages(context));
     model.eventWithoutProgress("Added %d images.", this.savedData.size());
   }
 

@@ -17,24 +17,24 @@
 
 package com.io7m.laurel.gui.internal;
 
+import com.io7m.jmulticlose.core.CloseableCollectionType;
+import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 
-import java.net.URL;
 import java.util.Objects;
-import java.util.ResourceBundle;
 
 /**
  * The global prefix captions editor.
  */
 
-public final class LGlobalPrefixCaptions implements LScreenViewType
+public final class LGlobalPrefixCaptions
+  extends LAbstractViewWithModel
 {
   private final Stage stage;
-  private final LControllerType controller;
   private final LCaptionEditors editors;
 
   @FXML private Button create;
@@ -47,16 +47,18 @@ public final class LGlobalPrefixCaptions implements LScreenViewType
   /**
    * The global prefix captions editor.
    *
-   * @param services The services
-   * @param inStage  The stage
+   * @param services    The services
+   * @param inFileModel The file model
+   * @param inStage     The stage
    */
 
-  public LGlobalPrefixCaptions(
+  LGlobalPrefixCaptions(
     final RPServiceDirectoryType services,
+    final LFileModelScope inFileModel,
     final Stage inStage)
   {
-    this.controller =
-      services.requireService(LControllerType.class);
+    super(inFileModel);
+
     this.editors =
       services.requireService(LCaptionEditors.class);
     this.stage =
@@ -64,21 +66,32 @@ public final class LGlobalPrefixCaptions implements LScreenViewType
   }
 
   @Override
-  public void initialize(
-    final URL url,
-    final ResourceBundle resourceBundle)
+  protected void onInitialize()
   {
     this.delete.setDisable(true);
     this.down.setDisable(true);
     this.modify.setDisable(true);
     this.up.setDisable(true);
 
-    this.captions.setItems(this.controller.globalPrefixCaptions());
     this.captions.getSelectionModel()
       .selectedItemProperty()
       .addListener((o, oldCap, newCap) -> {
         this.onCaptionSelectionChanged(newCap);
       });
+  }
+
+  @Override
+  protected void onFileBecameUnavailable()
+  {
+
+  }
+
+  @Override
+  protected void onFileBecameAvailable(
+    final CloseableCollectionType<?> subscriptions,
+    final LFileModelType fileModel)
+  {
+
   }
 
   private void onCaptionSelectionChanged(
@@ -108,17 +121,17 @@ public final class LGlobalPrefixCaptions implements LScreenViewType
     final var result = editor.result();
     if (result.isPresent()) {
       final var text = result.get();
-      this.controller.globalPrefixCaptionNew(text);
+      // this.controller.globalPrefixCaptionNew(text);
     }
   }
 
   @FXML
   private void onDeleteCaptionSelected()
   {
-    this.controller.globalPrefixCaptionDelete(
-      this.captions.getSelectionModel()
-        .getSelectedIndex()
-    );
+    //    this.controller.globalPrefixCaptionDelete(
+    //      this.captions.getSelectionModel()
+    //        .getSelectedIndex()
+    //    );
   }
 
   @FXML
@@ -133,11 +146,11 @@ public final class LGlobalPrefixCaptions implements LScreenViewType
     final var result = editor.result();
     if (result.isPresent()) {
       final var text = result.get();
-      this.controller.globalPrefixCaptionModify(
-        this.captions.getSelectionModel()
-          .getSelectedIndex(),
-        text
-      );
+      //      this.controller.globalPrefixCaptionModify(
+      //        this.captions.getSelectionModel()
+      //          .getSelectedIndex(),
+      //        text
+      //      );
     }
   }
 

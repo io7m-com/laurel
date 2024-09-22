@@ -17,9 +17,13 @@
 
 package com.io7m.laurel.filemodel.internal;
 
+import com.io7m.laurel.model.LCaption;
+import com.io7m.laurel.model.LCaptionID;
+import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LHashSHA256;
 import com.io7m.laurel.model.LImage;
-import com.io7m.laurel.model.LTag;
+import com.io7m.laurel.model.LImageID;
+import com.io7m.laurel.model.LImageWithID;
 import org.jooq.DSLContext;
 
 import java.net.URI;
@@ -28,17 +32,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+import static com.io7m.laurel.filemodel.internal.Tables.CAPTIONS;
 import static com.io7m.laurel.filemodel.internal.Tables.IMAGES;
 import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_BLOBS;
-import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_TAGS;
-import static com.io7m.laurel.filemodel.internal.Tables.TAGS;
+import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_CAPTIONS;
+import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_CAPTIONS_COUNTS;
 
 /**
  * Select an image.
  */
 
 public final class LCommandImageSelect
-  extends LCommandAbstract<Optional<String>>
+  extends LCommandAbstract<Optional<LImageID>>
 {
   /**
    * Select an image.
@@ -53,7 +58,7 @@ public final class LCommandImageSelect
    * @return A command factory
    */
 
-  public static LCommandFactoryType<Optional<String>> provider()
+  public static LCommandFactoryType<Optional<LImageID>> provider()
   {
     return new LCommandFactory<>(
       LCommandImageSelect.class.getCanonicalName(),
@@ -69,28 +74,32 @@ public final class LCommandImageSelect
     return c;
   }
 
-  private static LTag mapRecord(
+  private static LCaption mapRecord(
     final org.jooq.Record r)
   {
-    return new LTag(r.get(TAGS.TAG_TEXT));
+    return new LCaption(
+      new LCaptionID(r.get(CAPTIONS.CAPTION_ID)),
+      new LCaptionName(r.get(CAPTIONS.CAPTION_TEXT)),
+      r.get(LCommandModelUpdates.COUNT_FIELD)
+    );
   }
 
   @Override
   protected LCommandUndoable onExecute(
     final LFileModel model,
     final LDatabaseTransactionType transaction,
-    final Optional<String> request)
+    final Optional<LImageID> request)
   {
     final var context =
       transaction.get(DSLContext.class);
 
     if (request.isEmpty()) {
-      model.setTagsAssigned(List.of());
+      model.setImageCaptionsAssigned(List.of());
       model.setImageSelected(Optional.empty());
       return LCommandUndoable.COMMAND_NOT_UNDOABLE;
     }
 
-    final var imageName =
+    final var imageId =
       request.get();
 
     final var imageRecOpt =
@@ -104,41 +113,47 @@ public final class LCommandImageSelect
         ).from(IMAGES)
         .join(IMAGE_BLOBS)
         .on(IMAGE_BLOBS.IMAGE_BLOB_ID.eq(IMAGES.IMAGE_ID))
-        .where(IMAGES.IMAGE_NAME.eq(imageName))
+        .where(IMAGES.IMAGE_ID.eq(imageId.value()))
         .fetchOptional();
 
     if (imageRecOpt.isEmpty()) {
-      model.setTagsAssigned(List.of());
+      model.setImageCaptionsAssigned(List.of());
       model.setImageSelected(Optional.empty());
       return LCommandUndoable.COMMAND_NOT_UNDOABLE;
     }
 
     final var imageRec =
       imageRecOpt.get();
-    final var imageId =
-      imageRec.get(IMAGES.IMAGE_ID);
 
-    final var tags =
-      context.select(TAGS.TAG_TEXT)
-        .from(TAGS)
-        .join(IMAGE_TAGS)
-        .on(IMAGE_TAGS.IMAGE_TAG_TAG.eq(TAGS.TAG_ID))
-        .where(IMAGE_TAGS.IMAGE_TAG_IMAGE.eq(imageId))
-        .orderBy(TAGS.TAG_TEXT.asc())
+    final var captions =
+      context.select(
+          CAPTIONS.CAPTION_ID,
+          CAPTIONS.CAPTION_TEXT,
+          LCommandModelUpdates.COUNT_FIELD)
+        .from(CAPTIONS)
+        .join(IMAGE_CAPTIONS)
+        .on(IMAGE_CAPTIONS.IMAGE_CAPTION_CAPTION.eq(CAPTIONS.CAPTION_ID))
+        .leftJoin(IMAGE_CAPTIONS_COUNTS)
+        .on(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_ID.eq(CAPTIONS.CAPTION_ID))
+        .where(IMAGE_CAPTIONS.IMAGE_CAPTION_IMAGE.eq(imageId.value()))
+        .orderBy(CAPTIONS.CAPTION_TEXT.asc())
         .stream()
         .map(LCommandImageSelect::mapRecord)
         .toList();
 
-    model.setTagsAssigned(tags);
+    model.setImageCaptionsAssigned(captions);
     model.setImageSelected(
       Optional.of(
-        new LImage(
-          imageName,
-          Optional.ofNullable(imageRec.get(IMAGES.IMAGE_FILE))
-            .map(Paths::get),
-          Optional.ofNullable(imageRec.get(IMAGES.IMAGE_SOURCE))
-            .map(URI::create),
-          new LHashSHA256(imageRec.get(IMAGE_BLOBS.IMAGE_BLOB_SHA256))
+        new LImageWithID(
+          imageId,
+          new LImage(
+            imageRec.get(IMAGES.IMAGE_NAME),
+            Optional.ofNullable(imageRec.get(IMAGES.IMAGE_FILE))
+              .map(Paths::get),
+            Optional.ofNullable(imageRec.get(IMAGES.IMAGE_SOURCE))
+              .map(URI::create),
+            new LHashSHA256(imageRec.get(IMAGE_BLOBS.IMAGE_BLOB_SHA256))
+          )
         )
       )
     );

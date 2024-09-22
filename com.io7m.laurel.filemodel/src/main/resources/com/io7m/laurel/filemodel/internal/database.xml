@@ -37,6 +37,12 @@ STRICT
 CREATE TABLE metadata (
   meta_name  TEXT NOT NULL,
   meta_value TEXT NOT NULL
+
+-- [jooq ignore start]
+  ,
+  CONSTRAINT metadata_primary_key
+    PRIMARY KEY (meta_name)
+-- [jooq ignore stop]
 )
 -- [jooq ignore start]
 STRICT
@@ -84,18 +90,18 @@ STRICT
 ]]></Statement>
 
     <Comment>
-      The tags table stores the complete set of available tags.
+      The captions table stores the complete set of available captions.
     </Comment>
 
     <Statement><![CDATA[
-CREATE TABLE tags (
-  tag_id    INTEGER PRIMARY KEY NOT NULL,
-  tag_text  TEXT                NOT NULL
+CREATE TABLE captions (
+  caption_id    INTEGER PRIMARY KEY NOT NULL,
+  caption_text  TEXT                NOT NULL
 
 -- [jooq ignore start]
   ,
-  CONSTRAINT tags_text_unique
-    UNIQUE (tag_text)
+  CONSTRAINT captions_text_unique
+    UNIQUE (caption_text)
 -- [jooq ignore stop]
 )
 -- [jooq ignore start]
@@ -104,7 +110,7 @@ STRICT
 ]]></Statement>
 
     <Comment>
-      The categories table stores the categories for tags.
+      The categories table stores the categories for captions.
     </Comment>
 
     <Statement><![CDATA[
@@ -125,22 +131,26 @@ STRICT
 ]]></Statement>
 
     <Comment>
-      The tag_categories table associates tags with categories.
+      The caption_categories table associates captions with categories.
     </Comment>
 
     <Statement><![CDATA[
-CREATE TABLE tag_categories (
-  tag_tag_id       INTEGER NOT NULL,
-  tag_category_id  INTEGER NOT NULL,
+CREATE TABLE caption_categories (
+  caption_caption_id       INTEGER NOT NULL,
+  caption_category_id  INTEGER NOT NULL,
 
-  CONSTRAINT tag_categories_tag_exists
-    FOREIGN KEY (tag_tag_id) REFERENCES tags (tag_id),
+  CONSTRAINT caption_categories_caption_exists
+    FOREIGN KEY (caption_caption_id)
+      REFERENCES captions (caption_id)
+        ON DELETE CASCADE,
 
-  CONSTRAINT tag_categories_category_exists
-    FOREIGN KEY (tag_category_id) REFERENCES categories (category_id),
+  CONSTRAINT caption_categories_category_exists
+    FOREIGN KEY (caption_category_id)
+      REFERENCES categories (category_id)
+        ON DELETE CASCADE,
 
-  CONSTRAINT tag_categories_primary_key
-    PRIMARY KEY (tag_tag_id, tag_category_id)
+  CONSTRAINT caption_categories_primary_key
+    PRIMARY KEY (caption_caption_id, caption_category_id)
 )
 -- [jooq ignore start]
 STRICT
@@ -148,26 +158,44 @@ STRICT
 ]]></Statement>
 
     <Comment>
-      The image_tags table stores the associations between images and tags.
+      The image_captions table stores the associations between images and captions.
     </Comment>
 
     <Statement><![CDATA[
-CREATE TABLE image_tags (
-  image_tag_image  INTEGER NOT NULL,
-  image_tag_tag    INTEGER NOT NULL,
+CREATE TABLE image_captions (
+  image_caption_image    INTEGER NOT NULL,
+  image_caption_caption  INTEGER NOT NULL,
 
-  CONSTRAINT image_tags_image_exists
-    FOREIGN KEY (image_tag_image) REFERENCES images (image_id),
+  CONSTRAINT image_captions_image_exists
+    FOREIGN KEY (image_caption_image)
+      REFERENCES images (image_id)
+        ON DELETE CASCADE,
 
-  CONSTRAINT image_tags_tag_exists
-    FOREIGN KEY (image_tag_tag) REFERENCES tags (tag_id),
+  CONSTRAINT image_captions_caption_exists
+    FOREIGN KEY (image_caption_caption)
+      REFERENCES captions (caption_id)
+        ON DELETE CASCADE,
 
-  CONSTRAINT image_tags_primary_key
-    PRIMARY KEY (image_tag_image, image_tag_tag)
+  CONSTRAINT image_captions_primary_key
+    PRIMARY KEY (image_caption_image, image_caption_caption)
 )
 -- [jooq ignore start]
 STRICT
 -- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The image_captions_counts view stores the number of images to which each caption is assigned.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE VIEW image_captions_counts AS
+  SELECT
+    image_captions.image_caption_caption         AS count_caption_id,
+    count (image_captions.image_caption_caption) AS count_caption_count
+  FROM
+    image_captions
+  GROUP BY image_captions.image_caption_caption
 ]]></Statement>
 
     <Comment>
