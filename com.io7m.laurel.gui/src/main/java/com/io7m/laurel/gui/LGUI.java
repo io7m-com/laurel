@@ -51,10 +51,10 @@ public final class LGUI
     throws Exception
   {
     final var stage = new Stage();
-    stage.setMinWidth(800.0);
-    stage.setMinHeight(600.0);
-    stage.setWidth(800.0);
-    stage.setHeight(600.0);
+    stage.setMinWidth(960.0);
+    stage.setMinHeight(540.0);
+    stage.setWidth(960.0);
+    stage.setHeight(540.0);
 
     final var app = new LApplication(configuration);
     app.start(stage);

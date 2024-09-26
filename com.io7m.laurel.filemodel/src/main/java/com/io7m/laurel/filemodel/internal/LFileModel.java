@@ -531,6 +531,20 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public CompletableFuture<?> captionModify(
+    final LCaptionID id,
+    final LCaptionName name)
+  {
+    Objects.requireNonNull(id, "id");
+    Objects.requireNonNull(name, "name");
+
+    return this.runCommand(
+      new LCommandCaptionsModify(),
+      List.of(new LCaption(id, name, 0L))
+    );
+  }
+
+  @Override
   public CompletableFuture<?> captionRemove(
     final Set<LCaptionID> captions)
   {

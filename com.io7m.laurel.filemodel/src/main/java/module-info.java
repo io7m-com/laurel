@@ -16,6 +16,7 @@
 
 import com.io7m.laurel.filemodel.internal.LCommandCaptionDelete;
 import com.io7m.laurel.filemodel.internal.LCommandCaptionsAdd;
+import com.io7m.laurel.filemodel.internal.LCommandCaptionsModify;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesSetRequired;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesUnsetRequired;
@@ -63,6 +64,7 @@ module com.io7m.laurel.filemodel
   provides LCommandFactoryType with
     LCommandCaptionDelete,
     LCommandCaptionsAdd,
+    LCommandCaptionsModify,
     LCommandCategoriesAdd,
     LCommandCategoriesSetRequired,
     LCommandCategoriesUnsetRequired,

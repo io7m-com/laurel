@@ -34,7 +34,6 @@ import com.io7m.laurel.model.LImageID;
 import com.io7m.laurel.model.LMetadataValue;
 import com.io7m.zelador.test_extension.CloseableResourcesType;
 import com.io7m.zelador.test_extension.ZeladorExtension;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -265,7 +264,7 @@ public final class LFileModelTest
     assertEquals(Optional.empty(), this.model.undoText().get());
 
     final var ex =
-      Assertions.assertThrows(ExecutionException.class, () -> {
+      assertThrows(ExecutionException.class, () -> {
         this.model.imageAdd(
           "image-a",
           this.file.getParent().resolve("nonexistent.txt"),
@@ -287,7 +286,7 @@ public final class LFileModelTest
     assertEquals(Optional.empty(), this.model.undoText().get());
 
     final var ex =
-      Assertions.assertThrows(ExecutionException.class, () -> {
+      assertThrows(ExecutionException.class, () -> {
         this.model.imageAdd(
           "image-a",
           this.textFile,
@@ -371,6 +370,62 @@ public final class LFileModelTest
     assertEquals(Optional.empty(), this.model.redoText().get());
 
     this.compact();
+  }
+
+  @Test
+  public void testCaptionModify()
+    throws Exception
+  {
+    final var tta = new LCaptionName("A");
+
+    this.model.captionAdd(tta).get(TIMEOUT, SECONDS);
+
+    final var ta = this.findCaption("A");
+
+    this.model.captionModify(ta.id(), new LCaptionName("B"))
+      .get(TIMEOUT, SECONDS);
+
+    final var tb = this.findCaption("B");
+
+    assertEquals(ta.id(), tb.id());
+    this.model.undo().get(TIMEOUT, SECONDS);
+    this.model.redo().get(TIMEOUT, SECONDS);
+  }
+
+  @Test
+  public void testCaptionModifyNonexistent()
+    throws Exception
+  {
+    this.model.captionModify(new LCaptionID(1000L), new LCaptionName("B"))
+      .get(TIMEOUT, SECONDS);
+
+    assertEquals(List.of(), this.model.undoStack().get());
+  }
+
+  @Test
+  public void testCaptionModifyConflict()
+    throws Exception
+  {
+    final var tta = new LCaptionName("A");
+    final var ttb = new LCaptionName("B");
+
+    this.model.captionAdd(tta).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(ttb).get(TIMEOUT, SECONDS);
+
+    final var ta = this.findCaption("A");
+    final var tb = this.findCaption("B");
+
+    final var ex =
+      assertThrows(LException.class, () -> {
+        try {
+          this.model.captionModify(ta.id(), new LCaptionName("B"))
+            .get(TIMEOUT, SECONDS);
+        } catch (final ExecutionException e) {
+          throw e.getCause();
+        }
+      });
+
+    assertEquals("error-duplicate", ex.errorCode());
   }
 
   private List<LCaptionName> captionListNow()

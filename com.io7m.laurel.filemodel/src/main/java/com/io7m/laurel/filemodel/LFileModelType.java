@@ -156,6 +156,19 @@ public interface LFileModelType
     LCaptionName text);
 
   /**
+   * Modify a caption.
+   *
+   * @param id   The caption ID
+   * @param name The caption text
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> captionModify(
+    LCaptionID id,
+    LCaptionName name);
+
+  /**
    * Delete captions.
    *
    * @param captions The captions

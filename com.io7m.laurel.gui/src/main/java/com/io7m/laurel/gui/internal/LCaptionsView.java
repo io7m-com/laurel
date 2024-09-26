@@ -88,6 +88,7 @@ public final class LCaptionsView extends LAbstractViewWithModel
   @FXML private Button imageCaptionUnassign;
   @FXML private Button captionNew;
   @FXML private Button captionDelete;
+  @FXML private Button captionModify;
   @FXML private TextField captionAvailableSearch;
   @FXML private TextField imageSearch;
   @FXML private ContextMenu assignedCaptionsContextMenu;
@@ -145,6 +146,7 @@ public final class LCaptionsView extends LAbstractViewWithModel
     this.imageCaptionUnassign.setDisable(true);
     this.captionNew.setDisable(false);
     this.captionDelete.setDisable(true);
+    this.captionModify.setDisable(true);
 
     this.initializeImagesTable();
     this.initializeCaptionsAssignedTable();
@@ -317,15 +319,24 @@ public final class LCaptionsView extends LAbstractViewWithModel
     this.imagesAll.sort();
   }
 
-  private void onCaptionUnassignedSelected(
-    final LCaption caption)
+  private void onCaptionUnassignedSelected()
   {
     this.updateImageCaptionUnassignButton();
     this.updateImageCaptionAssignButton();
 
-    if (caption == null) {
-      this.captionDelete.setDisable(true);
+    final var captions =
+      this.captionsUnassignedView.getSelectionModel()
+        .getSelectedItems();
+
+    this.captionDelete.setDisable(true);
+    this.captionModify.setDisable(true);
+
+    if (captions.isEmpty()) {
       return;
+    }
+
+    if (captions.size() == 1) {
+      this.captionModify.setDisable(false);
     }
 
     this.captionDelete.setDisable(false);
@@ -554,6 +565,26 @@ public final class LCaptionsView extends LAbstractViewWithModel
           captionsAvailable.stream()
             .map(LCaption::id)
             .collect(Collectors.toSet())
+        );
+    }
+  }
+
+  @FXML
+  private void onCaptionModify()
+  {
+    final var caption =
+      this.captionsUnassignedView.getSelectionModel()
+        .getSelectedItem();
+
+    final var editor =
+      this.editors.open(caption.name().text());
+
+    final var r = editor.result();
+    if (r.isPresent()) {
+      this.fileModelNow()
+        .captionModify(
+          caption.id(),
+          new LCaptionName(r.get())
         );
     }
   }

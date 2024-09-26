@@ -98,7 +98,7 @@
             <Tooltip text="%images.tooltip.search" />
           </tooltip>
         </TextField>
-        <TableView fx:id="imagesAll" GridPane.rowIndex="3" styleClass="dataTable">
+        <TableView fx:id="imagesAll" styleClass="dataTable" GridPane.rowIndex="3">
           <columns>
             <TableColumn editable="false" prefWidth="248.0" text="%images.filename" />
           </columns>
@@ -137,7 +137,7 @@
                   </Label>
                </children>
             </HBox>
-        <TableView fx:id="captionsAssignedView" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" styleClass="dataTable">
+        <TableView fx:id="captionsAssignedView" styleClass="dataTable" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
           <columns>
             <TableColumn editable="false" prefWidth="64.0" text="%caption.text" />
             <TableColumn editable="false" prefWidth="64.0" text="%caption.count" />
@@ -219,11 +219,22 @@
                 <Tooltip text="%captions.tooltip.delete" />
               </tooltip>
             </Button>
+                  <Button fx:id="captionModify" layoutX="331.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onCaptionModify" prefHeight="32.0" prefWidth="32.0">
+                     <graphic>
+                        <ImageView>
+                           <image>
+                              <Image url="@tag-update.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <tooltip>
+                        <Tooltip text="%captions.tooltip.modify" />
+                     </tooltip>
+                  </Button>
           </children>
         </HBox>
         <TextField fx:id="captionAvailableSearch" maxHeight="-Infinity" minHeight="-Infinity" onAction="#onCaptionSearchChanged" onKeyTyped="#onCaptionSearchChanged" prefHeight="32.0" promptText="%caption.search" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-        <TableView fx:id="captionsUnassignedView" GridPane.columnIndex="2" GridPane.rowIndex="2"
-                   GridPane.rowSpan="2147483647" styleClass="dataTable">
+        <TableView fx:id="captionsUnassignedView" styleClass="dataTable" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.rowSpan="2147483647">
           <columns>
             <TableColumn editable="false" prefWidth="64.0" text="%caption.text" />
             <TableColumn editable="false" prefWidth="64.0" text="%caption.count" />

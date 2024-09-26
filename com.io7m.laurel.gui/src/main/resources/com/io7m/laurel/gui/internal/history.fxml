@@ -29,7 +29,7 @@
         <RowConstraints prefHeight="128.0" vgrow="SOMETIMES" />
       </rowConstraints>
       <children>
-        <TableView fx:id="undoList" GridPane.rowIndex="1" styleClass="dataTable">
+        <TableView fx:id="undoList" styleClass="dataTable" GridPane.rowIndex="1">
           <columns>
             <TableColumn fx:id="undoTimeColumn" prefWidth="75.0" text="%time" />
                   <TableColumn fx:id="undoValueColumn" prefWidth="75.0" text="%metadata_value" />
@@ -80,7 +80,7 @@
                   </Button>
                </children>
             </VBox>
-            <TableView fx:id="redoList" layoutX="11.0" layoutY="44.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+            <TableView fx:id="redoList" layoutX="11.0" layoutY="44.0" styleClass="dataTable" GridPane.columnIndex="2" GridPane.rowIndex="1">
                <columns>
                   <TableColumn fx:id="redoTimeColumn" prefWidth="75.0" text="%time" />
                   <TableColumn fx:id="redoValueColumn" prefWidth="75.0" text="%metadata_value" />
@@ -106,7 +106,7 @@
                         </ImageView>
                      </graphic>
                      <tooltip>
-                        <Tooltip text="Empty Tooltip" />
+                        <Tooltip text="%history.tooltip.compact" />
                      </tooltip>
                   </Button>
                </children>
