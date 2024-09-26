@@ -123,7 +123,7 @@ public final class LCommandMetadataRemove
       }
     }
 
-    model.eventWithoutProgress("Removed %d values.", max);
+    model.eventWithoutProgress("Removed %d metadata values.", max);
     model.setMetadata(LCommandModelUpdates.listMetadata(context));
     return LCommandUndoable.COMMAND_UNDOABLE;
   }
@@ -152,7 +152,7 @@ public final class LCommandMetadataRemove
         .execute();
     }
 
-    model.eventWithoutProgress("Updated %d values.", this.savedData.size());
+    model.eventWithoutProgress("Updated %d metadata values.", this.savedData.size());
     model.setMetadata(LCommandModelUpdates.listMetadata(context));
   }
 
@@ -180,7 +180,7 @@ public final class LCommandMetadataRemove
         .fetchOne(METADATA.META_VALUE);
     }
 
-    model.eventWithoutProgress("Removed %d values.", this.savedData.size());
+    model.eventWithoutProgress("Removed %d metadata values.", this.savedData.size());
     model.setMetadata(LCommandModelUpdates.listMetadata(context));
   }
 

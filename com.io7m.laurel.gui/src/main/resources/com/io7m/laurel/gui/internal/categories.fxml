@@ -92,7 +92,7 @@
                   </Button>
                </children>
             </HBox>
-        <TableView fx:id="categoryList" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
+        <TableView fx:id="categoryList" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" styleClass="dataTable">
           <columns>
             <TableColumn prefWidth="75.0" text="%category" />
                   <TableColumn prefWidth="75.0" text="%required" />
@@ -101,7 +101,8 @@
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
           </columnResizePolicy>
         </TableView>
-        <TableView fx:id="captionsAssigned" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
+        <TableView fx:id="captionsAssigned" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                   GridPane.rowSpan="2147483647" styleClass="dataTable">
           <columns>
             <TableColumn prefWidth="75.0" text="%caption" />
           </columns>
@@ -133,7 +134,8 @@
                   <Tooltip text="%categories.tooltip.unassign" />
                </tooltip>
         </Button>
-        <TableView fx:id="captionsUnassigned" GridPane.columnIndex="3" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
+        <TableView fx:id="captionsUnassigned" GridPane.columnIndex="3" GridPane.rowIndex="1"
+                   GridPane.rowSpan="2147483647" styleClass="dataTable">
           <columns>
             <TableColumn prefWidth="75.0" text="%caption" />
           </columns>

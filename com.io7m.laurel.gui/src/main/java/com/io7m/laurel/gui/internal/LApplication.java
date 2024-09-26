@@ -72,6 +72,9 @@ public final class LApplication extends Application
     final var preferences = LPreferences.open(this.configuration);
     services.register(LPreferencesType.class, preferences);
 
+    final var comparisonViews = new LCaptionComparisonViews(strings);
+    services.register(LCaptionComparisonViews.class, comparisonViews);
+
     final var captionEditors = new LCaptionEditors(strings);
     services.register(LCaptionEditors.class, captionEditors);
 

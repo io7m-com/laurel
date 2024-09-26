@@ -19,6 +19,8 @@ package com.io7m.laurel.filemodel.internal;
 
 import com.io7m.laurel.model.LCaptionName;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +39,8 @@ public final class LCommandGlobalCaptionsAdd
 
   private record SavedData(
     long id,
-    String text)
+    String text,
+    long order)
   {
 
   }
@@ -75,6 +78,8 @@ public final class LCommandGlobalCaptionsAdd
         "caption.%d.id".formatted(Integer.valueOf(index));
       final var textKey =
         "caption.%d.text".formatted(Integer.valueOf(index));
+      final var orderKey =
+        "caption.%d.order".formatted(Integer.valueOf(index));
 
       if (!p.containsKey(idKey)) {
         break;
@@ -83,7 +88,8 @@ public final class LCommandGlobalCaptionsAdd
       final var data =
         new SavedData(
           Long.parseUnsignedLong(p.getProperty(idKey)),
-          p.getProperty(textKey)
+          p.getProperty(textKey),
+          Integer.parseUnsignedInt(p.getProperty(orderKey))
         );
 
       c.savedData.add(data);
@@ -105,11 +111,25 @@ public final class LCommandGlobalCaptionsAdd
     final var max = captions.size();
     for (int index = 0; index < max; ++index) {
       final var caption = captions.get(index);
-      model.eventWithProgressCurrentMax(index, max, "Adding caption '%s'", caption);
+      model.eventWithProgressCurrentMax(
+        index,
+        max,
+        "Adding caption '%s'",
+        caption);
+
+      final var maxOrder =
+        context.select(
+            DSL.coalesce(DSL.max(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER), 0)
+              .add(1)
+              .cast(SQLDataType.BIGINT)
+          ).from(GLOBAL_CAPTIONS)
+          .fetchOne()
+          .value1();
 
       final var recOpt =
         context.insertInto(GLOBAL_CAPTIONS)
           .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT, caption.text())
+          .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER, maxOrder)
           .onDuplicateKeyIgnore()
           .returning(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID)
           .fetchOptional();
@@ -128,7 +148,8 @@ public final class LCommandGlobalCaptionsAdd
       this.savedData.add(
         new SavedData(
           rec.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID).longValue(),
-          caption.text()
+          caption.text(),
+          maxOrder
         )
       );
     }
@@ -189,6 +210,7 @@ public final class LCommandGlobalCaptionsAdd
       context.insertInto(GLOBAL_CAPTIONS)
         .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID, data.id)
         .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT, data.text)
+        .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER, data.order)
         .onDuplicateKeyUpdate()
         .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT, data.text)
         .execute();
@@ -208,10 +230,13 @@ public final class LCommandGlobalCaptionsAdd
         "caption.%d.id".formatted(Integer.valueOf(index));
       final var textKey =
         "caption.%d.text".formatted(Integer.valueOf(index));
+      final var orderKey =
+        "caption.%d.order".formatted(Integer.valueOf(index));
 
       final var data = this.savedData.get(index);
       p.setProperty(idKey, Long.toUnsignedString(data.id));
       p.setProperty(textKey, data.text);
+      p.setProperty(orderKey, Long.toUnsignedString(data.order));
     }
 
     return p;

@@ -98,7 +98,7 @@
             <Tooltip text="%images.tooltip.search" />
           </tooltip>
         </TextField>
-        <TableView fx:id="imagesAll" GridPane.rowIndex="3">
+        <TableView fx:id="imagesAll" GridPane.rowIndex="3" styleClass="dataTable">
           <columns>
             <TableColumn editable="false" prefWidth="248.0" text="%images.filename" />
           </columns>
@@ -137,7 +137,7 @@
                   </Label>
                </children>
             </HBox>
-        <TableView fx:id="captionsAssignedView" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
+        <TableView fx:id="captionsAssignedView" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" styleClass="dataTable">
           <columns>
             <TableColumn editable="false" prefWidth="64.0" text="%caption.text" />
             <TableColumn editable="false" prefWidth="64.0" text="%caption.count" />
@@ -222,7 +222,8 @@
           </children>
         </HBox>
         <TextField fx:id="captionAvailableSearch" maxHeight="-Infinity" minHeight="-Infinity" onAction="#onCaptionSearchChanged" onKeyTyped="#onCaptionSearchChanged" prefHeight="32.0" promptText="%caption.search" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-        <TableView fx:id="captionsUnassignedView" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.rowSpan="2147483647">
+        <TableView fx:id="captionsUnassignedView" GridPane.columnIndex="2" GridPane.rowIndex="2"
+                   GridPane.rowSpan="2147483647" styleClass="dataTable">
           <columns>
             <TableColumn editable="false" prefWidth="64.0" text="%caption.text" />
             <TableColumn editable="false" prefWidth="64.0" text="%caption.count" />

@@ -19,8 +19,8 @@ package com.io7m.laurel.gui.internal;
 
 import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.laurel.filemodel.LFileModelType;
-import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LCaptionName;
+import com.io7m.laurel.model.LGlobalCaption;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -48,7 +48,7 @@ public final class LGlobalPrefixCaptions
   @FXML private Button delete;
   @FXML private Button up;
   @FXML private Button down;
-  @FXML private ListView<LCaption> captions;
+  @FXML private ListView<LGlobalCaption> captions;
 
   /**
    * The global prefix captions editor.
@@ -93,7 +93,7 @@ public final class LGlobalPrefixCaptions
   @Override
   protected void onFileBecameUnavailable()
   {
-
+    this.captions.setItems(FXCollections.emptyObservableList());
   }
 
   @Override
@@ -112,14 +112,18 @@ public final class LGlobalPrefixCaptions
   }
 
   private void onCaptionSelectionChanged(
-    final LCaption caption)
+    final LGlobalCaption caption)
   {
     if (caption != null) {
       this.delete.setDisable(false);
+      this.down.setDisable(false);
       this.modify.setDisable(false);
+      this.up.setDisable(false);
     } else {
       this.delete.setDisable(true);
+      this.down.setDisable(true);
       this.modify.setDisable(true);
+      this.up.setDisable(true);
     }
   }
 
@@ -145,33 +149,62 @@ public final class LGlobalPrefixCaptions
   @FXML
   private void onDeleteCaptionSelected()
   {
-    this.fileModelNow().globalCaptionRemove(
-      this.captions.getSelectionModel()
-        .getSelectedItem()
-        .id()
-    );
+    this.fileModelNow()
+      .globalCaptionRemove(
+        this.captions.getSelectionModel()
+          .getSelectedItem()
+          .caption()
+          .id()
+      );
   }
 
   @FXML
   private void onModifyCaptionSelected()
   {
+    final var selected =
+      this.captions.getSelectionModel()
+        .getSelectedItem();
 
+    final var editor =
+      this.editors.open(selected.caption().name().text());
+
+    final var result = editor.result();
+    if (result.isPresent()) {
+      final var text = result.get();
+      this.fileModelNow()
+        .globalCaptionModify(
+          selected.caption().id(),
+          new LCaptionName(text)
+        );
+    }
   }
 
   @FXML
   private void onCaptionUpSelected()
   {
-
+    this.fileModelNow()
+      .globalCaptionOrderLower(
+        this.captions.getSelectionModel()
+          .getSelectedItem()
+          .caption()
+          .id()
+      );
   }
 
   @FXML
   private void onCaptionDownSelected()
   {
-
+    this.fileModelNow()
+      .globalCaptionOrderUpper(
+        this.captions.getSelectionModel()
+          .getSelectedItem()
+          .caption()
+          .id()
+      );
   }
 
   private static final class LCaptionListCell
-    extends ListCell<LCaption>
+    extends ListCell<LGlobalCaption>
   {
     LCaptionListCell()
     {
@@ -180,14 +213,14 @@ public final class LGlobalPrefixCaptions
 
     @Override
     protected void updateItem(
-      final LCaption caption,
+      final LGlobalCaption caption,
       final boolean isEmpty)
     {
       super.updateItem(caption, isEmpty);
       this.setGraphic(null);
       this.setText(null);
       if (caption != null) {
-        this.setText(caption.name().text());
+        this.setText(caption.caption().name().text());
       }
     }
   }

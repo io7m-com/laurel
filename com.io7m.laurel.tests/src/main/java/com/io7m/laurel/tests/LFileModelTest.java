@@ -17,19 +17,20 @@
 
 package com.io7m.laurel.tests;
 
+import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LFileModels;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
-import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
+import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LCaptionID;
 import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LCategoryID;
 import com.io7m.laurel.model.LCategoryName;
 import com.io7m.laurel.model.LException;
+import com.io7m.laurel.model.LGlobalCaption;
 import com.io7m.laurel.model.LImageID;
-import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LMetadataValue;
 import com.io7m.zelador.test_extension.CloseableResourcesType;
 import com.io7m.zelador.test_extension.ZeladorExtension;
@@ -50,11 +51,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith({ZeladorExtension.class})
 public final class LFileModelTest
@@ -495,14 +496,18 @@ public final class LFileModelTest
     final var tb = this.findCategory(tbn);
     final var tc = this.findCategory(tcn);
 
-    this.model.categorySetRequired(Set.of(ta.id(), tc.id())).get(TIMEOUT, SECONDS);
+    this.model.categorySetRequired(Set.of(ta.id(), tc.id())).get(
+      TIMEOUT,
+      SECONDS);
     assertEquals(
       List.of(ta.id(), tc.id()),
       this.categoriesRequiredIDNow()
     );
 
     // Redundant, won't be added to the undo stack.
-    this.model.categorySetRequired(Set.of(ta.id(), tc.id())).get(TIMEOUT, SECONDS);
+    this.model.categorySetRequired(Set.of(ta.id(), tc.id())).get(
+      TIMEOUT,
+      SECONDS);
     assertEquals(List.of(ta.id(), tc.id()), this.categoriesRequiredIDNow());
 
     // Redundant, won't be added to the undo stack.
@@ -680,6 +685,116 @@ public final class LFileModelTest
   }
 
   @Test
+  public void testImageCaptionsDeletion()
+    throws Exception
+  {
+    final var can = new LCategoryName("A");
+    final var cbn = new LCategoryName("B");
+
+    this.model.categoryAdd(can).get(TIMEOUT, SECONDS);
+    this.model.categoryAdd(cbn).get(TIMEOUT, SECONDS);
+
+    final var ca = this.findCategory(can);
+    final var cb = this.findCategory(cbn);
+
+    this.model.imageAdd(
+      "image-a",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.imageAdd(
+      "image-b",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    final var i0 = this.model.imageList().get().get(0).id();
+    final var i1 = this.model.imageList().get().get(1).id();
+
+    this.model.imageSelect(Optional.of(i1)).get(TIMEOUT, SECONDS);
+
+    this.model.captionAdd(new LCaptionName("TX")).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(new LCaptionName("TY")).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(new LCaptionName("TZ")).get(TIMEOUT, SECONDS);
+
+    final var tx = this.findCaption("TX");
+    final var ty = this.findCaption("TY");
+    final var tz = this.findCaption("TZ");
+
+    final var imageAssigns = List.of(
+      new LImageCaptionsAssignment(i0, Set.of(tx.id(), ty.id())),
+      new LImageCaptionsAssignment(i1, Set.of(ty.id(), tz.id()))
+    );
+
+    this.model.imageCaptionsAssign(imageAssigns).get(TIMEOUT, SECONDS);
+
+    final var categoryAssigns =
+      List.of(
+        new LCategoryCaptionsAssignment(ca.id(), List.of(tx.id(), ty.id())),
+        new LCategoryCaptionsAssignment(cb.id(), List.of(tz.id()))
+      );
+
+    this.model.categoryCaptionsAssign(categoryAssigns)
+      .get(TIMEOUT, SECONDS);
+
+    this.model.imageSelect(Optional.of(i0)).get(TIMEOUT, SECONDS);
+    assertEquals(
+      List.of(tx.name(), ty.name()),
+      this.imageCaptionsAssignedNow());
+    this.model.imageSelect(Optional.of(i1)).get(TIMEOUT, SECONDS);
+    assertEquals(
+      List.of(ty.name(), tz.name()),
+      this.imageCaptionsAssignedNow());
+    this.model.categorySelect(Optional.of(ca.id())).get(TIMEOUT, SECONDS);
+    assertEquals(
+      List.of(tx.name(), ty.name()),
+      this.categoryCaptionsNow(ca.id()));
+    this.model.categorySelect(Optional.of(cb.id())).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tz.name()), this.categoryCaptionsNow(cb.id()));
+
+    this.model.captionRemove(Set.of(tx.id(), ty.id(), tz.id()))
+      .get(TIMEOUT, SECONDS);
+
+    this.model.imageSelect(Optional.of(i0)).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.imageCaptionsAssignedNow());
+    this.model.imageSelect(Optional.of(i1)).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.imageCaptionsAssignedNow());
+    this.model.categorySelect(Optional.of(ca.id())).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.categoryCaptionsNow(ca.id()));
+    this.model.categorySelect(Optional.of(cb.id())).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.categoryCaptionsNow(cb.id()));
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+
+    this.model.imageSelect(Optional.of(i0)).get(TIMEOUT, SECONDS);
+    assertEquals(
+      List.of(tx.name(), ty.name()),
+      this.imageCaptionsAssignedNow());
+    this.model.imageSelect(Optional.of(i1)).get(TIMEOUT, SECONDS);
+    assertEquals(
+      List.of(ty.name(), tz.name()),
+      this.imageCaptionsAssignedNow());
+    this.model.categorySelect(Optional.of(ca.id())).get(TIMEOUT, SECONDS);
+    assertEquals(
+      List.of(tx.name(), ty.name()),
+      this.categoryCaptionsNow(ca.id()));
+    this.model.categorySelect(Optional.of(cb.id())).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tz.name()), this.categoryCaptionsNow(cb.id()));
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+
+    this.model.imageSelect(Optional.of(i0)).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.imageCaptionsAssignedNow());
+    this.model.imageSelect(Optional.of(i1)).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.imageCaptionsAssignedNow());
+    this.model.categorySelect(Optional.of(ca.id())).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.categoryCaptionsNow(ca.id()));
+    this.model.categorySelect(Optional.of(cb.id())).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(), this.categoryCaptionsNow(cb.id()));
+  }
+
+  @Test
   public void testImageDelete()
     throws Exception
   {
@@ -717,12 +832,14 @@ public final class LFileModelTest
       );
     final var assign1 =
       new LImageCaptionsAssignment(
-        i0,
+        i1,
         Set.of(ty.id())
       );
 
     this.model.imageSelect(Optional.of(i0)).get(TIMEOUT, SECONDS);
-    this.model.imageCaptionsAssign(List.of(assign0, assign1)).get(TIMEOUT, SECONDS);
+    this.model.imageCaptionsAssign(List.of(assign0, assign1)).get(
+      TIMEOUT,
+      SECONDS);
     assertEquals(
       List.of(tx.name(), ty.name(), tz.name()),
       this.imageCaptionsAssignedNow()
@@ -740,6 +857,119 @@ public final class LFileModelTest
 
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(), this.imageCaptionsAssignedNow());
+  }
+
+  @Test
+  public void testImageComparison()
+    throws Exception
+  {
+    this.model.imageAdd(
+      "image-a",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.imageAdd(
+      "image-b",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    final var i0 =
+      this.model.imageList().get().get(0).id();
+    final var i1 =
+      this.model.imageList().get().get(1).id();
+
+    this.model.captionAdd(new LCaptionName("TX")).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(new LCaptionName("TY")).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(new LCaptionName("TZ")).get(TIMEOUT, SECONDS);
+
+    final var tx = this.findCaption("TX");
+    final var ty = this.findCaption("TY");
+    final var tz = this.findCaption("TZ");
+
+    assertEquals(List.of(), this.imageCaptionsAssignedNow());
+
+    final var assign0 =
+      new LImageCaptionsAssignment(
+        i0,
+        Set.of(tx.id(), ty.id(), tz.id())
+      );
+    final var assign1 =
+      new LImageCaptionsAssignment(
+        i1,
+        Set.of(ty.id())
+      );
+
+    this.model.imageCaptionsAssign(List.of(assign0, assign1))
+      .get(TIMEOUT, SECONDS);
+
+    this.model.imagesCompare(i0, i1)
+      .get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      i0, this.model.imageComparison().get().orElseThrow().imageA().id()
+    );
+    assertEquals(
+      i1, this.model.imageComparison().get().orElseThrow().imageB().id()
+    );
+
+    /*
+     * Image A has two captions that image B doesn't have.
+     */
+
+    assertEquals(
+      List.of(
+        tx.id(),
+        tz.id()
+      ),
+      this.model.imageComparisonA()
+        .get()
+        .stream()
+        .map(LCaption::id)
+        .toList()
+    );
+
+    assertEquals(
+      List.of(),
+      this.model.imageComparisonB()
+        .get()
+        .stream()
+        .map(LCaption::id)
+        .toList()
+    );
+
+    /*
+     * Now, assign one of the captions to image B...
+     */
+
+    this.model.imageCaptionsAssign(
+        List.of(new LImageCaptionsAssignment(i1, Set.of(tz.id()))))
+      .get(TIMEOUT, SECONDS);
+
+    /*
+     * Now image A only has one caption that image B doesn't have.
+     */
+
+    assertEquals(
+      List.of(
+        tx.id()
+      ),
+      this.model.imageComparisonA()
+        .get()
+        .stream()
+        .map(LCaption::id)
+        .toList()
+    );
+
+    assertEquals(
+      List.of(),
+      this.model.imageComparisonB()
+        .get()
+        .stream()
+        .map(LCaption::id)
+        .toList()
+    );
   }
 
   private List<LCaptionName> imageCaptionsAssignedNow()
@@ -812,7 +1042,9 @@ public final class LFileModelTest
     this.model.redo().get(TIMEOUT, SECONDS);
     assertEquals(List.of(meta0, meta1, meta2), this.model.metadataList().get());
 
-    this.model.metadataRemove(List.of(meta0, meta1, meta2)).get(TIMEOUT, SECONDS);
+    this.model.metadataRemove(List.of(meta0, meta1, meta2)).get(
+      TIMEOUT,
+      SECONDS);
     assertEquals(List.of(), this.model.metadataList().get());
 
     this.model.undo().get(TIMEOUT, SECONDS);
@@ -870,11 +1102,154 @@ public final class LFileModelTest
     assertEquals(List.of(tx.id(), ty.id()), this.globalCaptionsNow());
   }
 
+  @Test
+  public void testGlobalCaptionsOrderLower()
+    throws Exception
+  {
+    final var txn = new LCaptionName("TX");
+    final var tyn = new LCaptionName("TY");
+    final var tzn = new LCaptionName("TZ");
+
+    assertEquals(List.of(), this.globalCaptionsNow());
+
+    this.model.globalCaptionAdd(txn).get(TIMEOUT, SECONDS);
+    this.model.globalCaptionAdd(tyn).get(TIMEOUT, SECONDS);
+    this.model.globalCaptionAdd(tzn).get(TIMEOUT, SECONDS);
+
+    final var tx = this.findGlobalCaption(txn);
+    final var ty = this.findGlobalCaption(tyn);
+    final var tz = this.findGlobalCaption(tzn);
+
+    this.model.globalCaptionOrderLower(tx.id()).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id(), tz.id()), this.globalCaptionsNow());
+
+    this.model.globalCaptionOrderLower(ty.id()).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ty.id(), tx.id(), tz.id()), this.globalCaptionsNow());
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id(), tz.id()), this.globalCaptionsNow());
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(ty.id(), tx.id(), tz.id()), this.globalCaptionsNow());
+  }
+
+  @Test
+  public void testGlobalCaptionsOrderUpper()
+    throws Exception
+  {
+    final var txn = new LCaptionName("TX");
+    final var tyn = new LCaptionName("TY");
+    final var tzn = new LCaptionName("TZ");
+
+    assertEquals(List.of(), this.globalCaptionsNow());
+
+    this.model.globalCaptionAdd(txn).get(TIMEOUT, SECONDS);
+    this.model.globalCaptionAdd(tyn).get(TIMEOUT, SECONDS);
+    this.model.globalCaptionAdd(tzn).get(TIMEOUT, SECONDS);
+
+    final var tx = this.findGlobalCaption(txn);
+    final var ty = this.findGlobalCaption(tyn);
+    final var tz = this.findGlobalCaption(tzn);
+
+    this.model.globalCaptionOrderUpper(tz.id()).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id(), tz.id()), this.globalCaptionsNow());
+
+    this.model.globalCaptionOrderUpper(ty.id()).get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), tz.id(), ty.id()), this.globalCaptionsNow());
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), ty.id(), tz.id()), this.globalCaptionsNow());
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(List.of(tx.id(), tz.id(), ty.id()), this.globalCaptionsNow());
+  }
+
+  @Test
+  public void testGlobalCaptionsModify()
+    throws Exception
+  {
+    final var txn = new LCaptionName("TX");
+
+    assertEquals(List.of(), this.globalCaptionsNow());
+
+    this.model.globalCaptionAdd(txn).get(TIMEOUT, SECONDS);
+
+    final var tx = this.findGlobalCaption(txn);
+
+    this.model.globalCaptionModify(tx.id(), new LCaptionName("ZZZ"))
+      .get(TIMEOUT, SECONDS);
+    assertEquals(
+      "ZZZ",
+      this.model.globalCaptionList().get().get(0).caption().name().text()
+    );
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+    assertEquals(
+      "TX",
+      this.model.globalCaptionList().get().get(0).caption().name().text()
+    );
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+    assertEquals(
+      "ZZZ",
+      this.model.globalCaptionList().get().get(0).caption().name().text()
+    );
+  }
+
+  @Test
+  public void testGlobalCaptionsModifyCollision()
+    throws Exception
+  {
+    final var txn = new LCaptionName("TX");
+    final var tyn = new LCaptionName("TY");
+
+    assertEquals(List.of(), this.globalCaptionsNow());
+
+    this.model.globalCaptionAdd(txn).get(TIMEOUT, SECONDS);
+    this.model.globalCaptionAdd(tyn).get(TIMEOUT, SECONDS);
+
+    final var tx = this.findGlobalCaption(txn);
+    final var ty = this.findGlobalCaption(tyn);
+
+    final var ex = assertThrows(LException.class, () -> {
+      try {
+        this.model.globalCaptionModify(tx.id(), new LCaptionName("TY"))
+          .get(TIMEOUT, SECONDS);
+      } catch (final ExecutionException e) {
+        throw e.getCause();
+      }
+    });
+
+    assertEquals("error-duplicate", ex.errorCode());
+  }
+
+  @Test
+  public void testGlobalCaptionsModifyNonexistent()
+    throws Exception
+  {
+    final var txn = new LCaptionName("TX");
+
+    assertEquals(List.of(), this.globalCaptionsNow());
+
+    this.model.globalCaptionAdd(txn).get(TIMEOUT, SECONDS);
+
+    final var tx0 = this.findGlobalCaption(txn);
+
+    this.model.globalCaptionModify(
+        new LCaptionID(1000L),
+        new LCaptionName("TY"))
+      .get(TIMEOUT, SECONDS);
+
+    final var tx1 = this.findGlobalCaption(txn);
+    assertEquals(tx0, tx1);
+  }
+
   private List<LCaptionID> globalCaptionsNow()
   {
     return this.model.globalCaptionList()
       .get()
       .stream()
+      .map(LGlobalCaption::caption)
       .map(LCaption::id)
       .toList();
   }
@@ -885,6 +1260,7 @@ public final class LFileModelTest
     return this.model.globalCaptionList()
       .get()
       .stream()
+      .map(LGlobalCaption::caption)
       .filter(x -> Objects.equals(x.name(), name))
       .findFirst()
       .orElseThrow();

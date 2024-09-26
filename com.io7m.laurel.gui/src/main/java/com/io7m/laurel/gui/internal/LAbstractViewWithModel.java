@@ -21,6 +21,7 @@ import com.io7m.jmulticlose.core.CloseableCollection;
 import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.jmulticlose.core.ClosingResourceFailedException;
 import com.io7m.laurel.filemodel.LFileModelType;
+import com.io7m.laurel.model.LException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,5 +97,11 @@ abstract class LAbstractViewWithModel implements LViewType
       .orElseThrow(() -> {
         return new IllegalStateException("No file is open!");
       });
+  }
+
+  protected final void fileModelClose()
+    throws LException
+  {
+    this.fileModel.close();
   }
 }

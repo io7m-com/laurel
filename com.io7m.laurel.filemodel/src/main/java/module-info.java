@@ -14,21 +14,25 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+import com.io7m.laurel.filemodel.internal.LCommandCaptionDelete;
+import com.io7m.laurel.filemodel.internal.LCommandCaptionsAdd;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesSetRequired;
 import com.io7m.laurel.filemodel.internal.LCommandCategoriesUnsetRequired;
 import com.io7m.laurel.filemodel.internal.LCommandCategoryCaptionsAssign;
 import com.io7m.laurel.filemodel.internal.LCommandCategoryCaptionsUnassign;
 import com.io7m.laurel.filemodel.internal.LCommandFactoryType;
+import com.io7m.laurel.filemodel.internal.LCommandGlobalCaptionModify;
+import com.io7m.laurel.filemodel.internal.LCommandGlobalCaptionOrderLower;
+import com.io7m.laurel.filemodel.internal.LCommandGlobalCaptionOrderUpper;
 import com.io7m.laurel.filemodel.internal.LCommandGlobalCaptionsAdd;
 import com.io7m.laurel.filemodel.internal.LCommandGlobalCaptionsRemove;
-import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
 import com.io7m.laurel.filemodel.internal.LCommandImageCaptionsAssign;
 import com.io7m.laurel.filemodel.internal.LCommandImageCaptionsUnassign;
+import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
 import com.io7m.laurel.filemodel.internal.LCommandImagesAdd;
-import com.io7m.laurel.filemodel.internal.LCommandCaptionsAdd;
 import com.io7m.laurel.filemodel.internal.LCommandImagesDelete;
-import com.io7m.laurel.filemodel.internal.LCommandMetadataAdd;
+import com.io7m.laurel.filemodel.internal.LCommandMetadataPut;
 import com.io7m.laurel.filemodel.internal.LCommandMetadataRemove;
 
 /**
@@ -57,12 +61,16 @@ module com.io7m.laurel.filemodel
   requires org.xerial.sqlitejdbc;
 
   provides LCommandFactoryType with
+    LCommandCaptionDelete,
     LCommandCaptionsAdd,
     LCommandCategoriesAdd,
     LCommandCategoriesSetRequired,
     LCommandCategoriesUnsetRequired,
     LCommandCategoryCaptionsAssign,
     LCommandCategoryCaptionsUnassign,
+    LCommandGlobalCaptionModify,
+    LCommandGlobalCaptionOrderLower,
+    LCommandGlobalCaptionOrderUpper,
     LCommandGlobalCaptionsAdd,
     LCommandGlobalCaptionsRemove,
     LCommandImageCaptionsAssign,
@@ -70,7 +78,7 @@ module com.io7m.laurel.filemodel
     LCommandImageSelect,
     LCommandImagesAdd,
     LCommandImagesDelete,
-    LCommandMetadataAdd,
+    LCommandMetadataPut,
     LCommandMetadataRemove
     ;
 

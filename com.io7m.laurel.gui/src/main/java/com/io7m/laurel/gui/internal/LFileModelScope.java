@@ -96,4 +96,14 @@ final class LFileModelScope
   {
     return this.fileModel.subscribe(receiver);
   }
+
+  public void close()
+    throws LException
+  {
+    final var existing = this.fileModel.get();
+    if (existing.isPresent()) {
+      existing.get().close();
+      this.fileModel.set(Optional.empty());
+    }
+  }
 }

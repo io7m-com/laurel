@@ -17,6 +17,7 @@
 
 package com.io7m.laurel.filemodel.internal;
 
+import com.io7m.darco.api.DDatabaseException;
 import com.io7m.darco.api.DDatabaseUnit;
 import org.jooq.DSLContext;
 
@@ -68,6 +69,7 @@ public final class LCommandCompact
     final LFileModel model,
     final LDatabaseTransactionType transaction,
     final DDatabaseUnit request)
+    throws DDatabaseException
   {
     final var context =
       transaction.get(DSLContext.class);
@@ -82,6 +84,8 @@ public final class LCommandCompact
           .from(IMAGES)
       ))
       .execute();
+
+    transaction.commit();
 
     model.clearUndo();
     return LCommandUndoable.COMMAND_NOT_UNDOABLE;

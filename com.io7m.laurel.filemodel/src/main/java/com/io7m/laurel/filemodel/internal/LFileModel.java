@@ -31,27 +31,34 @@ import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
 import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
+import com.io7m.laurel.filemodel.LImageComparison;
 import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LCaptionID;
 import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LCategoryID;
 import com.io7m.laurel.model.LCategoryName;
+import com.io7m.laurel.model.LCommandRecord;
 import com.io7m.laurel.model.LException;
+import com.io7m.laurel.model.LGlobalCaption;
 import com.io7m.laurel.model.LImageID;
 import com.io7m.laurel.model.LImageWithID;
 import com.io7m.laurel.model.LMetadataValue;
 import com.io7m.seltzer.api.SStructuredErrorType;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.exception.IntegrityConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.sqlite.SQLiteErrorCode;
+import org.sqlite.SQLiteException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashSet;
@@ -89,7 +96,6 @@ public final class LFileModel implements LFileModelType
       LOG.error("Uncaught attribute exception: ", throwable);
     });
 
-  private final AttributeType<List<LCaption>> globalCaptions;
   private final AttributeType<List<LCaption>> categoryCaptionsAssigned;
   private final AttributeType<List<LCaption>> categoryCaptionsUnassigned;
   private final AttributeType<List<LCaption>> imageCaptionsAssigned;
@@ -97,6 +103,9 @@ public final class LFileModel implements LFileModelType
   private final AttributeType<List<LCaption>> tagsAll;
   private final AttributeType<List<LCategory>> categoriesAll;
   private final AttributeType<List<LCategory>> categoriesRequired;
+  private final AttributeType<List<LCommandRecord>> redoStack;
+  private final AttributeType<List<LCommandRecord>> undoStack;
+  private final AttributeType<List<LGlobalCaption>> globalCaptions;
   private final AttributeType<List<LImageWithID>> imagesAll;
   private final AttributeType<List<LMetadataValue>> metadata;
   private final AttributeType<Optional<? extends LCommandType<?>>> redo;
@@ -111,6 +120,7 @@ public final class LFileModel implements LFileModelType
   private final LDatabaseType database;
   private final ReentrantLock commandLock;
   private final SubmissionPublisher<LFileModelEvent> events;
+  private final LImageComparisonModel imageComparison;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -147,6 +157,10 @@ public final class LFileModel implements LFileModelType
       ATTRIBUTES.withValue(Optional.empty());
     this.undoText =
       this.undo.map(o -> o.map(LCommandType::describe));
+    this.undoStack =
+      ATTRIBUTES.withValue(List.of());
+    this.redoStack =
+      ATTRIBUTES.withValue(List.of());
     this.redo =
       ATTRIBUTES.withValue(Optional.empty());
     this.redoText =
@@ -155,6 +169,8 @@ public final class LFileModel implements LFileModelType
       new ReentrantLock();
     this.attributes =
       new ConcurrentHashMap<>();
+    this.imageComparison =
+      new LImageComparisonModel(ATTRIBUTES, this.imagesAll);
 
     this.resources =
       CloseableCollection.create(() -> {
@@ -185,6 +201,12 @@ public final class LFileModel implements LFileModelType
     this.resources.add(
       this.categoryCaptionsAssigned.subscribe(
         (_0, _1) -> this.onCategoryCaptionsUnassignedRecalculate())
+    );
+    this.resources.add(
+      this.undo.subscribe((_0, _1) -> this.onUndoStateChanged())
+    );
+    this.resources.add(
+      this.redo.subscribe((_0, _1) -> this.onRedoStateChanged())
     );
   }
 
@@ -455,9 +477,48 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public CompletableFuture<?> globalCaptionOrderLower(
+    final LCaptionID id)
+  {
+    Objects.requireNonNull(id, "id");
+
+    return this.runCommand(
+      new LCommandGlobalCaptionOrderLower(),
+      id
+    );
+  }
+
+  @Override
+  public CompletableFuture<?> globalCaptionOrderUpper(
+    final LCaptionID id)
+  {
+    Objects.requireNonNull(id, "id");
+
+    return this.runCommand(
+      new LCommandGlobalCaptionOrderUpper(),
+      id
+    );
+  }
+
+  @Override
+  public CompletableFuture<?> globalCaptionModify(
+    final LCaptionID id,
+    final LCaptionName newName)
+  {
+    Objects.requireNonNull(id, "id");
+    Objects.requireNonNull(newName, "newName");
+
+    return this.runCommand(
+      new LCommandGlobalCaptionModify(),
+      new LCaption(id, newName, 0L)
+    );
+  }
+
+  @Override
   public CompletableFuture<?> categoryAdd(
     final LCategoryName text)
   {
+    Objects.requireNonNull(text, "text");
     return this.runCommand(new LCommandCategoriesAdd(), List.of(text));
   }
 
@@ -465,7 +526,19 @@ public final class LFileModel implements LFileModelType
   public CompletableFuture<?> captionAdd(
     final LCaptionName text)
   {
+    Objects.requireNonNull(text, "text");
     return this.runCommand(new LCommandCaptionsAdd(), List.of(text));
+  }
+
+  @Override
+  public CompletableFuture<?> captionRemove(
+    final Set<LCaptionID> captions)
+  {
+    Objects.requireNonNull(captions, "captions");
+    return this.runCommand(
+      new LCommandCaptionDelete(),
+      captions
+    );
   }
 
   @Override
@@ -531,6 +604,35 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public CompletableFuture<Void> imagesCompare(
+    final LImageID imageA,
+    final LImageID imageB)
+  {
+    Objects.requireNonNull(imageA, "imageA");
+    Objects.requireNonNull(imageB, "imageB");
+
+    final var future = new CompletableFuture<Void>();
+    Thread.ofVirtual()
+      .start(() -> {
+        try {
+          this.commandLock.lock();
+          try {
+            try (var t = this.database.openTransaction()) {
+              this.imageComparison.set(t.get(DSLContext.class), imageA, imageB);
+            }
+
+            future.complete(null);
+          } finally {
+            this.commandLock.unlock();
+          }
+        } catch (final Throwable e) {
+          future.completeExceptionally(e);
+        }
+      });
+    return future;
+  }
+
+  @Override
   public CompletableFuture<?> imageSelect(
     final Optional<LImageID> name)
   {
@@ -585,7 +687,7 @@ public final class LFileModel implements LFileModelType
     Objects.requireNonNull(values, "metadata");
 
     return this.runCommand(
-      new LCommandMetadataAdd(),
+      new LCommandMetadataPut(),
       values
     );
   }
@@ -677,6 +779,24 @@ public final class LFileModel implements LFileModelType
   private LException handleThrowable(
     final Throwable e)
   {
+    if (e instanceof final SQLiteException x) {
+      if (x.getResultCode() == SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE) {
+        return new LException(
+          "Object or name already exists.",
+          e,
+          "error-duplicate",
+          this.attributes(),
+          Optional.empty()
+        );
+      }
+    }
+
+    if (e instanceof final IntegrityConstraintViolationException x) {
+      if (x.getCause() != null) {
+        return this.handleThrowable(x.getCause());
+      }
+    }
+
     if (e instanceof final SStructuredErrorType<?> x) {
       this.attributes.putAll(x.attributes());
       return new LException(
@@ -759,6 +879,18 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public AttributeReadableType<List<LCommandRecord>> undoStack()
+  {
+    return this.undoStack;
+  }
+
+  @Override
+  public AttributeReadableType<List<LCommandRecord>> redoStack()
+  {
+    return this.redoStack;
+  }
+
+  @Override
   public AttributeReadableType<List<LCaption>> categoryCaptionsAssigned()
   {
     return this.categoryCaptionsAssigned;
@@ -819,7 +951,6 @@ public final class LFileModel implements LFileModelType
         } else {
           this.undo.set(Optional.empty());
         }
-
       } catch (final Throwable e) {
         throw this.handleThrowable(e);
       }
@@ -888,9 +1019,28 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
-  public AttributeReadableType<List<LCaption>> globalCaptionList()
+  public AttributeReadableType<List<LGlobalCaption>> globalCaptionList()
   {
     return this.globalCaptions;
+  }
+
+  @Override
+  public AttributeReadableType<List<LCaption>> imageComparisonA()
+  {
+    return this.imageComparison.imageComparisonA();
+  }
+
+  @Override
+  public AttributeReadableType<List<LCaption>> imageComparisonB()
+  {
+    return this.imageComparison.imageComparisonB();
+
+  }
+
+  @Override
+  public AttributeReadableType<Optional<LImageComparison>> imageComparison()
+  {
+    return this.imageComparison.imageComparison();
   }
 
   private Optional<InputStream> executeImageStream(
@@ -1005,6 +1155,17 @@ public final class LFileModel implements LFileModelType
     ));
   }
 
+  void eventWithProgress(
+    final double progress,
+    final String format,
+    final Object... arguments)
+  {
+    this.event(new LFileModelEvent(
+      String.format(format, arguments),
+      OptionalDouble.of(progress)
+    ));
+  }
+
   void eventWithProgressCurrentMax(
     final int current,
     final int max,
@@ -1020,6 +1181,7 @@ public final class LFileModel implements LFileModelType
   }
 
   void setCategoriesAndCaptions(
+    final DSLContext context,
     final List<LCaption> newCaptionsAll,
     final List<LCategory> newCategoriesAll,
     final List<LCategory> newCategoriesRequired,
@@ -1029,6 +1191,7 @@ public final class LFileModel implements LFileModelType
     this.categoriesAll.set(newCategoriesAll);
     this.categoriesRequired.set(newCategoriesRequired);
     this.categoryCaptions.set(newCategoryCaptions);
+    this.imageComparison.reload(context);
   }
 
   void setCategorySelected(
@@ -1050,8 +1213,90 @@ public final class LFileModel implements LFileModelType
   }
 
   void setGlobalCaptions(
-    final List<LCaption> captions)
+    final List<LGlobalCaption> captions)
   {
     this.globalCaptions.set(captions);
+  }
+
+  void loadUndo(
+    final LDatabaseTransactionType transaction)
+  {
+    final var rec = dbUndoGetTip(transaction);
+    if (rec.isPresent()) {
+      try {
+        this.undo.set(Optional.of(parseUndoCommandFromProperties(rec.get())));
+      } catch (final IOException e) {
+        LOG.debug("Unable to parse stored undo command: ", e);
+      }
+    }
+  }
+
+  void loadRedo(
+    final LDatabaseTransactionType transaction)
+  {
+    final var rec = dbRedoGetTip(transaction);
+    if (rec.isPresent()) {
+      try {
+        this.redo.set(Optional.of(parseRedoCommandFromProperties(rec.get())));
+      } catch (final IOException e) {
+        LOG.debug("Unable to parse stored redo command: ", e);
+      }
+    }
+  }
+
+  private void onRedoStateChanged()
+  {
+    Thread.ofVirtual().start(() -> {
+      try (var t = this.database.openTransaction()) {
+        final var context = t.get(DSLContext.class);
+
+        this.redoStack.set(
+          context.select(
+              REDO.REDO_TIME,
+              REDO.REDO_DESCRIPTION
+            ).from(REDO)
+            .orderBy(REDO.REDO_TIME.desc())
+            .stream()
+            .map(r -> {
+              final var instant =
+                Instant.ofEpochMilli(r.get(REDO.REDO_TIME).longValue());
+              final var time =
+                OffsetDateTime.ofInstant(instant, UTC);
+              return new LCommandRecord(time, r.get(REDO.REDO_DESCRIPTION));
+            })
+            .toList()
+        );
+      } catch (final Throwable e) {
+        LOG.debug("Error reading redo stack: ", e);
+      }
+    });
+  }
+
+  private void onUndoStateChanged()
+  {
+    Thread.ofVirtual().start(() -> {
+      try (var t = this.database.openTransaction()) {
+        final var context = t.get(DSLContext.class);
+
+        this.undoStack.set(
+          context.select(
+              UNDO.UNDO_TIME,
+              UNDO.UNDO_DESCRIPTION
+            ).from(UNDO)
+            .orderBy(UNDO.UNDO_TIME.desc())
+            .stream()
+            .map(r -> {
+              final var instant =
+                Instant.ofEpochMilli(r.get(UNDO.UNDO_TIME).longValue());
+              final var time =
+                OffsetDateTime.ofInstant(instant, UTC);
+              return new LCommandRecord(time, r.get(UNDO.UNDO_DESCRIPTION));
+            })
+            .toList()
+        );
+      } catch (final Throwable e) {
+        LOG.debug("Error reading undo stack: ", e);
+      }
+    });
   }
 }

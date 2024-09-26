@@ -37,7 +37,8 @@ public final class LCommandGlobalCaptionsRemove
 
   private record SavedData(
     long id,
-    String text)
+    String text,
+    long order)
   {
 
   }
@@ -75,6 +76,8 @@ public final class LCommandGlobalCaptionsRemove
         "caption.%d.id".formatted(Integer.valueOf(index));
       final var textKey =
         "caption.%d.text".formatted(Integer.valueOf(index));
+      final var orderKey =
+        "caption.%d.order".formatted(Integer.valueOf(index));
 
       if (!p.containsKey(idKey)) {
         break;
@@ -83,7 +86,8 @@ public final class LCommandGlobalCaptionsRemove
       final var data =
         new SavedData(
           Long.parseUnsignedLong(p.getProperty(idKey)),
-          p.getProperty(textKey)
+          p.getProperty(textKey),
+          Long.parseUnsignedLong(p.getProperty(orderKey))
         );
 
       c.savedData.add(data);
@@ -114,8 +118,10 @@ public final class LCommandGlobalCaptionsRemove
       final var recOpt =
         context.deleteFrom(GLOBAL_CAPTIONS)
           .where(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID.eq(caption.value()))
-          .returning(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT)
-          .fetchOptional(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT);
+          .returning(
+            GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT,
+            GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER)
+          .fetchOptional();
 
       if (recOpt.isEmpty()) {
         model.eventWithProgressCurrentMax(
@@ -128,7 +134,13 @@ public final class LCommandGlobalCaptionsRemove
       }
 
       final var rec = recOpt.get();
-      this.savedData.add(new SavedData(caption.value(), rec));
+      this.savedData.add(
+        new SavedData(
+          caption.value(),
+          rec.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT),
+          rec.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER)
+        )
+      );
     }
 
     model.eventWithoutProgress("Removed %d captions.", this.savedData.size());
@@ -162,6 +174,7 @@ public final class LCommandGlobalCaptionsRemove
       context.insertInto(GLOBAL_CAPTIONS)
         .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID, data.id)
         .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT, data.text)
+        .set(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER, data.order)
         .onConflictDoNothing()
         .execute();
     }
@@ -207,10 +220,13 @@ public final class LCommandGlobalCaptionsRemove
         "caption.%d.id".formatted(Integer.valueOf(index));
       final var textKey =
         "caption.%d.text".formatted(Integer.valueOf(index));
+      final var orderKey =
+        "caption.%d.order".formatted(Integer.valueOf(index));
 
       final var data = this.savedData.get(index);
       p.setProperty(idKey, Long.toUnsignedString(data.id));
       p.setProperty(textKey, data.text);
+      p.setProperty(orderKey, Long.toUnsignedString(data.order));
     }
 
     return p;

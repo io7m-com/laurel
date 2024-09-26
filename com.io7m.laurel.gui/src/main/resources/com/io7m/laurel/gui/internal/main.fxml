@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -33,17 +34,6 @@
                   </MenuItem>
               <MenuItem fx:id="menuItemClose" disable="true" mnemonicParsing="false" onAction="#onCloseSelected" text="Close" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="menuItemSave" disable="true" mnemonicParsing="false" onAction="#onSaveSelected" text="Save">
-                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
-                  </MenuItem>
-                  <MenuItem fx:id="menuItemSaveAs" disable="true" mnemonicParsing="false" onAction="#onSaveAsSelected" text="Save As...">
-                     <accelerator>
-                        <KeyCodeCombination alt="DOWN" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
-                  </MenuItem>
-                  <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="menuItemImport" mnemonicParsing="false" onAction="#onImportSelected" text="Import..." />
                   <MenuItem fx:id="menuItemExport" disable="true" mnemonicParsing="false" onAction="#onExportSelected" text="Export..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
@@ -71,8 +61,7 @@
           </Menu>
         </menus>
       </MenuBar>
-      <TabPane fx:id="mainContent" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE"
-               VBox.vgrow="ALWAYS">
+      <TabPane fx:id="mainContent" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <tabs>
           <Tab text="%images">
             <fx:include source="captions.fxml" VBox.vgrow="ALWAYS" />
@@ -82,6 +71,9 @@
           </Tab>
           <Tab text="%metadata">
             <fx:include source="metadata.fxml" VBox.vgrow="ALWAYS" />
+          </Tab>
+          <Tab text="%history">
+            <fx:include source="history.fxml" VBox.vgrow="ALWAYS" />
           </Tab>
         </tabs>
       </TabPane>
@@ -100,7 +92,15 @@
                   <Insets left="8.0" />
                </HBox.margin>
             </Label>
-            <Region HBox.hgrow="ALWAYS" />
+            <Region HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets right="8.0" />
+               </HBox.margin></Region>
+            <ProgressBar fx:id="statusProgress" prefHeight="16.0" prefWidth="64.0" progress="0.0">
+               <HBox.margin>
+                  <Insets right="8.0" />
+               </HBox.margin>
+            </ProgressBar>
          </children>
          <VBox.margin>
             <Insets />

@@ -21,7 +21,9 @@ import com.io7m.darco.api.DDatabaseUnit;
 import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.jwheatsheaf.api.JWFileChooserAction;
 import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
+import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelType;
+import com.io7m.laurel.model.LException;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -30,6 +32,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -37,8 +40,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.io7m.darco.api.DDatabaseUnit.UNIT;
+import static com.io7m.laurel.gui.internal.LStringConstants.REDO;
+import static com.io7m.laurel.gui.internal.LStringConstants.REDO_SPECIFIC;
+import static com.io7m.laurel.gui.internal.LStringConstants.TITLE;
+import static com.io7m.laurel.gui.internal.LStringConstants.UNDO;
+import static com.io7m.laurel.gui.internal.LStringConstants.UNDO_SPECIFIC;
 
 /**
  * The main controller.
@@ -60,8 +69,6 @@ public final class LFileView extends LAbstractViewWithModel
   private @FXML Parent root;
   private @FXML MenuItem menuItemNew;
   private @FXML MenuItem menuItemOpen;
-  private @FXML MenuItem menuItemSave;
-  private @FXML MenuItem menuItemSaveAs;
   private @FXML MenuItem menuItemClose;
   private @FXML MenuItem menuItemExport;
   private @FXML MenuItem menuItemImport;
@@ -69,6 +76,7 @@ public final class LFileView extends LAbstractViewWithModel
   private @FXML MenuItem menuItemUndo;
   private @FXML MenuItem menuItemRedo;
   private @FXML Label statusLabel;
+  private @FXML ProgressBar statusProgress;
   private @FXML LCaptionsView captionsController;
 
   /**
@@ -156,6 +164,12 @@ public final class LFileView extends LAbstractViewWithModel
           () -> {
             return new LMetadataView(services, fileScope);
           }
+        ),
+        Map.entry(
+          LHistoryView.class,
+          () -> {
+            return new LHistoryView(services, fileScope);
+          }
         )
       );
 
@@ -166,7 +180,7 @@ public final class LFileView extends LAbstractViewWithModel
     final var pane = loader.<Pane>load();
     LCSS.setCSS(pane);
     stage.setScene(new Scene(pane));
-    stage.setTitle(strings.format(LStringConstants.TITLE));
+    stage.setTitle(strings.format(TITLE));
     stage.setWidth(800.0);
     stage.setHeight(600.0);
 
@@ -180,6 +194,9 @@ public final class LFileView extends LAbstractViewWithModel
 
     this.mainContent.setDisable(true);
     this.mainContent.setVisible(false);
+    this.menuItemClose.setDisable(true);
+    this.menuItemRedo.setDisable(true);
+    this.menuItemUndo.setDisable(true);
   }
 
   @Override
@@ -188,6 +205,7 @@ public final class LFileView extends LAbstractViewWithModel
     Platform.runLater(() -> {
       this.mainContent.setDisable(true);
       this.mainContent.setVisible(false);
+      this.menuItemClose.setDisable(true);
     });
   }
 
@@ -196,10 +214,89 @@ public final class LFileView extends LAbstractViewWithModel
     final CloseableCollectionType<?> subscriptions,
     final LFileModelType fileModel)
   {
+    final var eventSubscriber =
+      subscriptions.add(
+        new LPerpetualSubscriber<LFileModelEvent>(event -> {
+          Platform.runLater(() -> {
+            this.onFileModelEvent(event);
+          });
+        })
+      );
+
+    fileModel.events().subscribe(eventSubscriber);
+
+    subscriptions.add(
+      fileModel.undoText()
+        .subscribe((oldValue, newValue) -> {
+          Platform.runLater(() -> this.onUndoStateChanged(newValue));
+        })
+    );
+
+    subscriptions.add(
+      fileModel.redoText()
+        .subscribe((oldValue, newValue) -> {
+          Platform.runLater(() -> this.onRedoStateChanged(newValue));
+        })
+    );
+
     Platform.runLater(() -> {
       this.mainContent.setDisable(false);
       this.mainContent.setVisible(true);
+      this.menuItemClose.setDisable(false);
     });
+  }
+
+  private void onFileModelEvent(
+    final LFileModelEvent event)
+  {
+    this.statusProgress.setProgress(event.progress().orElse(0.0));
+    this.statusLabel.setText(event.message());
+  }
+
+  private void onUndoStateChanged(
+    final Optional<String> opt)
+  {
+    if (opt.isPresent()) {
+      this.undoEnable(opt.get());
+    } else {
+      this.undoDisable();
+    }
+  }
+
+  private void undoDisable()
+  {
+    this.menuItemUndo.setDisable(true);
+    this.menuItemUndo.setText(this.strings.format(UNDO));
+  }
+
+  private void undoEnable(
+    final String text)
+  {
+    this.menuItemUndo.setDisable(false);
+    this.menuItemUndo.setText(this.strings.format(UNDO_SPECIFIC, text));
+  }
+
+  private void onRedoStateChanged(
+    final Optional<String> opt)
+  {
+    if (opt.isPresent()) {
+      this.redoEnable(opt.get());
+    } else {
+      this.redoDisable();
+    }
+  }
+
+  private void redoDisable()
+  {
+    this.menuItemRedo.setDisable(true);
+    this.menuItemRedo.setText(this.strings.format(REDO));
+  }
+
+  private void redoEnable(
+    final String text)
+  {
+    this.menuItemRedo.setDisable(false);
+    this.menuItemRedo.setText(this.strings.format(REDO_SPECIFIC, text));
   }
 
   /**
@@ -314,31 +411,9 @@ public final class LFileView extends LAbstractViewWithModel
 
   @FXML
   public void onCloseSelected()
+    throws LException
   {
-
-  }
-
-  /**
-   * The user tried to save an image set.
-   */
-
-  @FXML
-  public void onSaveSelected()
-  {
-
-  }
-
-  /**
-   * The user tried to save an image set.
-   *
-   * @throws Exception On errors
-   */
-
-  @FXML
-  public void onSaveAsSelected()
-    throws Exception
-  {
-
+    this.fileModelClose();
   }
 
   /**
@@ -348,7 +423,7 @@ public final class LFileView extends LAbstractViewWithModel
   @FXML
   public void onExitSelected()
   {
-
+    Platform.exit();
   }
 
   /**
@@ -363,13 +438,10 @@ public final class LFileView extends LAbstractViewWithModel
 
   /**
    * The user tried to import.
-   *
-   * @throws Exception On errors
    */
 
   @FXML
   public void onImportSelected()
-    throws Exception
   {
 
   }
@@ -381,7 +453,7 @@ public final class LFileView extends LAbstractViewWithModel
   @FXML
   public void onUndo()
   {
-
+    this.fileModelNow().undo();
   }
 
   /**
@@ -391,7 +463,7 @@ public final class LFileView extends LAbstractViewWithModel
   @FXML
   public void onRedo()
   {
-
+    this.fileModelNow().redo();
   }
 
   /**

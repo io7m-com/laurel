@@ -24,7 +24,9 @@ import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LCategoryID;
 import com.io7m.laurel.model.LCategoryName;
+import com.io7m.laurel.model.LCommandRecord;
 import com.io7m.laurel.model.LException;
+import com.io7m.laurel.model.LGlobalCaption;
 import com.io7m.laurel.model.LImageID;
 import com.io7m.laurel.model.LImageWithID;
 import com.io7m.laurel.model.LMetadataValue;
@@ -75,6 +77,41 @@ public interface LFileModelType
     LCaptionID id);
 
   /**
+   * Lower the order of the given caption (making it higher priority).
+   *
+   * @param id The caption
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> globalCaptionOrderLower(
+    LCaptionID id);
+
+  /**
+   * Increase the order of the given caption (making it lower priority).
+   *
+   * @param id The caption
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> globalCaptionOrderUpper(
+    LCaptionID id);
+
+  /**
+   * Change the text for a global caption.
+   *
+   * @param id      The caption
+   * @param newName The new text
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> globalCaptionModify(
+    LCaptionID id,
+    LCaptionName newName);
+
+  /**
    * Set categories as required.
    *
    * @param categories The categories
@@ -117,6 +154,17 @@ public interface LFileModelType
 
   CompletableFuture<?> captionAdd(
     LCaptionName text);
+
+  /**
+   * Delete captions.
+   *
+   * @param captions The captions
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> captionRemove(
+    Set<LCaptionID> captions);
 
   /**
    * Load an image and add it to the file.
@@ -167,6 +215,19 @@ public interface LFileModelType
 
   CompletableFuture<?> imageCaptionsUnassign(
     List<LImageCaptionsAssignment> assignments);
+
+  /**
+   * Compare captions on images.
+   *
+   * @param imageA The left image
+   * @param imageB The right image
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> imagesCompare(
+    LImageID imageA,
+    LImageID imageB);
 
   /**
    * Select an image.
@@ -293,6 +354,18 @@ public interface LFileModelType
   AttributeReadableType<Optional<String>> undoText();
 
   /**
+   * @return The undo stack
+   */
+
+  AttributeReadableType<List<LCommandRecord>> undoStack();
+
+  /**
+   * @return The redo stack
+   */
+
+  AttributeReadableType<List<LCommandRecord>> redoStack();
+
+  /**
    * @return The list of captions assigned to the current category
    */
 
@@ -359,5 +432,23 @@ public interface LFileModelType
    * @return The current complete list of global captions
    */
 
-  AttributeReadableType<List<LCaption>> globalCaptionList();
+  AttributeReadableType<List<LGlobalCaption>> globalCaptionList();
+
+  /**
+   * @return The list of captions that are on image A, but not on image B
+   */
+
+  AttributeReadableType<List<LCaption>> imageComparisonA();
+
+  /**
+   * @return The list of captions that are on image B, but not on image A
+   */
+
+  AttributeReadableType<List<LCaption>> imageComparisonB();
+
+  /**
+   * @return The current image comparison
+   */
+
+  AttributeReadableType<Optional<LImageComparison>> imageComparison();
 }

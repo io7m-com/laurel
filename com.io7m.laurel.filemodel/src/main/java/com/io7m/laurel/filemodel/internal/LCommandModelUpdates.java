@@ -23,6 +23,7 @@ import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LCategory;
 import com.io7m.laurel.model.LCategoryID;
 import com.io7m.laurel.model.LCategoryName;
+import com.io7m.laurel.model.LGlobalCaption;
 import com.io7m.laurel.model.LHashSHA256;
 import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LImageID;
@@ -250,9 +251,9 @@ public final class LCommandModelUpdates
     final DSLContext context)
   {
     return context.select(
-      CATEGORIES.CATEGORY_TEXT,
-      CATEGORIES.CATEGORY_ID,
-      CATEGORIES.CATEGORY_REQUIRED)
+        CATEGORIES.CATEGORY_TEXT,
+        CATEGORIES.CATEGORY_ID,
+        CATEGORIES.CATEGORY_REQUIRED)
       .from(CATEGORIES)
       .where(CATEGORIES.CATEGORY_REQUIRED.eq(1L))
       .orderBy(CATEGORIES.CATEGORY_TEXT.asc())
@@ -292,6 +293,7 @@ public final class LCommandModelUpdates
     }
 
     model.setCategoriesAndCaptions(
+      context,
       listCaptionsAll(context),
       listCategoriesAll(context),
       listCategoriesRequired(context),
@@ -326,22 +328,24 @@ public final class LCommandModelUpdates
       }).toList();
   }
 
-  static List<LCaption> listGlobalCaptions(
+  static List<LGlobalCaption> listGlobalCaptions(
     final DSLContext context)
   {
     return context.select(
-      GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID,
-      GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT)
+        GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID,
+        GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT,
+        GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER)
       .from(GLOBAL_CAPTIONS)
-      .orderBy(
-        GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT.asc(),
-        GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID.asc())
+      .orderBy(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER.asc())
       .stream()
       .map(r -> {
-        return new LCaption(
-          new LCaptionID(r.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID)),
-          new LCaptionName(r.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT)),
-          1L
+        return new LGlobalCaption(
+          new LCaption(
+            new LCaptionID(r.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ID)),
+            new LCaptionName(r.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_TEXT)),
+            1L
+          ),
+          r.get(GLOBAL_CAPTIONS.GLOBAL_CAPTION_ORDER).longValue()
         );
       })
       .toList();

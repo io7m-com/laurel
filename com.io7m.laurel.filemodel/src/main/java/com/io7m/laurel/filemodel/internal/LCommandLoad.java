@@ -65,15 +65,32 @@ public final class LCommandLoad
     final DDatabaseUnit request)
   {
     final var context = transaction.get(DSLContext.class);
+
+    model.eventWithProgress(0.0, "Loading images…");
     model.setImagesAll(LCommandModelUpdates.listImages(context));
+
+    model.eventWithProgress(0.25, "Loading captions…");
     model.setCategoriesAndCaptions(
+      context,
       LCommandModelUpdates.listCaptionsAll(context),
       LCommandModelUpdates.listCategoriesAll(context),
       LCommandModelUpdates.listCategoriesRequired(context),
       LCommandModelUpdates.listCategoriesCaptions(context)
     );
+
+    model.eventWithProgress(0.5, "Loading metadata…");
     model.setMetadata(LCommandModelUpdates.listMetadata(context));
+
+    model.eventWithProgress(0.75, "Loading global captions…");
     model.setGlobalCaptions(LCommandModelUpdates.listGlobalCaptions(context));
+
+    model.eventWithProgress(0.8, "Loading undo stack…");
+    model.loadUndo(transaction);
+
+    model.eventWithProgress(0.9, "Loading redo stack…");
+    model.loadRedo(transaction);
+
+    model.eventWithProgress(1.0, "Loaded file.");
     return LCommandUndoable.COMMAND_NOT_UNDOABLE;
   }
 

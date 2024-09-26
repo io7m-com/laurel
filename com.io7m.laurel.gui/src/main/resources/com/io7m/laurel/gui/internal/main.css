@@ -183,6 +183,12 @@
   -fx-font-family: "Monospaced";
 }
 
+.dataTable
+{
+  -fx-font-size:   9pt;
+  -fx-font-family: "Monospaced";
+}
+
 .textShadow
 {
   -fx-text-fill: #000000;

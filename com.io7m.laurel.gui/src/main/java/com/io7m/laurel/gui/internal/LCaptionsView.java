@@ -74,6 +74,7 @@ public final class LCaptionsView extends LAbstractViewWithModel
   private final LFileChoosers choosers;
   private final LCaptionEditors editors;
   private final LPreferencesType preferences;
+  private final LCaptionComparisonViews comparisons;
 
   @FXML private TableView<LCaption> captionsUnassignedView;
   @FXML private TableView<LCaption> captionsAssignedView;
@@ -119,6 +120,8 @@ public final class LCaptionsView extends LAbstractViewWithModel
       inServices.requireService(LCaptionEditors.class);
     this.preferences =
       inServices.requireService(LPreferencesType.class);
+    this.comparisons =
+      inServices.requireService(LCaptionComparisonViews.class);
   }
 
   @Override
@@ -541,13 +544,18 @@ public final class LCaptionsView extends LAbstractViewWithModel
   @FXML
   private void onCaptionDelete()
   {
-    //    final var captionsAvailable =
-    //      this.captionsUnassignedView.getSelectionModel()
-    //        .getSelectedItems();
-    //
-    //    if (!captionsAvailable.isEmpty()) {
-    //      this.controller.captionRemove(captionsAvailable);
-    //    }
+    final var captionsAvailable =
+      this.captionsUnassignedView.getSelectionModel()
+        .getSelectedItems();
+
+    if (!captionsAvailable.isEmpty()) {
+      this.fileModelNow()
+        .captionRemove(
+          captionsAvailable.stream()
+            .map(LCaption::id)
+            .collect(Collectors.toSet())
+        );
+    }
   }
 
   @FXML
@@ -647,6 +655,16 @@ public final class LCaptionsView extends LAbstractViewWithModel
   @FXML
   private void onCaptionsCompareSelected()
   {
+    final var selected =
+      this.imagesAll.getSelectionModel()
+        .getSelectedItems();
 
+    this.fileModelNow()
+      .imagesCompare(
+        selected.get(0).id(),
+        selected.get(1).id()
+      );
+
+    this.comparisons.open(this.services, this.fileModelScope());
   }
 }

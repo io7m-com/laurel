@@ -32,7 +32,7 @@ import static com.io7m.laurel.filemodel.internal.Tables.METADATA;
  * Add metadata.
  */
 
-public final class LCommandMetadataAdd
+public final class LCommandMetadataPut
   extends LCommandAbstract<List<LMetadataValue>>
 {
   private final ArrayList<SavedData> savedData;
@@ -49,7 +49,7 @@ public final class LCommandMetadataAdd
    * Add metadata.
    */
 
-  public LCommandMetadataAdd()
+  public LCommandMetadataPut()
   {
     this.savedData = new ArrayList<>();
   }
@@ -61,15 +61,15 @@ public final class LCommandMetadataAdd
   public static LCommandFactoryType<List<LMetadataValue>> provider()
   {
     return new LCommandFactory<>(
-      LCommandMetadataAdd.class.getCanonicalName(),
-      LCommandMetadataAdd::fromProperties
+      LCommandMetadataPut.class.getCanonicalName(),
+      LCommandMetadataPut::fromProperties
     );
   }
 
-  private static LCommandMetadataAdd fromProperties(
+  private static LCommandMetadataPut fromProperties(
     final Properties p)
   {
-    final var c = new LCommandMetadataAdd();
+    final var c = new LCommandMetadataPut();
 
     for (int index = 0; index < Integer.MAX_VALUE; ++index) {
       final var nameKey =
@@ -139,7 +139,7 @@ public final class LCommandMetadataAdd
       );
     }
 
-    model.eventWithoutProgress("Added %d values.", max);
+    model.eventWithoutProgress("Added %d metadata values.", max);
     model.setMetadata(LCommandModelUpdates.listMetadata(context));
     return LCommandUndoable.COMMAND_UNDOABLE;
   }
@@ -174,7 +174,7 @@ public final class LCommandMetadataAdd
       }
     }
 
-    model.eventWithoutProgress("Updated %d values.", this.savedData.size());
+    model.eventWithoutProgress("Updated %d metadata values.", this.savedData.size());
     model.setMetadata(LCommandModelUpdates.listMetadata(context));
   }
 
@@ -204,7 +204,7 @@ public final class LCommandMetadataAdd
         .execute();
     }
 
-    model.eventWithoutProgress("Updated %d values.", this.savedData.size());
+    model.eventWithoutProgress("Updated %d metadata values.", this.savedData.size());
     model.setMetadata(LCommandModelUpdates.listMetadata(context));
   }
 
@@ -233,6 +233,6 @@ public final class LCommandMetadataAdd
   @Override
   public String describe()
   {
-    return "Add metadata value(s)";
+    return "Update metadata value(s)";
   }
 }

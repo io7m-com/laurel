@@ -8,4 +8,8 @@
   <!-- Bytes to string. -->
   <suppress files="LAbout.java"
             checks="IllegalInstantiation"/>
+  
+  <!-- Seems unavoidable. -->
+  <suppress files="LFileModel.java"
+            checks="ClassDataAbstractionCoupling"/>
 </suppressions>

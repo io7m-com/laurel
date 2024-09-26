@@ -44,6 +44,7 @@ public final class LMetadataView extends LAbstractViewWithModel
   @FXML private TableView<LMetadataValue> metadataList;
   @FXML private Button metadataRemove;
   @FXML private Button metadataAdd;
+  @FXML private Button metadataUpdate;
 
   LMetadataView(
     final RPServiceDirectoryType services,
@@ -53,6 +54,20 @@ public final class LMetadataView extends LAbstractViewWithModel
 
     this.editors =
       services.requireService(LMetadataEditors.class);
+  }
+
+  @FXML
+  private void onMetadataUpdateSelected()
+  {
+    final var edit =
+      this.editors.open(
+        this.metadataList.getSelectionModel()
+          .getSelectedItem()
+      );
+    final var result =
+      edit.result();
+
+    result.ifPresent(meta -> this.fileModelNow().metadataPut(List.of(meta)));
   }
 
   @FXML
@@ -82,6 +97,8 @@ public final class LMetadataView extends LAbstractViewWithModel
   protected void onInitialize()
   {
     this.metadataRemove.setDisable(true);
+    this.metadataUpdate.setDisable(true);
+
     this.initializeMetadataTable();
   }
 
@@ -124,6 +141,7 @@ public final class LMetadataView extends LAbstractViewWithModel
         .getSelectedItems();
 
     this.metadataRemove.setDisable(selected.isEmpty());
+    this.metadataUpdate.setDisable(selected.isEmpty());
   }
 
   @Override

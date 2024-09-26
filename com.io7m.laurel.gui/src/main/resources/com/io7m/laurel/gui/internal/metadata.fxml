@@ -38,9 +38,7 @@
                      </HBox.margin>
               </Label>
                   <Region HBox.hgrow="ALWAYS" />
-                  <Button fx:id="metadataAdd" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" 
-                          minWidth="-Infinity" mnemonicParsing="false" onAction="#onMetadataAddSelected" prefHeight="32.0" 
-                          prefWidth="32.0">
+                  <Button fx:id="metadataAdd" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onMetadataAddSelected" prefHeight="32.0" prefWidth="32.0">
                      <graphic>
                         <ImageView fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -52,9 +50,7 @@
                         <Tooltip text="%metadata.tooltip.add" />
                      </tooltip>
                   </Button>
-                  <Button fx:id="metadataRemove" disable="true" layoutX="90.0" layoutY="10.0" maxHeight="-Infinity" 
-                          maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" 
-                          onAction="#onMetadataRemoveSelected" prefHeight="32.0" prefWidth="32.0">
+                  <Button fx:id="metadataRemove" disable="true" layoutX="90.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onMetadataRemoveSelected" prefHeight="32.0" prefWidth="32.0">
                      <graphic>
                         <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -66,9 +62,21 @@
                         <Tooltip text="%metadata.tooltip.delete" />
                      </tooltip>
                   </Button>
+                  <Button fx:id="metadataUpdate" disable="true" layoutX="576.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onMetadataUpdateSelected" prefHeight="32.0" prefWidth="32.0">
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@metadata-update.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                     <tooltip>
+                        <Tooltip text="%metadata.tooltip.update" />
+                     </tooltip>
+                  </Button>
                </children>
             </HBox>
-        <TableView fx:id="metadataList" GridPane.rowIndex="1" GridPane.rowSpan="2147483647">
+        <TableView fx:id="metadataList" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" styleClass="dataTable">
           <columns>
             <TableColumn prefWidth="75.0" text="%metadata_name" />
                   <TableColumn prefWidth="75.0" text="%metadata_value" />

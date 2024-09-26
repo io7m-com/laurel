@@ -115,8 +115,9 @@ STRICT
 
     <Statement><![CDATA[
 CREATE TABLE global_captions (
-  global_caption_id    INTEGER PRIMARY KEY NOT NULL,
-  global_caption_text  TEXT                NOT NULL
+  global_caption_id     INTEGER PRIMARY KEY NOT NULL,
+  global_caption_text   TEXT                NOT NULL,
+  global_caption_order  INTEGER             NOT NULL
 
 -- [jooq ignore start]
   ,
