@@ -17,47 +17,40 @@
 
 package com.io7m.laurel.model;
 
-import java.util.Collections;
-import java.util.Comparator;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.Optional;
 
 /**
  * An image.
  *
- * @param imageID  The image ID
- * @param fileName The file name
- * @param captions The captions
+ * @param name   The name
+ * @param file   The file
+ * @param source The source
+ * @param hash   The hash
  */
 
 public record LImage(
-  LImageID imageID,
-  String fileName,
-  SortedSet<LImageCaptionID> captions)
-  implements Comparable<LImage>
+  String name,
+  Optional<Path> file,
+  Optional<URI> source,
+  LHashType hash)
 {
   /**
    * An image.
    *
-   * @param imageID  The image ID
-   * @param fileName The file name
-   * @param captions The captions
+   * @param name   The name
+   * @param file   The file
+   * @param source The source
+   * @param hash   The hash
    */
 
   public LImage
   {
-    Objects.requireNonNull(imageID, "imageID");
-    Objects.requireNonNull(fileName, "fileName");
-    captions = Collections.unmodifiableSortedSet(new TreeSet<>(captions));
-  }
-
-  @Override
-  public int compareTo(
-    final LImage other)
-  {
-    return Comparator.comparing(LImage::fileName)
-      .thenComparing(LImage::imageID)
-      .compare(this, other);
+    Objects.requireNonNull(name, "name");
+    Objects.requireNonNull(file, "file");
+    Objects.requireNonNull(source, "source");
+    Objects.requireNonNull(hash, "hash");
   }
 }

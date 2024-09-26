@@ -23,15 +23,18 @@ open module com.io7m.laurel.gui
   requires static org.osgi.annotation.versioning;
   requires static org.osgi.annotation.bundle;
 
+  requires com.io7m.laurel.filemodel;
+  requires com.io7m.laurel.io;
   requires com.io7m.laurel.model;
   requires com.io7m.laurel.reader.api;
   requires com.io7m.laurel.writer.api;
-  requires com.io7m.laurel.io;
 
   requires com.io7m.anethum.api;
+  requires com.io7m.darco.api;
   requires com.io7m.jade.api;
   requires com.io7m.jaffirm.core;
   requires com.io7m.jattribute.core;
+  requires com.io7m.jmulticlose.core;
   requires com.io7m.junreachable.core;
   requires com.io7m.jwheatsheaf.api;
   requires com.io7m.jwheatsheaf.oxygen;
@@ -43,14 +46,9 @@ open module com.io7m.laurel.gui
   requires javafx.base;
   requires javafx.controls;
   requires javafx.fxml;
-  requires org.jgrapht.core;
   requires org.slf4j;
 
   exports com.io7m.laurel.gui;
 
-  exports com.io7m.laurel.gui.internal
-    to com.io7m.laurel.tests;
-  exports com.io7m.laurel.gui.internal.errors
-    to com.io7m.laurel.tests;
-  exports com.io7m.laurel.gui.internal.model to com.io7m.laurel.tests;
+  exports com.io7m.laurel.gui.internal;
 }

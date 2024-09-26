@@ -29,13 +29,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import static com.io7m.laurel.model.LImageCaption.VALID_CAPTION;
+import static com.io7m.laurel.model.LCaptionName.VALID_CAPTION;
 
 /**
  * The caption editor.
  */
 
-public final class LCaptionEdit implements LScreenViewType
+public final class LCaptionEdit implements LViewType
 {
   private final String startingCaption;
 

@@ -17,24 +17,30 @@
 
 package com.io7m.laurel.gui.internal;
 
+import com.io7m.jmulticlose.core.CloseableCollectionType;
+import com.io7m.laurel.filemodel.LFileModelType;
+import com.io7m.laurel.model.LCaptionName;
+import com.io7m.laurel.model.LGlobalCaption;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.stage.Stage;
 
-import java.net.URL;
 import java.util.Objects;
-import java.util.ResourceBundle;
 
 /**
  * The global prefix captions editor.
  */
 
-public final class LGlobalPrefixCaptions implements LScreenViewType
+public final class LGlobalPrefixCaptions
+  extends LAbstractViewWithModel
 {
   private final Stage stage;
-  private final LControllerType controller;
   private final LCaptionEditors editors;
 
   @FXML private Button create;
@@ -42,21 +48,23 @@ public final class LGlobalPrefixCaptions implements LScreenViewType
   @FXML private Button delete;
   @FXML private Button up;
   @FXML private Button down;
-  @FXML private ListView<String> captions;
+  @FXML private ListView<LGlobalCaption> captions;
 
   /**
    * The global prefix captions editor.
    *
-   * @param services The services
-   * @param inStage  The stage
+   * @param services    The services
+   * @param inFileModel The file model
+   * @param inStage     The stage
    */
 
-  public LGlobalPrefixCaptions(
+  LGlobalPrefixCaptions(
     final RPServiceDirectoryType services,
+    final LFileModelScope inFileModel,
     final Stage inStage)
   {
-    this.controller =
-      services.requireService(LControllerType.class);
+    super(inFileModel);
+
     this.editors =
       services.requireService(LCaptionEditors.class);
     this.stage =
@@ -64,16 +72,17 @@ public final class LGlobalPrefixCaptions implements LScreenViewType
   }
 
   @Override
-  public void initialize(
-    final URL url,
-    final ResourceBundle resourceBundle)
+  protected void onInitialize()
   {
     this.delete.setDisable(true);
     this.down.setDisable(true);
     this.modify.setDisable(true);
     this.up.setDisable(true);
 
-    this.captions.setItems(this.controller.globalPrefixCaptions());
+    this.captions.setCellFactory(v -> new LCaptionListCell());
+    this.captions.getSelectionModel()
+      .setSelectionMode(SelectionMode.SINGLE);
+
     this.captions.getSelectionModel()
       .selectedItemProperty()
       .addListener((o, oldCap, newCap) -> {
@@ -81,15 +90,40 @@ public final class LGlobalPrefixCaptions implements LScreenViewType
       });
   }
 
+  @Override
+  protected void onFileBecameUnavailable()
+  {
+    this.captions.setItems(FXCollections.emptyObservableList());
+  }
+
+  @Override
+  protected void onFileBecameAvailable(
+    final CloseableCollectionType<?> subscriptions,
+    final LFileModelType fileModel)
+  {
+    subscriptions.add(
+      fileModel.globalCaptionList()
+        .subscribe((oldValue, newValue) -> {
+          Platform.runLater(() -> {
+            this.captions.setItems(FXCollections.observableList(newValue));
+          });
+        })
+    );
+  }
+
   private void onCaptionSelectionChanged(
-    final String caption)
+    final LGlobalCaption caption)
   {
     if (caption != null) {
       this.delete.setDisable(false);
+      this.down.setDisable(false);
       this.modify.setDisable(false);
+      this.up.setDisable(false);
     } else {
       this.delete.setDisable(true);
+      this.down.setDisable(true);
       this.modify.setDisable(true);
+      this.up.setDisable(true);
     }
   }
 
@@ -108,48 +142,86 @@ public final class LGlobalPrefixCaptions implements LScreenViewType
     final var result = editor.result();
     if (result.isPresent()) {
       final var text = result.get();
-      this.controller.globalPrefixCaptionNew(text);
+      this.fileModelNow().globalCaptionAdd(new LCaptionName(text));
     }
   }
 
   @FXML
   private void onDeleteCaptionSelected()
   {
-    this.controller.globalPrefixCaptionDelete(
-      this.captions.getSelectionModel()
-        .getSelectedIndex()
-    );
+    this.fileModelNow()
+      .globalCaptionRemove(
+        this.captions.getSelectionModel()
+          .getSelectedItem()
+          .caption()
+          .id()
+      );
   }
 
   @FXML
   private void onModifyCaptionSelected()
   {
+    final var selected =
+      this.captions.getSelectionModel()
+        .getSelectedItem();
+
     final var editor =
-      this.editors.open(
-        this.captions.getSelectionModel()
-          .getSelectedItem()
-      );
+      this.editors.open(selected.caption().name().text());
 
     final var result = editor.result();
     if (result.isPresent()) {
       final var text = result.get();
-      this.controller.globalPrefixCaptionModify(
-        this.captions.getSelectionModel()
-          .getSelectedIndex(),
-        text
-      );
+      this.fileModelNow()
+        .globalCaptionModify(
+          selected.caption().id(),
+          new LCaptionName(text)
+        );
     }
   }
 
   @FXML
   private void onCaptionUpSelected()
   {
-
+    this.fileModelNow()
+      .globalCaptionOrderLower(
+        this.captions.getSelectionModel()
+          .getSelectedItem()
+          .caption()
+          .id()
+      );
   }
 
   @FXML
   private void onCaptionDownSelected()
   {
+    this.fileModelNow()
+      .globalCaptionOrderUpper(
+        this.captions.getSelectionModel()
+          .getSelectedItem()
+          .caption()
+          .id()
+      );
+  }
 
+  private static final class LCaptionListCell
+    extends ListCell<LGlobalCaption>
+  {
+    LCaptionListCell()
+    {
+
+    }
+
+    @Override
+    protected void updateItem(
+      final LGlobalCaption caption,
+      final boolean isEmpty)
+    {
+      super.updateItem(caption, isEmpty);
+      this.setGraphic(null);
+      this.setText(null);
+      if (caption != null) {
+        this.setText(caption.caption().name().text());
+      }
+    }
   }
 }

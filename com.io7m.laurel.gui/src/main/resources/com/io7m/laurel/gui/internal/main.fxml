@@ -5,8 +5,10 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.input.KeyCodeCombination?>
@@ -14,7 +16,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="root" prefHeight="480.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.io7m.laurel.gui.internal.LMainView">
+<VBox fx:id="root" prefHeight="540.0" prefWidth="960.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.io7m.laurel.gui.internal.LFileView">
    <children>
       <MenuBar>
         <menus>
@@ -32,18 +34,8 @@
                   </MenuItem>
               <MenuItem fx:id="menuItemClose" disable="true" mnemonicParsing="false" onAction="#onCloseSelected" text="Close" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="menuItemSave" disable="true" mnemonicParsing="false" onAction="#onSaveSelected" text="Save">
-                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
-                  </MenuItem>
-                  <MenuItem fx:id="menuItemSaveAs" disable="true" mnemonicParsing="false" onAction="#onSaveAsSelected" text="Save As...">
-                     <accelerator>
-                        <KeyCodeCombination alt="DOWN" code="S" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
-                  </MenuItem>
-                  <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="menuItemImport" mnemonicParsing="false" onAction="#onImportSelected" text="Import..." />
+                  <MenuItem fx:id="menuItemImport" disable="true" mnemonicParsing="false"
+                            onAction="#onImportSelected" text="Import..." />
                   <MenuItem fx:id="menuItemExport" disable="true" mnemonicParsing="false" onAction="#onExportSelected" text="Export..." />
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="menuItemExit" mnemonicParsing="false" onAction="#onExitSelected" text="Exit" />
@@ -70,24 +62,49 @@
           </Menu>
         </menus>
       </MenuBar>
-     <fx:include source="captions.fxml" VBox.vgrow="ALWAYS" />
-      <Separator prefWidth="200.0" />
-      <HBox alignment="CENTER" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0">
+      <TabPane fx:id="mainContent" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <tabs>
+          <Tab text="%images">
+            <fx:include source="captions.fxml" VBox.vgrow="ALWAYS" />
+          </Tab>
+          <Tab text="%categories">
+            <fx:include source="categories.fxml" VBox.vgrow="ALWAYS" />
+          </Tab>
+          <Tab text="%metadata">
+            <fx:include source="metadata.fxml" VBox.vgrow="ALWAYS" />
+          </Tab>
+          <Tab text="%history">
+            <fx:include source="history.fxml" VBox.vgrow="ALWAYS" />
+          </Tab>
+        </tabs>
+      </TabPane>
+      <HBox alignment="CENTER" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" styleClass="borderedOutset">
          <children>
             <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@icon24.png" />
                </image>
+               <HBox.margin>
+                  <Insets left="4.0" />
+               </HBox.margin>
             </ImageView>
             <Label fx:id="statusLabel" HBox.hgrow="ALWAYS">
                <HBox.margin>
                   <Insets left="8.0" />
                </HBox.margin>
             </Label>
-            <Region HBox.hgrow="ALWAYS" />
+            <Region HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets right="8.0" />
+               </HBox.margin></Region>
+            <ProgressBar fx:id="statusProgress" prefHeight="16.0" prefWidth="64.0" progress="0.0">
+               <HBox.margin>
+                  <Insets right="8.0" />
+               </HBox.margin>
+            </ProgressBar>
          </children>
          <VBox.margin>
-            <Insets left="4.0" right="4.0" />
+            <Insets />
          </VBox.margin></HBox>
    </children>
 </VBox>

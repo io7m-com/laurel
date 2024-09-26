@@ -24,7 +24,7 @@ import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
+import java.io.InputStream;
 import java.util.Optional;
 
 /**
@@ -44,7 +44,7 @@ public final class LImages
   /**
    * Configure an image view for the given file.
    *
-   * @param fileOpt       The file
+   * @param streamOpt     The data
    * @param imageProgress The progress indicator
    * @param imageView     The image view
    * @param imageError    The error indicator shown on failures
@@ -53,7 +53,7 @@ public final class LImages
    */
 
   public static void imageLoad(
-    final Optional<Path> fileOpt,
+    final Optional<InputStream> streamOpt,
     final ProgressBar imageProgress,
     final ImageView imageView,
     final Node imageError,
@@ -61,13 +61,12 @@ public final class LImages
     final double height)
   {
     imageProgress.setVisible(true);
-    if (fileOpt.isPresent()) {
+    if (streamOpt.isPresent()) {
       final var imageValue =
         new Image(
-          fileOpt.get().toUri().toString(),
+          streamOpt.get(),
           width,
           height,
-          true,
           true,
           true
         );
@@ -79,13 +78,14 @@ public final class LImages
             LOG.error("Image load: ", e);
             imageError.setVisible(true);
           }
-          imageProgress.setVisible(true);
+          imageProgress.setVisible(false);
         });
 
       imageValue.progressProperty()
         .addListener((observable, oldValue, newValue) -> {
           if (newValue.doubleValue() >= 1.0) {
             imageProgress.setVisible(false);
+            imageView.setVisible(true);
           }
         });
 

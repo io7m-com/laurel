@@ -17,128 +17,110 @@
 
 package com.io7m.laurel.gui.internal;
 
-import com.io7m.laurel.gui.internal.model.LMImage;
-import com.io7m.repetoir.core.RPServiceDirectoryType;
+import com.io7m.jmulticlose.core.CloseableCollectionType;
+import com.io7m.laurel.filemodel.LFileModelType;
+import com.io7m.laurel.model.LImageWithID;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 /**
- * The About screen.
+ * A single image view.
  */
 
-public final class LImageView implements LScreenViewType
+public final class LImageView extends LAbstractViewWithModel
 {
   private final Stage stage;
-  private final LControllerType controller;
-
-  private @FXML Rectangle border;
   private @FXML ImageView imageView;
   private @FXML Button dismiss;
   private @FXML ProgressBar imageProgress;
+  private @FXML Parent errorImageLoad;
+  private @FXML StackPane imageContainer;
 
   /**
    * The image view screen.
    *
-   * @param services The services
-   * @param inStage  The stage
+   * @param inFileModel The file model
+   * @param inStage     The stage
    */
 
   public LImageView(
-    final RPServiceDirectoryType services,
+    final LFileModelScope inFileModel,
     final Stage inStage)
   {
-    this.controller =
-      services.requireService(LControllerType.class);
+    super(inFileModel);
+
     this.stage =
       Objects.requireNonNull(inStage, "inStage");
   }
 
   @Override
-  public void initialize(
-    final URL url,
-    final ResourceBundle resourceBundle)
+  protected void onInitialize()
   {
-    this.border.widthProperty()
-      .bind(this.stage.widthProperty().subtract(24.0));
-    this.border.heightProperty()
-      .bind(this.stage.heightProperty().subtract(32 + 32 + 16 + 8));
+    this.imageView.fitWidthProperty()
+      .bind(this.imageContainer.widthProperty());
+    this.imageView.fitHeightProperty()
+      .bind(this.imageContainer.heightProperty());
+  }
 
-    this.border.widthProperty()
-      .addListener((observable, oldValue, newValue) -> {
-        this.imageView.setFitWidth(newValue.doubleValue() - 2.0);
-      });
-    this.border.heightProperty()
-      .addListener((observable, oldValue, newValue) -> {
-        this.imageView.setFitHeight(newValue.doubleValue() - 2.0);
-      });
+  @Override
+  protected void onFileBecameUnavailable()
+  {
 
-    this.controller.imageSelected()
-      .subscribe((image1, image2) -> {
-        this.onImageSelected(image2);
-      });
+  }
+
+  @Override
+  protected void onFileBecameAvailable(
+    final CloseableCollectionType<?> subscriptions,
+    final LFileModelType fileModel)
+  {
+    subscriptions.add(
+      fileModel.imageSelected()
+        .subscribe((oldValue, newValue) -> {
+          Platform.runLater(() -> {
+            this.onImageSelected(newValue);
+          });
+        })
+    );
   }
 
   private void onImageSelected(
-    final LMImage image)
+    final Optional<LImageWithID> image)
   {
-    if (image == null) {
-      this.controller.imageSelect(Optional.empty());
+    final var fileModel = this.fileModelNow();
+    if (image.isEmpty()) {
       this.imageView.setImage(null);
+      this.imageProgress.setVisible(false);
+      this.errorImageLoad.setVisible(false);
       return;
     }
 
-    final var imageFileOpt =
-      Optional.ofNullable(image.fileName().get());
-
-    this.imageProgress.setVisible(true);
-    if (imageFileOpt.isPresent()) {
-      final var imageValue =
-        new Image(
-          imageFileOpt.get().toUri().toString(),
-          this.imageView.getFitWidth(),
-          this.imageView.getFitHeight(),
-          false,
-          true,
-          true
-        );
-
-      this.imageProgress.setVisible(true);
-
-      imageValue.exceptionProperty()
-        .subscribe(e -> {
-          this.imageProgress.setVisible(true);
+    fileModel.imageStream(image.get().id())
+      .thenAccept(inputStreamOpt -> {
+        Platform.runLater(() -> {
+          LImages.imageLoad(
+            inputStreamOpt,
+            this.imageProgress,
+            this.imageView,
+            this.errorImageLoad,
+            this.imageView.getFitWidth(),
+            this.imageView.getFitHeight()
+          );
         });
-
-      imageValue.progressProperty()
-        .addListener((observable, oldValue, newValue) -> {
-          if (newValue.doubleValue() >= 1.0) {
-            this.imageProgress.setVisible(false);
-          }
-        });
-
-      this.imageProgress.progressProperty()
-        .bind(imageValue.progressProperty());
-
-      this.imageView.setImage(imageValue);
-    } else {
-      this.imageView.setImage(null);
-      this.imageProgress.setVisible(false);
-    }
+      });
   }
 
   @FXML
@@ -150,16 +132,16 @@ public final class LImageView implements LScreenViewType
   /**
    * The image view screen.
    *
-   * @param stage    The stage
-   * @param services The services
-   * @param strings  The strings
+   * @param stage       The stage
+   * @param inFileModel The file model
+   * @param strings     The strings
    *
-   * @return The about screen
+   * @return The image view screen
    */
 
   public static LImageView create(
     final Stage stage,
-    final RPServiceDirectoryType services,
+    final LFileModelScope inFileModel,
     final LStrings strings)
   {
     try {
@@ -172,7 +154,7 @@ public final class LImageView implements LScreenViewType
       final var loader =
         new FXMLLoader(layout, strings.resources());
 
-      final var image = new LImageView(services, stage);
+      final var image = new LImageView(inFileModel, stage);
       loader.setControllerFactory(param -> {
         return image;
       });
@@ -181,10 +163,10 @@ public final class LImageView implements LScreenViewType
       LCSS.setCSS(pane);
 
       stage.setTitle(strings.format("image"));
-      stage.setWidth(512);
-      stage.setMinWidth(256);
-      stage.setMinHeight(256);
-      stage.setHeight(512);
+      stage.setMinWidth(512.0);
+      stage.setMinHeight(512.0 + 64.0);
+      stage.setWidth(512.0);
+      stage.setHeight(512.0 + 64.0);
       stage.setScene(new Scene(pane));
       return image;
     } catch (final IOException e) {

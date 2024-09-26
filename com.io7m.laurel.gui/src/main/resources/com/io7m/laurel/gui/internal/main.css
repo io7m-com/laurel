@@ -124,6 +124,23 @@
   -fx-border-radius: 0 0 0 0;
 }
 
+.tab .tab-label
+{
+  -fx-pref-width: 160;
+  -fx-alignment: center;
+}
+
+.tab:selected .tab-label
+{
+  -fx-alignment: center;
+}
+
+.tab-pane
+{
+  -fx-tab-min-height: 32;
+  -fx-tab-max-height: 32;
+}
+
 .tabButton {
   -fx-font-size: 8pt;
 }
@@ -166,6 +183,12 @@
   -fx-font-family: "Monospaced";
 }
 
+.dataTable
+{
+  -fx-font-size:   9pt;
+  -fx-font-family: "Monospaced";
+}
+
 .textShadow
 {
   -fx-text-fill: #000000;
@@ -189,4 +212,31 @@
   -fx-background-color: #243119;
   -fx-text-fill:        #FFFFFF;
   -fx-border-color:     #202020;
+}
+
+.borderedOutset
+{
+  -fx-border-color: #000000aa;
+  -fx-border-insets: 0;
+  -fx-border-width:  2.0;
+}
+
+.gridVisible
+{
+  -fx-background-color: #000000aa;
+  -fx-vgap: 1;
+  -fx-hgap: 1;
+  -fx-padding: 1;
+}
+
+.gridMember
+{
+  -fx-background-color: #4b5f38;
+}
+
+.table-view .column-header
+{
+  -fx-max-height: 32px;
+  -fx-pref-height: 32px;
+  -fx-min-height: 32px;
 }

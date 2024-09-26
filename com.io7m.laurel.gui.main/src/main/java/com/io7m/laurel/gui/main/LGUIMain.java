@@ -49,6 +49,9 @@ public final class LGUIMain
   public static void main(
     final String[] args)
   {
+    System.setProperty("org.jooq.no-logo", "true");
+    System.setProperty("org.jooq.no-tips", "true");
+
     final var directoryConfiguration =
       ApplicationDirectoryConfiguration.builder()
         .setApplicationName("com.io7m.laurel")

@@ -17,9 +17,11 @@
 
 package com.io7m.laurel.gui.internal;
 
+import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.jwheatsheaf.api.JWFileChooserAction;
 import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
 import com.io7m.jwheatsheaf.oxygen.JWOxygenIconSet;
+import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.io.LExportRequest;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.fxml.FXML;
@@ -29,17 +31,15 @@ import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 /**
  * The exporter view.
  */
 
-public final class LExporterView implements LScreenViewType
+public final class LExporterView extends LAbstractViewWithModel
 {
   private final Stage stage;
   private final LPreferencesType preferences;
@@ -56,6 +56,7 @@ public final class LExporterView implements LScreenViewType
    * The exporter view.
    *
    * @param inDialogs  The dialogs
+   * @param fileModel  The file model
    * @param inServices The service directory
    * @param inStage    The stage
    */
@@ -63,8 +64,11 @@ public final class LExporterView implements LScreenViewType
   public LExporterView(
     final LExporterDialogs inDialogs,
     final RPServiceDirectoryType inServices,
+    final LFileModelScope fileModel,
     final Stage inStage)
   {
+    super(fileModel);
+
     this.dialogs =
       Objects.requireNonNull(inDialogs, "dialogs");
     this.fileChoosers =
@@ -87,9 +91,7 @@ public final class LExporterView implements LScreenViewType
   }
 
   @Override
-  public void initialize(
-    final URL url,
-    final ResourceBundle resourceBundle)
+  protected void onInitialize()
   {
     this.export.setDisable(true);
 
@@ -106,6 +108,20 @@ public final class LExporterView implements LScreenViewType
     );
 
     this.cancel.requestFocus();
+  }
+
+  @Override
+  protected void onFileBecameUnavailable()
+  {
+
+  }
+
+  @Override
+  protected void onFileBecameAvailable(
+    final CloseableCollectionType<?> subscriptions,
+    final LFileModelType fileModel)
+  {
+
   }
 
   private void updateDirectoryField(
@@ -126,16 +142,15 @@ public final class LExporterView implements LScreenViewType
     throws Exception
   {
     final var fileChooser =
-      this.fileChoosers.fileChoosers()
-        .create(
-          JWFileChooserConfiguration.builder()
-            .setModality(Modality.APPLICATION_MODAL)
-            .setAction(JWFileChooserAction.OPEN_EXISTING_SINGLE)
-            .setRecentFiles(this.preferences.recentFiles())
-            .setCssStylesheet(LCSS.defaultCSS().toURL())
-            .setFileImageSet(new JWOxygenIconSet())
-            .build()
-        );
+      this.fileChoosers.create(
+        JWFileChooserConfiguration.builder()
+          .setModality(Modality.APPLICATION_MODAL)
+          .setAction(JWFileChooserAction.OPEN_EXISTING_SINGLE)
+          .setRecentFiles(this.preferences.recentFiles())
+          .setCssStylesheet(LCSS.defaultCSS().toURL())
+          .setFileImageSet(new JWOxygenIconSet())
+          .build()
+      );
 
     final var file = fileChooser.showAndWait();
     if (file.isEmpty()) {
