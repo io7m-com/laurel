@@ -35,6 +35,7 @@ import com.io7m.laurel.model.LImageWithID;
 import com.io7m.laurel.model.LMetadataValue;
 import com.io7m.zelador.test_extension.CloseableResourcesType;
 import com.io7m.zelador.test_extension.ZeladorExtension;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,6 +115,13 @@ public final class LFileModelTest
       "/com/io7m/laurel/tests/001.png")) {
       Files.write(this.imageFile, stream.readAllBytes(), OPEN_OPTIONS);
     }
+  }
+
+  @AfterEach
+  public void tearDown()
+    throws LException
+  {
+    this.model.close();
   }
 
   @Test
