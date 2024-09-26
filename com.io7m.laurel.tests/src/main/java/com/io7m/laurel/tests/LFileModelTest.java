@@ -501,6 +501,127 @@ public final class LFileModelTest
     );
   }
 
+  @Test
+  public void testCaptionFilter()
+    throws Exception
+  {
+    final var tta = new LCaptionName("A");
+    final var ttb = new LCaptionName("B");
+    final var ttc = new LCaptionName("C");
+
+    this.model.captionAdd(tta).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(ttb).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(ttc).get(TIMEOUT, SECONDS);
+
+    final var ta = this.findCaption("A");
+    final var tb = this.findCaption("B");
+    final var tc = this.findCaption("C");
+
+    this.model.imageAdd(
+      "image-a",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    final var images =
+      this.model.imageList().get();
+
+    this.model.imageSelect(Optional.of(images.get(0).id()))
+      .get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      List.of(ta, tb, tc),
+      this.model.imageCaptionsUnassignedFiltered().get()
+    );
+
+    this.model.captionsUnassignedListFilterSet("a");
+
+    assertEquals(
+      List.of(ta),
+      this.model.imageCaptionsUnassignedFiltered().get()
+    );
+
+    this.model.captionsUnassignedListFilterSet("b");
+
+    assertEquals(
+      List.of(tb),
+      this.model.imageCaptionsUnassignedFiltered().get()
+    );
+
+    this.model.captionsUnassignedListFilterSet("c");
+
+    assertEquals(
+      List.of(tc),
+      this.model.imageCaptionsUnassignedFiltered().get()
+    );
+
+    this.model.captionsUnassignedListFilterSet("");
+
+    assertEquals(
+      List.of(ta, tb, tc),
+      this.model.imageCaptionsUnassignedFiltered().get()
+    );
+  }
+
+  @Test
+  public void testImageFilter()
+    throws Exception
+  {
+    this.model.imageAdd(
+      "image-a",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.imageAdd(
+      "image-b",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.imageAdd(
+      "image-c",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    final var images =
+      this.model.imageList().get();
+
+    assertEquals(
+      images,
+      this.model.imageListFiltered().get()
+    );
+
+    this.model.imageListFilterSet("-a");
+
+    assertEquals(
+      List.of(images.get(0)),
+      this.model.imageListFiltered().get()
+    );
+
+    this.model.imageListFilterSet("-b");
+
+    assertEquals(
+      List.of(images.get(1)),
+      this.model.imageListFiltered().get()
+    );
+
+    this.model.imageListFilterSet("-c");
+
+    assertEquals(
+      List.of(images.get(2)),
+      this.model.imageListFiltered().get()
+    );
+
+    this.model.imageListFilterSet("");
+
+    assertEquals(
+      images,
+      this.model.imageListFiltered().get()
+    );
+  }
+
   private List<LCaptionName> captionListNow()
   {
     return this.model.captionList()

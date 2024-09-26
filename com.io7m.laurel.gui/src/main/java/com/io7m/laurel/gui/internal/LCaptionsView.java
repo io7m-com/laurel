@@ -166,7 +166,7 @@ public final class LCaptionsView extends LAbstractViewWithModel
     final LFileModelType fileModel)
   {
     subscriptions.add(
-      fileModel.imageList().subscribe((oldValue, newValue) -> {
+      fileModel.imageListFiltered().subscribe((oldValue, newValue) -> {
         Platform.runLater(() -> {
           this.imagesAll.setItems(
             FXCollections.observableList(newValue)
@@ -186,7 +186,7 @@ public final class LCaptionsView extends LAbstractViewWithModel
     );
 
     subscriptions.add(
-      fileModel.imageCaptionsUnassigned().subscribe((oldValue, newValue) -> {
+      fileModel.imageCaptionsUnassignedFiltered().subscribe((oldValue, newValue) -> {
         Platform.runLater(() -> {
           this.captionsUnassignedView.setItems(
             FXCollections.observableList(newValue)
@@ -599,15 +599,21 @@ public final class LCaptionsView extends LAbstractViewWithModel
   @FXML
   private void onCaptionSearchChanged()
   {
-    //    this.controller.captionsUnassignedSetFilter(
-    //      this.captionAvailableSearch.getText().trim()
-    //    );
+    this.fileModelNow()
+      .captionsUnassignedListFilterSet(
+        this.captionAvailableSearch.getText()
+          .trim()
+      );
   }
 
   @FXML
   private void onImageSearchChanged()
   {
-    // this.controller.imagesSetFilter(this.imageSearch.getText().trim());
+    this.fileModelNow()
+      .imageListFilterSet(
+        this.imageSearch.getText()
+          .trim()
+      );
   }
 
   @FXML

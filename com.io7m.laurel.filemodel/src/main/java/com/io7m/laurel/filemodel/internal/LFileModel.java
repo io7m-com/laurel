@@ -96,6 +96,7 @@ public final class LFileModel implements LFileModelType
       LOG.error("Uncaught attribute exception: ", throwable);
     });
 
+  private final AttributeType<List<LCaption>> imageCaptionsUnassignedFiltered;
   private final AttributeType<List<LCaption>> categoryCaptionsAssigned;
   private final AttributeType<List<LCaption>> categoryCaptionsUnassigned;
   private final AttributeType<List<LCaption>> imageCaptionsAssigned;
@@ -107,6 +108,7 @@ public final class LFileModel implements LFileModelType
   private final AttributeType<List<LCommandRecord>> undoStack;
   private final AttributeType<List<LGlobalCaption>> globalCaptions;
   private final AttributeType<List<LImageWithID>> imagesAll;
+  private final AttributeType<List<LImageWithID>> imagesAllFiltered;
   private final AttributeType<List<LMetadataValue>> metadata;
   private final AttributeType<Optional<? extends LCommandType<?>>> redo;
   private final AttributeType<Optional<? extends LCommandType<?>>> undo;
@@ -116,6 +118,8 @@ public final class LFileModel implements LFileModelType
   private final AttributeType<Optional<String>> undoText;
   private final AttributeType<Set<LCaptionID>> captionClipboard;
   private final AttributeType<SortedMap<LCategoryID, List<LCaption>>> categoryCaptions;
+  private final AttributeType<String> captionsFilter;
+  private final AttributeType<String> imageFilter;
   private final CloseableCollectionType<LException> resources;
   private final ConcurrentHashMap<String, String> attributes;
   private final LDatabaseType database;
@@ -150,8 +154,16 @@ public final class LFileModel implements LFileModelType
       ATTRIBUTES.withValue(List.of());
     this.categoryCaptionsUnassigned =
       ATTRIBUTES.withValue(List.of());
+    this.imageCaptionsUnassignedFiltered =
+      ATTRIBUTES.withValue(List.of());
+    this.captionsFilter =
+      ATTRIBUTES.withValue("");
     this.imagesAll =
       ATTRIBUTES.withValue(List.of());
+    this.imagesAllFiltered =
+      ATTRIBUTES.withValue(List.of());
+    this.imageFilter =
+      ATTRIBUTES.withValue("");
     this.imageSelected =
       ATTRIBUTES.withValue(Optional.empty());
     this.categorySelected =
@@ -211,6 +223,53 @@ public final class LFileModel implements LFileModelType
     this.resources.add(
       this.redo.subscribe((_0, _1) -> this.onRedoStateChanged())
     );
+    this.resources.add(
+      this.imageFilter.subscribe((_0, _1) -> this.onImageRefilter())
+    );
+    this.resources.add(
+      this.imagesAll.subscribe((_0, _1) -> this.onImageRefilter())
+    );
+
+    this.resources.add(
+      this.captionsFilter.subscribe((_0, _1) -> this.onCaptionsRefilter())
+    );
+    this.resources.add(
+      this.imageCaptionsUnassigned.subscribe((_0, _1) -> this.onCaptionsRefilter())
+    );
+  }
+
+  private void onCaptionsRefilter()
+  {
+    final var filter =
+      this.captionsFilter.get().toUpperCase();
+
+    if (filter.isBlank()) {
+      this.imageCaptionsUnassignedFiltered.set(this.imageCaptionsUnassigned.get());
+    } else {
+      this.imageCaptionsUnassignedFiltered.set(
+        this.imageCaptionsUnassigned.get()
+          .stream()
+          .filter(c -> c.name().text().toUpperCase().contains(filter))
+          .toList()
+      );
+    }
+  }
+
+  private void onImageRefilter()
+  {
+    final var filter =
+      this.imageFilter.get().toUpperCase();
+
+    if (filter.isBlank()) {
+      this.imagesAllFiltered.set(this.imagesAll.get());
+    } else {
+      this.imagesAllFiltered.set(
+        this.imagesAll.get()
+          .stream()
+          .filter(i -> i.image().name().toUpperCase().contains(filter))
+          .toList()
+      );
+    }
   }
 
   /**
@@ -866,6 +925,19 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public void imageListFilterSet(
+    final String filter)
+  {
+    this.imageFilter.set(Objects.requireNonNull(filter, "filter"));
+  }
+
+  @Override
+  public AttributeReadableType<List<LImageWithID>> imageListFiltered()
+  {
+    return this.imagesAllFiltered;
+  }
+
+  @Override
   public AttributeReadableType<List<LCategory>> categoriesRequired()
   {
     return this.categoriesRequired;
@@ -887,6 +959,19 @@ public final class LFileModel implements LFileModelType
   public AttributeReadableType<List<LCaption>> imageCaptionsUnassigned()
   {
     return this.imageCaptionsUnassigned;
+  }
+
+  @Override
+  public AttributeReadableType<List<LCaption>> imageCaptionsUnassignedFiltered()
+  {
+    return this.imageCaptionsUnassignedFiltered;
+  }
+
+  @Override
+  public void captionsUnassignedListFilterSet(
+    final String filter)
+  {
+    this.captionsFilter.set(Objects.requireNonNull(filter, "filter"));
   }
 
   @Override

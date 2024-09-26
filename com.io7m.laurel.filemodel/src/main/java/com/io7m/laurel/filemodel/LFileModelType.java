@@ -337,6 +337,20 @@ public interface LFileModelType
   AttributeReadableType<List<LImageWithID>> imageList();
 
   /**
+   * Set the filter for the image list.
+   *
+   * @param filter The filter
+   */
+
+  void imageListFilterSet(String filter);
+
+  /**
+   * @return The current complete list of images with a search filter applied
+   */
+
+  AttributeReadableType<List<LImageWithID>> imageListFiltered();
+
+  /**
    * @return The current complete list of required caption categories
    */
 
@@ -359,6 +373,20 @@ public interface LFileModelType
    */
 
   AttributeReadableType<List<LCaption>> imageCaptionsUnassigned();
+
+  /**
+   * @return The filtered list of captions not assigned to the current image
+   */
+
+  AttributeReadableType<List<LCaption>> imageCaptionsUnassignedFiltered();
+
+  /**
+   * Set the filter for the caption list.
+   *
+   * @param filter The filter
+   */
+
+  void captionsUnassignedListFilterSet(String filter);
 
   /**
    * @return Text describing the top of the undo stack, if any
