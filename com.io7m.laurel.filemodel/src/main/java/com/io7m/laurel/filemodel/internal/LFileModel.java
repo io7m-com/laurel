@@ -114,13 +114,14 @@ public final class LFileModel implements LFileModelType
   private final AttributeType<Optional<LImageWithID>> imageSelected;
   private final AttributeType<Optional<String>> redoText;
   private final AttributeType<Optional<String>> undoText;
+  private final AttributeType<Set<LCaptionID>> captionClipboard;
   private final AttributeType<SortedMap<LCategoryID, List<LCaption>>> categoryCaptions;
   private final CloseableCollectionType<LException> resources;
   private final ConcurrentHashMap<String, String> attributes;
   private final LDatabaseType database;
+  private final LImageComparisonModel imageComparison;
   private final ReentrantLock commandLock;
   private final SubmissionPublisher<LFileModelEvent> events;
-  private final LImageComparisonModel imageComparison;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -129,6 +130,8 @@ public final class LFileModel implements LFileModelType
       Objects.requireNonNull(inDatabase, "database");
     this.metadata =
       ATTRIBUTES.withValue(List.of());
+    this.captionClipboard =
+      ATTRIBUTES.withValue(Set.of());
     this.categoriesAll =
       ATTRIBUTES.withValue(List.of());
     this.categoriesRequired =
@@ -1055,6 +1058,38 @@ public final class LFileModel implements LFileModelType
   public AttributeReadableType<Optional<LImageComparison>> imageComparison()
   {
     return this.imageComparison.imageComparison();
+  }
+
+  @Override
+  public AttributeReadableType<Set<LCaptionID>> captionClipboard()
+  {
+    return this.captionClipboard;
+  }
+
+  @Override
+  public void captionsCopy(
+    final Set<LCaptionID> captions)
+  {
+    Objects.requireNonNull(captions, "captions");
+
+    this.captionClipboard.set(captions);
+  }
+
+  @Override
+  public CompletableFuture<?> captionsPaste(
+    final Set<LImageID> images)
+  {
+    Objects.requireNonNull(images, "images");
+
+    final var captions = this.captionClipboard.get();
+    this.captionClipboard.set(Set.of());
+
+    return this.runCommand(
+      new LCommandImageCaptionsAssign(),
+      images.stream()
+        .map(i -> new LImageCaptionsAssignment(i, captions))
+        .toList()
+    );
   }
 
   private Optional<InputStream> executeImageStream(

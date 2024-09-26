@@ -23,11 +23,11 @@ import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
 import com.io7m.laurel.model.LCaption;
+import com.io7m.laurel.model.LCaptionID;
 import com.io7m.laurel.model.LCaptionName;
 import com.io7m.laurel.model.LImageWithID;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.application.Platform;
-import javafx.beans.Observable;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static javafx.stage.Modality.APPLICATION_MODAL;
@@ -193,14 +194,20 @@ public final class LCaptionsView extends LAbstractViewWithModel
         });
       })
     );
+
+    subscriptions.add(
+      fileModel.captionClipboard().subscribe((oldValue, newValue) -> {
+        Platform.runLater(() -> {
+          this.onCaptionsClipboardChanged(newValue);
+        });
+      })
+    );
   }
 
-  private void onCaptionsAssignedCopiedChanged(
-    final Observable observable)
+  private void onCaptionsClipboardChanged(
+    final Set<LCaptionID> newValue)
   {
-    //    final var copied = this.controller.captionsAssignedCopied();
-    //    LOG.debug("Captions copied: {}", copied);
-    //    this.assignedCaptionsContextMenuPaste.setDisable(copied.isEmpty());
+    this.assignedCaptionsContextMenuPaste.setDisable(newValue.isEmpty());
   }
 
   private void initializeCaptionsUnassignedTable()
@@ -667,20 +674,32 @@ public final class LCaptionsView extends LAbstractViewWithModel
   @FXML
   private void onCaptionsAssignedCopy()
   {
-    //    final var captionsCopied =
-    //      List.copyOf(
-    //        this.captionsAssignedView.getSelectionModel()
-    //          .getSelectedItems()
-    //      );
-    //
-    //    LOG.debug("Copying captions: {}", captionsCopied);
-    //    this.controller.captionsAssignedCopy(captionsCopied);
+    final var captionsCopied =
+      List.copyOf(
+        this.captionsAssignedView.getSelectionModel()
+          .getSelectedItems()
+      );
+
+    LOG.debug("Copying captions: {}", captionsCopied);
+    this.fileModelNow()
+      .captionsCopy(
+        captionsCopied.stream()
+          .map(LCaption::id)
+          .collect(Collectors.toSet())
+      );
   }
 
   @FXML
   private void onCaptionsAssignedPaste()
   {
-    //    this.controller.captionsAssignedPaste();
+    this.fileModelNow()
+      .captionsPaste(
+        this.imagesAll.getSelectionModel()
+          .getSelectedItems()
+          .stream()
+          .map(LImageWithID::id)
+          .collect(Collectors.toSet())
+      );
   }
 
   @FXML

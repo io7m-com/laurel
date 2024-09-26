@@ -464,4 +464,30 @@ public interface LFileModelType
    */
 
   AttributeReadableType<Optional<LImageComparison>> imageComparison();
+
+  /**
+   * @return The current caption clipboard
+   */
+
+  AttributeReadableType<Set<LCaptionID>> captionClipboard();
+
+  /**
+   * Move a set of captions to the clipboard.
+   *
+   * @param captions The captions
+   */
+
+  void captionsCopy(Set<LCaptionID> captions);
+
+  /**
+   * Assign the captions in the clipboard to each of the given images,
+   * and then clear the clipboard.
+   *
+   * @param images The images
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> captionsPaste(
+    Set<LImageID> images);
 }

@@ -31,6 +31,7 @@ import com.io7m.laurel.model.LCategoryName;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LGlobalCaption;
 import com.io7m.laurel.model.LImageID;
+import com.io7m.laurel.model.LImageWithID;
 import com.io7m.laurel.model.LMetadataValue;
 import com.io7m.zelador.test_extension.CloseableResourcesType;
 import com.io7m.zelador.test_extension.ZeladorExtension;
@@ -50,6 +51,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -426,6 +428,77 @@ public final class LFileModelTest
       });
 
     assertEquals("error-duplicate", ex.errorCode());
+  }
+
+  @Test
+  public void testCaptionCopyPaste()
+    throws Exception
+  {
+    final var tta = new LCaptionName("A");
+    final var ttb = new LCaptionName("B");
+    final var ttc = new LCaptionName("C");
+
+    this.model.captionAdd(tta).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(ttb).get(TIMEOUT, SECONDS);
+    this.model.captionAdd(ttc).get(TIMEOUT, SECONDS);
+
+    final var ta = this.findCaption("A");
+    final var tb = this.findCaption("B");
+    final var tc = this.findCaption("C");
+
+    this.model.captionsCopy(
+      Set.of(ta, tb, tc)
+        .stream()
+        .map(LCaption::id)
+        .collect(Collectors.toSet())
+    );
+
+    assertEquals(
+      Set.of(ta.id(), tb.id(), tc.id()),
+      this.model.captionClipboard().get()
+    );
+
+    this.model.imageAdd(
+      "image-a",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.imageAdd(
+      "image-b",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    final var images =
+      this.model.imageList().get();
+
+    this.model.captionsPaste(
+      images.stream()
+        .map(LImageWithID::id)
+        .collect(Collectors.toSet())
+    ).get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      Set.of(),
+      this.model.captionClipboard().get()
+    );
+
+    this.model.imageSelect(Optional.of(images.get(0).id()))
+      .get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      List.of(tta, ttb, ttc),
+      this.imageCaptionsAssignedNow()
+    );
+
+    this.model.imageSelect(Optional.of(images.get(1).id()))
+      .get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      List.of(tta, ttb, ttc),
+      this.imageCaptionsAssignedNow()
+    );
   }
 
   private List<LCaptionName> captionListNow()
