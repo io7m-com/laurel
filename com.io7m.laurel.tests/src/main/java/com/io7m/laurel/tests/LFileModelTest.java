@@ -119,9 +119,11 @@ public final class LFileModelTest
 
   @AfterEach
   public void tearDown()
-    throws LException
+    throws Exception
   {
     this.model.close();
+
+    Thread.sleep(1_000L);
   }
 
   @Test
