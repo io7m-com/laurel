@@ -23,9 +23,6 @@ open module com.io7m.laurel.tests
   requires static org.osgi.annotation.versioning;
 
   requires com.io7m.laurel.model;
-  requires com.io7m.laurel.io;
-  requires com.io7m.laurel.reader.api;
-  requires com.io7m.laurel.writer.api;
   requires com.io7m.laurel.gui;
   requires com.io7m.laurel.filemodel;
 

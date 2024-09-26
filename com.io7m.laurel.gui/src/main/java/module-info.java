@@ -24,10 +24,7 @@ open module com.io7m.laurel.gui
   requires static org.osgi.annotation.bundle;
 
   requires com.io7m.laurel.filemodel;
-  requires com.io7m.laurel.io;
   requires com.io7m.laurel.model;
-  requires com.io7m.laurel.reader.api;
-  requires com.io7m.laurel.writer.api;
 
   requires com.io7m.anethum.api;
   requires com.io7m.darco.api;

@@ -22,7 +22,6 @@ import com.io7m.jwheatsheaf.api.JWFileChooserAction;
 import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
 import com.io7m.jwheatsheaf.oxygen.JWOxygenIconSet;
 import com.io7m.laurel.filemodel.LFileModelType;
-import com.io7m.laurel.io.LExportRequest;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -43,7 +42,7 @@ public final class LExporterView extends LAbstractViewWithModel
 {
   private final Stage stage;
   private final LPreferencesType preferences;
-  private Optional<LExportRequest> result;
+  private Optional<?> result;
   private final LExporterDialogs dialogs;
   private final LFileChoosers fileChoosers;
 
@@ -85,7 +84,7 @@ public final class LExporterView extends LAbstractViewWithModel
    * @return The resulting request, if any
    */
 
-  public Optional<LExportRequest> result()
+  public Optional<?> result()
   {
     return this.result;
   }
@@ -171,10 +170,6 @@ public final class LExporterView extends LAbstractViewWithModel
   @FXML
   private void onExport()
   {
-    this.result = Optional.of(new LExportRequest(
-      this.dialogs.directoryProperty().get(),
-      this.includeImages.isSelected()
-    ));
     this.stage.close();
   }
 }
