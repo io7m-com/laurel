@@ -18,6 +18,7 @@
 package com.io7m.laurel.filemodel;
 
 import com.io7m.laurel.filemodel.internal.LFileModel;
+import com.io7m.laurel.filemodel.internal.LFileModelImport;
 import com.io7m.laurel.model.LException;
 
 import java.nio.file.Path;
@@ -50,5 +51,21 @@ public final class LFileModels
     throws LException
   {
     return LFileModel.open(file, readOnly);
+  }
+
+  /**
+   * Create a file model import operation.
+   *
+   * @param directory  The import directory
+   * @param outputFile The output file
+   *
+   * @return An import operation
+   */
+
+  public static LFileModelImportType createImport(
+    final Path directory,
+    final Path outputFile)
+  {
+    return LFileModelImport.create(directory, outputFile);
   }
 }

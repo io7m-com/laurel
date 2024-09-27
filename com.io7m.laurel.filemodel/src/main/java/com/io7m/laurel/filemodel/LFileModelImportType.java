@@ -17,31 +17,30 @@
 
 package com.io7m.laurel.filemodel;
 
-import java.util.Objects;
-import java.util.OptionalDouble;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Flow;
 
 /**
- * An event raised by the model.
- *
- * @param message  The event message
- * @param progress The progress value, if any
+ * An import operation.
  */
 
-public record LFileModelEvent(
-  String message,
-  OptionalDouble progress)
-  implements LFileModelEventType
+public interface LFileModelImportType
+  extends AutoCloseable
 {
   /**
-   * An event raised by the model.
-   *
-   * @param message  The event message
-   * @param progress The progress value, if any
+   * @return The stream of events
    */
 
-  public LFileModelEvent
-  {
-    Objects.requireNonNull(message, "message");
-    Objects.requireNonNull(progress, "progress");
-  }
+  Flow.Publisher<LFileModelEventType> events();
+
+  /**
+   * Execute the operation.
+   *
+   * @return The operation in process
+   */
+
+  CompletableFuture<Void> execute();
+
+  @Override
+  void close();
 }

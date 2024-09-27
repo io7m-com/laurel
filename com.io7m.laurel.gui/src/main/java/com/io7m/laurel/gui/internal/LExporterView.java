@@ -44,7 +44,7 @@ public final class LExporterView extends LAbstractViewWithModel
   private final LPreferencesType preferences;
   private Optional<?> result;
   private final LExporterDialogs dialogs;
-  private final LFileChoosers fileChoosers;
+  private final LFileChoosersType fileChoosers;
 
   @FXML private Button cancel;
   @FXML private Button export;
@@ -71,7 +71,7 @@ public final class LExporterView extends LAbstractViewWithModel
     this.dialogs =
       Objects.requireNonNull(inDialogs, "dialogs");
     this.fileChoosers =
-      inServices.requireService(LFileChoosers.class);
+      inServices.requireService(LFileChoosersType.class);
     this.preferences =
       inServices.requireService(LPreferencesType.class);
     this.stage =

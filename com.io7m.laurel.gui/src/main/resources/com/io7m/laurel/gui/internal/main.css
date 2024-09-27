@@ -189,6 +189,13 @@
   -fx-font-family: "Monospaced";
 }
 
+.headerlessTable .column-header-background
+{
+  -fx-max-height: 0;
+  -fx-pref-height: 0;
+  -fx-min-height: 0;
+}
+
 .textShadow
 {
   -fx-text-fill: #000000;

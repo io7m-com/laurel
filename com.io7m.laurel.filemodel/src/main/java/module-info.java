@@ -57,6 +57,8 @@ module com.io7m.laurel.filemodel
   requires com.io7m.seltzer.api;
   requires io.opentelemetry.api;
   requires java.desktop;
+  requires org.apache.commons.io;
+  requires org.apache.tika.core;
   requires org.jooq;
   requires org.slf4j;
   requires org.xerial.sqlitejdbc;

@@ -15,39 +15,27 @@
  */
 
 
-package com.io7m.laurel.gui.internal;
+package com.io7m.laurel.filemodel;
 
-import com.io7m.repetoir.core.RPServiceType;
-import javafx.stage.Stage;
+import java.util.OptionalDouble;
 
 /**
- * A window tracker.
+ * The type of file model events.
  */
 
-public interface LFileWindowTrackerType
-  extends RPServiceType
+public sealed interface LFileModelEventType
+  permits LFileModelEvent,
+  LFileModelEventError
 {
   /**
-   * Register a window.
-   *
-   * @param stage The window
+   * @return The message
    */
 
-  void register(
-    Stage stage);
+  String message();
 
   /**
-   * Close and de-register a window.
-   *
-   * @param stage The window
+   * @return The progress, if any
    */
 
-  void closeWindow(
-    Stage stage);
-
-  /**
-   * @return The number of currently open windows
-   */
-
-  int fileWindowsOpen();
+  OptionalDouble progress();
 }

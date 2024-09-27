@@ -88,10 +88,7 @@ public final class LApplication extends Application
     services.register(LExporterDialogs.class, exporters);
 
     final var choosers = new LFileChoosers(services);
-    services.register(LFileChoosers.class, choosers);
-
-    final var windowTracker = LFileWindowTracker.create();
-    services.register(LFileWindowTrackerType.class, windowTracker);
+    services.register(LFileChoosersType.class, choosers);
 
     final var viewAndStage =
       LFileView.openForStage(

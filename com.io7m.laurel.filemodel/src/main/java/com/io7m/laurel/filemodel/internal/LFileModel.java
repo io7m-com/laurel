@@ -29,6 +29,7 @@ import com.io7m.jmulticlose.core.CloseableCollection;
 import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
 import com.io7m.laurel.filemodel.LFileModelEvent;
+import com.io7m.laurel.filemodel.LFileModelEventType;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
 import com.io7m.laurel.filemodel.LImageComparison;
@@ -125,7 +126,7 @@ public final class LFileModel implements LFileModelType
   private final LDatabaseType database;
   private final LImageComparisonModel imageComparison;
   private final ReentrantLock commandLock;
-  private final SubmissionPublisher<LFileModelEvent> events;
+  private final SubmissionPublisher<LFileModelEventType> events;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -509,7 +510,7 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
-  public SubmissionPublisher<LFileModelEvent> events()
+  public SubmissionPublisher<LFileModelEventType> events()
   {
     return this.events;
   }
@@ -1274,7 +1275,7 @@ public final class LFileModel implements LFileModelType
   }
 
   void event(
-    final LFileModelEvent event)
+    final LFileModelEventType event)
   {
     this.events.submit(event);
   }

@@ -72,7 +72,7 @@ public final class LCaptionsView extends LAbstractViewWithModel
 
   private final RPServiceDirectoryType services;
   private final LStrings strings;
-  private final LFileChoosers choosers;
+  private final LFileChoosersType choosers;
   private final LCaptionEditors editors;
   private final LPreferencesType preferences;
   private final LCaptionComparisonViews comparisons;
@@ -117,7 +117,7 @@ public final class LCaptionsView extends LAbstractViewWithModel
     this.strings =
       inServices.requireService(LStrings.class);
     this.choosers =
-      inServices.requireService(LFileChoosers.class);
+      inServices.requireService(LFileChoosersType.class);
     this.editors =
       inServices.requireService(LCaptionEditors.class);
     this.preferences =

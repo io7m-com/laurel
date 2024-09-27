@@ -52,7 +52,7 @@ public interface LFileModelType
    * @return The file model events
    */
 
-  Flow.Publisher<LFileModelEvent> events();
+  Flow.Publisher<LFileModelEventType> events();
 
   /**
    * Add a global caption.

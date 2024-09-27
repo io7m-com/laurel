@@ -21,7 +21,7 @@ import com.io7m.darco.api.DDatabaseUnit;
 import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.jwheatsheaf.api.JWFileChooserAction;
 import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
-import com.io7m.laurel.filemodel.LFileModelEvent;
+import com.io7m.laurel.filemodel.LFileModelEventType;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.model.LException;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
@@ -59,7 +59,7 @@ public final class LFileView extends LAbstractViewWithModel
     LoggerFactory.getLogger(LFileView.class);
 
   private final LStrings strings;
-  private final LFileChoosers choosers;
+  private final LFileChoosersType choosers;
   private final Stage stage;
   private final LExporterDialogs exporterDialogs;
   private final LPreferencesType preferences;
@@ -99,7 +99,7 @@ public final class LFileView extends LAbstractViewWithModel
     this.strings =
       this.services.requireService(LStrings.class);
     this.choosers =
-      this.services.requireService(LFileChoosers.class);
+      this.services.requireService(LFileChoosersType.class);
     this.exporterDialogs =
       this.services.requireService(LExporterDialogs.class);
     this.preferences =
@@ -216,7 +216,7 @@ public final class LFileView extends LAbstractViewWithModel
   {
     final var eventSubscriber =
       subscriptions.add(
-        new LPerpetualSubscriber<LFileModelEvent>(event -> {
+        new LPerpetualSubscriber<LFileModelEventType>(event -> {
           Platform.runLater(() -> {
             this.onFileModelEvent(event);
           });
@@ -247,7 +247,7 @@ public final class LFileView extends LAbstractViewWithModel
   }
 
   private void onFileModelEvent(
-    final LFileModelEvent event)
+    final LFileModelEventType event)
   {
     this.statusProgress.setProgress(event.progress().orElse(0.0));
     this.statusLabel.setText(event.message());
@@ -438,12 +438,18 @@ public final class LFileView extends LAbstractViewWithModel
 
   /**
    * The user tried to import.
+   *
+   * @throws Exception On errors
    */
 
   @FXML
   public void onImportSelected()
+    throws Exception
   {
+    final var p =
+      LImporterView.openForStage(this.services, new Stage());
 
+    p.stage().showAndWait();
   }
 
   /**
