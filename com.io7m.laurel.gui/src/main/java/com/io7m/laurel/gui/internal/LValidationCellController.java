@@ -20,7 +20,6 @@ package com.io7m.laurel.gui.internal;
 import com.io7m.laurel.filemodel.LValidationProblemType;
 import com.io7m.laurel.filemodel.LValidationProblemType.ImageMissingRequiredCaption;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 
 import java.net.URL;
