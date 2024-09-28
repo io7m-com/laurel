@@ -19,6 +19,8 @@ package com.io7m.laurel.filemodel.internal;
 
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LHashSHA256;
+import com.io7m.mime2045.core.MimeType;
+import org.apache.tika.Tika;
 import org.jooq.DSLContext;
 
 import javax.imageio.ImageIO;
@@ -31,6 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -44,6 +47,9 @@ import static com.io7m.laurel.filemodel.internal.Tables.IMAGE_BLOBS;
 public final class LCommandImagesAdd
   extends LCommandAbstract<List<LImageRequest>>
 {
+  private static final Tika TIKA =
+    new Tika();
+
   private final ArrayList<SavedData> savedData;
 
   private record SavedData(
@@ -136,10 +142,19 @@ public final class LCommandImagesAdd
       final var imageHash =
         hashOf(imageBytes);
 
+      final MimeType type;
+      try {
+        final var typeText = TIKA.detect(file);
+        type = LCommandModelUpdates.MIME_PARSERS.parse(typeText);
+      } catch (final Exception e) {
+        throw new LException(e, "error-mime", Map.of(), Optional.empty());
+      }
+
       final var blobRec =
         context.insertInto(IMAGE_BLOBS)
           .set(IMAGE_BLOBS.IMAGE_BLOB_SHA256, imageHash.value())
           .set(IMAGE_BLOBS.IMAGE_BLOB_DATA, imageBytes)
+          .set(IMAGE_BLOBS.IMAGE_BLOB_TYPE, type.toString())
           .returning(IMAGE_BLOBS.IMAGE_BLOB_ID)
           .fetchOne();
 

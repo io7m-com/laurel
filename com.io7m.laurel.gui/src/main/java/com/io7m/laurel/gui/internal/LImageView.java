@@ -146,7 +146,7 @@ public final class LImageView extends LAbstractViewWithModel
   {
     try {
       final var layout =
-        LExporterDialogs.class.getResource(
+        LImageView.class.getResource(
           "/com/io7m/laurel/gui/internal/image.fxml");
 
       Objects.requireNonNull(layout, "layout");

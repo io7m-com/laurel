@@ -29,6 +29,8 @@ import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LImageID;
 import com.io7m.laurel.model.LImageWithID;
 import com.io7m.laurel.model.LMetadataValue;
+import com.io7m.mime2045.parser.MimeParsers;
+import com.io7m.mime2045.parser.api.MimeParseException;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
@@ -58,6 +60,9 @@ import static com.io7m.laurel.filemodel.internal.Tables.METADATA;
 
 public final class LCommandModelUpdates
 {
+  static final MimeParsers MIME_PARSERS =
+    new MimeParsers();
+
   static final Field<Long> COUNT_FIELD =
     DSL.coalesce(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_COUNT, 0L)
       .as(IMAGE_CAPTIONS_COUNTS.COUNT_CAPTION_COUNT);
@@ -75,7 +80,8 @@ public final class LCommandModelUpdates
         IMAGES.IMAGE_SOURCE,
         IMAGES.IMAGE_NAME,
         IMAGES.IMAGE_FILE,
-        IMAGE_BLOBS.IMAGE_BLOB_SHA256
+        IMAGE_BLOBS.IMAGE_BLOB_SHA256,
+        IMAGE_BLOBS.IMAGE_BLOB_TYPE
       )
       .from(IMAGES)
       .join(IMAGE_BLOBS)
@@ -89,15 +95,20 @@ public final class LCommandModelUpdates
   private static LImageWithID mapImageRecord(
     final org.jooq.Record r)
   {
-    return new LImageWithID(
-      new LImageID(r.<Long>get(IMAGES.IMAGE_ID).longValue()),
-      new LImage(
-        r.get(IMAGES.IMAGE_NAME),
-        Optional.ofNullable(r.get(IMAGES.IMAGE_FILE)).map(Paths::get),
-        Optional.ofNullable(r.get(IMAGES.IMAGE_SOURCE)).map(URI::create),
-        new LHashSHA256(r.get(IMAGE_BLOBS.IMAGE_BLOB_SHA256))
-      )
-    );
+    try {
+      return new LImageWithID(
+        new LImageID(r.<Long>get(IMAGES.IMAGE_ID).longValue()),
+        new LImage(
+          r.get(IMAGES.IMAGE_NAME),
+          Optional.ofNullable(r.get(IMAGES.IMAGE_FILE)).map(Paths::get),
+          Optional.ofNullable(r.get(IMAGES.IMAGE_SOURCE)).map(URI::create),
+          MIME_PARSERS.parse(r.get(IMAGE_BLOBS.IMAGE_BLOB_TYPE)),
+          new LHashSHA256(r.get(IMAGE_BLOBS.IMAGE_BLOB_SHA256))
+        )
+      );
+    } catch (final MimeParseException e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   static List<LCaption> listCaptionsAll(

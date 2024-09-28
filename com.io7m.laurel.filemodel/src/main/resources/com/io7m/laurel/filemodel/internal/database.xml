@@ -57,7 +57,8 @@ STRICT
 CREATE TABLE image_blobs (
   image_blob_id      INTEGER PRIMARY KEY NOT NULL,
   image_blob_data    BLOB                NOT NULL,
-  image_blob_sha256  TEXT                NOT NULL
+  image_blob_sha256  TEXT                NOT NULL,
+  image_blob_type    TEXT                NOT NULL
 )
 -- [jooq ignore start]
 STRICT

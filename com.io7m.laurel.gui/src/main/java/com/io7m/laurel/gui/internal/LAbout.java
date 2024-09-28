@@ -91,7 +91,7 @@ public final class LAbout implements Initializable
       final var stage = new Stage();
 
       final var layout =
-        LExporterDialogs.class.getResource(
+        LAbout.class.getResource(
           "/com/io7m/laurel/gui/internal/about.fxml");
 
       Objects.requireNonNull(layout, "layout");

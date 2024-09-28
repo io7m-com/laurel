@@ -12,4 +12,8 @@
   <!-- Seems unavoidable. -->
   <suppress files="LFileModel.java"
             checks="ClassDataAbstractionCoupling"/>
+  <!-- Seems unavoidable. -->
+  <suppress files="LFileModel.java"
+            checks="MethodCount"/>
+
 </suppressions>

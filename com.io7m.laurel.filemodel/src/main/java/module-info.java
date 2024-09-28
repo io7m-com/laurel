@@ -54,7 +54,12 @@ module com.io7m.laurel.filemodel
   requires com.io7m.jmulticlose.core;
   requires com.io7m.lanark.core;
   requires com.io7m.laurel.model;
+  requires com.io7m.mime2045.core;
+  requires com.io7m.mime2045.fileext;
+  requires com.io7m.mime2045.parser.api;
+  requires com.io7m.mime2045.parser;
   requires com.io7m.seltzer.api;
+
   requires io.opentelemetry.api;
   requires java.desktop;
   requires org.apache.commons.io;

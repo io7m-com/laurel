@@ -61,7 +61,6 @@ public final class LFileView extends LAbstractViewWithModel
   private final LStrings strings;
   private final LFileChoosersType choosers;
   private final Stage stage;
-  private final LExporterDialogs exporterDialogs;
   private final LPreferencesType preferences;
   private final RPServiceDirectoryType services;
 
@@ -100,8 +99,6 @@ public final class LFileView extends LAbstractViewWithModel
       this.services.requireService(LStrings.class);
     this.choosers =
       this.services.requireService(LFileChoosersType.class);
-    this.exporterDialogs =
-      this.services.requireService(LExporterDialogs.class);
     this.preferences =
       this.services.requireService(LPreferencesType.class);
 
@@ -203,6 +200,7 @@ public final class LFileView extends LAbstractViewWithModel
     this.menuItemClose.setDisable(true);
     this.menuItemRedo.setDisable(true);
     this.menuItemUndo.setDisable(true);
+    this.menuItemExport.setDisable(true);
   }
 
   @Override
@@ -212,6 +210,7 @@ public final class LFileView extends LAbstractViewWithModel
       this.mainContent.setDisable(true);
       this.mainContent.setVisible(false);
       this.menuItemClose.setDisable(true);
+      this.menuItemExport.setDisable(true);
     });
   }
 
@@ -249,6 +248,7 @@ public final class LFileView extends LAbstractViewWithModel
       this.mainContent.setDisable(false);
       this.mainContent.setVisible(true);
       this.menuItemClose.setDisable(false);
+      this.menuItemExport.setDisable(false);
     });
   }
 
@@ -434,12 +434,22 @@ public final class LFileView extends LAbstractViewWithModel
 
   /**
    * The user tried to export.
+   *
+   * @throws Exception On errors
    */
 
   @FXML
   public void onExportSelected()
+    throws Exception
   {
+    final var p =
+      LExporterView.openForStage(
+        this.services,
+        this.fileModelScope(),
+        new Stage()
+      );
 
+    p.stage().showAndWait();
   }
 
   /**

@@ -20,15 +20,18 @@ package com.io7m.laurel.filemodel.internal;
 import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LCaptionID;
 import com.io7m.laurel.model.LCaptionName;
+import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LHashSHA256;
 import com.io7m.laurel.model.LImage;
 import com.io7m.laurel.model.LImageID;
 import com.io7m.laurel.model.LImageWithID;
+import com.io7m.mime2045.parser.api.MimeParseException;
 import org.jooq.DSLContext;
 
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -89,6 +92,7 @@ public final class LCommandImageSelect
     final LFileModel model,
     final LDatabaseTransactionType transaction,
     final Optional<LImageID> request)
+    throws LException
   {
     final var context =
       transaction.get(DSLContext.class);
@@ -109,7 +113,8 @@ public final class LCommandImageSelect
           IMAGES.IMAGE_ID,
           IMAGES.IMAGE_NAME,
           IMAGES.IMAGE_SOURCE,
-          IMAGE_BLOBS.IMAGE_BLOB_SHA256
+          IMAGE_BLOBS.IMAGE_BLOB_SHA256,
+          IMAGE_BLOBS.IMAGE_BLOB_TYPE
         ).from(IMAGES)
         .join(IMAGE_BLOBS)
         .on(IMAGE_BLOBS.IMAGE_BLOB_ID.eq(IMAGES.IMAGE_ID))
@@ -142,21 +147,28 @@ public final class LCommandImageSelect
         .toList();
 
     model.setImageCaptionsAssigned(captions);
-    model.setImageSelected(
-      Optional.of(
-        new LImageWithID(
-          imageId,
-          new LImage(
-            imageRec.get(IMAGES.IMAGE_NAME),
-            Optional.ofNullable(imageRec.get(IMAGES.IMAGE_FILE))
-              .map(Paths::get),
-            Optional.ofNullable(imageRec.get(IMAGES.IMAGE_SOURCE))
-              .map(URI::create),
-            new LHashSHA256(imageRec.get(IMAGE_BLOBS.IMAGE_BLOB_SHA256))
+    try {
+      model.setImageSelected(
+        Optional.of(
+          new LImageWithID(
+            imageId,
+            new LImage(
+              imageRec.get(IMAGES.IMAGE_NAME),
+              Optional.ofNullable(imageRec.get(IMAGES.IMAGE_FILE))
+                .map(Paths::get),
+              Optional.ofNullable(imageRec.get(IMAGES.IMAGE_SOURCE))
+                .map(URI::create),
+              LCommandModelUpdates.MIME_PARSERS.parse(
+                imageRec.get(IMAGE_BLOBS.IMAGE_BLOB_TYPE)
+              ),
+              new LHashSHA256(imageRec.get(IMAGE_BLOBS.IMAGE_BLOB_SHA256))
+            )
           )
         )
-      )
-    );
+      );
+    } catch (final MimeParseException e) {
+      throw new LException(e, "error-mime", Map.of(), Optional.empty());
+    }
     return LCommandUndoable.COMMAND_NOT_UNDOABLE;
   }
 

@@ -84,9 +84,6 @@ public final class LApplication extends Application
     final var metadataEditors = new LMetadataEditors(strings);
     services.register(LMetadataEditors.class, metadataEditors);
 
-    final var exporters = new LExporterDialogs(services, strings);
-    services.register(LExporterDialogs.class, exporters);
-
     final var choosers = new LFileChoosers(services);
     services.register(LFileChoosersType.class, choosers);
 

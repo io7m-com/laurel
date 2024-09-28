@@ -15,48 +15,31 @@
  */
 
 
-package com.io7m.laurel.model;
+package com.io7m.laurel.filemodel;
 
-import com.io7m.mime2045.core.MimeType;
-
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
- * An image.
+ * A request to export a dataset.
  *
- * @param name   The name
- * @param file   The file
- * @param source The source
- * @param type   The MIME type
- * @param hash   The hash
+ * @param outputDirectory The output directory
+ * @param exportImages    {@code true} if images should be exported
  */
 
-public record LImage(
-  String name,
-  Optional<Path> file,
-  Optional<URI> source,
-  MimeType type,
-  LHashType hash)
+public record LExportRequest(
+  Path outputDirectory,
+  boolean exportImages)
 {
   /**
-   * An image.
+   * A request to export a dataset.
    *
-   * @param name   The name
-   * @param file   The file
-   * @param source The source
-   * @param type   The MIME type
-   * @param hash   The hash
+   * @param outputDirectory The output directory
+   * @param exportImages    {@code true} if images should be exported
    */
 
-  public LImage
+  public LExportRequest
   {
-    Objects.requireNonNull(name, "name");
-    Objects.requireNonNull(file, "file");
-    Objects.requireNonNull(source, "source");
-    Objects.requireNonNull(hash, "hash");
-    Objects.requireNonNull(type, "type");
+    Objects.requireNonNull(outputDirectory, "outputDirectory");
   }
 }

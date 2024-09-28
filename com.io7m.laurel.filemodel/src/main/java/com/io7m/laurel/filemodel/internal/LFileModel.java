@@ -28,6 +28,7 @@ import com.io7m.jattribute.core.Attributes;
 import com.io7m.jmulticlose.core.CloseableCollection;
 import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
+import com.io7m.laurel.filemodel.LExportRequest;
 import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelEventType;
 import com.io7m.laurel.filemodel.LFileModelType;
@@ -129,6 +130,7 @@ public final class LFileModel implements LFileModelType
   private final ReentrantLock commandLock;
   private final SubmissionPublisher<LFileModelEventType> events;
   private final AttributeType<List<LValidationProblemType>> validationProblems;
+  private final AttributeType<List<LFileModelEventType>> exportEvents;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -183,6 +185,8 @@ public final class LFileModel implements LFileModelType
       ATTRIBUTES.withValue(Optional.empty());
     this.redoText =
       this.redo.map(o -> o.map(LCommandType::describe));
+    this.exportEvents =
+      ATTRIBUTES.withValue(List.of());
     this.validationProblems =
       ATTRIBUTES.withValue(List.of());
     this.commandLock =
@@ -1197,6 +1201,30 @@ public final class LFileModel implements LFileModelType
     return this.validationProblems;
   }
 
+  @Override
+  public CompletableFuture<?> export(
+    final LExportRequest request)
+  {
+    Objects.requireNonNull(request, "request");
+
+    return this.runCommand(
+      new LCommandExport(),
+      request
+    );
+  }
+
+  @Override
+  public AttributeReadableType<List<LFileModelEventType>> exportEvents()
+  {
+    return this.exportEvents;
+  }
+
+  @Override
+  public void exportClear()
+  {
+    this.exportEvents.set(List.of());
+  }
+
   private Optional<InputStream> executeImageStream(
     final LImageID id)
     throws LException
@@ -1458,5 +1486,11 @@ public final class LFileModel implements LFileModelType
     final List<LValidationProblemType> problems)
   {
     this.validationProblems.set(problems);
+  }
+
+  void setExportEvents(
+    final List<LFileModelEventType> newEvents)
+  {
+    this.exportEvents.set(newEvents);
   }
 }

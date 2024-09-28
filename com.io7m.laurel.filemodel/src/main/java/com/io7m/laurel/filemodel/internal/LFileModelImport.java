@@ -316,9 +316,10 @@ public final class LFileModelImport implements LFileModelImportType
         this.attributes.put("File", capFile);
         this.eventProgress(index, max, "Loading caption file %s.", capFile);
 
-        final List<LCaptionName> captionList =
-          this.parseCaptions(Files.readString(capFile));
-        this.captions.put(imageFile, captionList);
+        this.captions.put(
+          imageFile,
+          LCaptionFiles.parse(this.attributes, capFile)
+        );
       } catch (final Throwable e) {
         this.failed.set(true);
         this.handleException(e);
@@ -338,32 +339,6 @@ public final class LFileModelImport implements LFileModelImportType
       this.attributesCopy(),
       Optional.empty()
     );
-  }
-
-  private List<LCaptionName> parseCaptions(
-    final String rawText)
-  {
-    final var results =
-      new ArrayList<LCaptionName>();
-
-    final var segments =
-      List.of(rawText.split(","));
-
-    for (final var text : segments) {
-      final var trimmed = text.trim();
-      if (trimmed.isBlank()) {
-        continue;
-      }
-      this.attributes.put("Caption", trimmed);
-      try {
-        results.add(new LCaptionName(trimmed));
-      } catch (final Throwable e) {
-        this.failed.set(true);
-        this.handleException(e);
-      }
-    }
-
-    return List.copyOf(results);
   }
 
   private void listFiles()

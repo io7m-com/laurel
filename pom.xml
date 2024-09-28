@@ -37,12 +37,14 @@
 
     <!-- io7m dependencies. -->
     <com.io7m.darco.version>1.0.0</com.io7m.darco.version>
+    <com.io7m.jade.version>1.0.3</com.io7m.jade.version>
     <com.io7m.jbssio.version>2.1.0</com.io7m.jbssio.version>
+    <com.io7m.jwheatsheaf.version>4.0.0</com.io7m.jwheatsheaf.version>
     <com.io7m.jxtrand.version>2.1.0</com.io7m.jxtrand.version>
+    <com.io7m.mime2045.version>1.1.0</com.io7m.mime2045.version>
     <com.io7m.trasco.version>1.1.0</com.io7m.trasco.version>
     <com.io7m.xstructural.version>1.8.0</com.io7m.xstructural.version>
     <com.io7m.zelador.version>1.0.0</com.io7m.zelador.version>
-    <com.io7m.jwheatsheaf.version>4.0.0</com.io7m.jwheatsheaf.version>
 
     <!-- Third-party dependencies. -->
     <io.opentelemetry.version>1.42.1</io.opentelemetry.version>
@@ -50,7 +52,6 @@
     <org.jooq.version>3.19.13</org.jooq.version>
     <org.junit.version>5.11.1</org.junit.version>
     <org.xerial.sqlite.version>3.46.0.1</org.xerial.sqlite.version>
-    <com.io7m.jade.version>1.0.3</com.io7m.jade.version>
   </properties>
 
   <licenses>
@@ -297,6 +298,26 @@
         <groupId>org.apache.tika</groupId>
         <artifactId>tika-core</artifactId>
         <version>2.9.2</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.mime2045</groupId>
+        <artifactId>com.io7m.mime2045.core</artifactId>
+        <version>${com.io7m.mime2045.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.mime2045</groupId>
+        <artifactId>com.io7m.mime2045.parser</artifactId>
+        <version>${com.io7m.mime2045.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.mime2045</groupId>
+        <artifactId>com.io7m.mime2045.parser.api</artifactId>
+        <version>${com.io7m.mime2045.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.mime2045</groupId>
+        <artifactId>com.io7m.mime2045.fileext</artifactId>
+        <version>${com.io7m.mime2045.version}</version>
       </dependency>
 
       <dependency>

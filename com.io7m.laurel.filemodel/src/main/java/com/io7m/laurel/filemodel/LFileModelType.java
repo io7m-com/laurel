@@ -532,4 +532,26 @@ public interface LFileModelType
    */
 
   AttributeReadableType<List<LValidationProblemType>> validationProblems();
+
+  /**
+   * Execute an export.
+   *
+   * @param request The export request
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> export(LExportRequest request);
+
+  /**
+   * @return The export events
+   */
+
+  AttributeReadableType<List<LFileModelEventType>> exportEvents();
+
+  /**
+   * Clear the export events.
+   */
+
+  void exportClear();
 }
