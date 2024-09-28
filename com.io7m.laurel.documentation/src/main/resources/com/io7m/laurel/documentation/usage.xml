@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         title="Usage">
+  <xi:include href="u-overview.xml"/>
+  <xi:include href="u-fileview.xml"/>
+  <xi:include href="u-images.xml"/>
+  <xi:include href="u-categories.xml"/>
+  <xi:include href="u-metadata.xml"/>
+  <xi:include href="u-history.xml"/>
+  <xi:include href="u-validation.xml"/>
+</Section>

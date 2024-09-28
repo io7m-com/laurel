@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="3d9f296a-0946-4bb3-81f1-c5185b23973e"
+         title="Categories">
+  <Subsection title="Overview">
+    <Paragraph>
+      Categories...
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Required Categories" id="dd94cd12-ab51-406d-96d5-c68404ca8cc7">
+    <Paragraph>
+      Required...
+    </Paragraph>
+  </Subsection>
+
+</Section>

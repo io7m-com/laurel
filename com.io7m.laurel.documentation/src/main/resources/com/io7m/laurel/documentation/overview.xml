@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         title="Overview">
+
+  <Subsection title="Introduction">
+    <Paragraph>
+      The <Term type="package">laurel</Term> application attempts to provide tools to assist with
+      <Term type="term">image captioning</Term>
+      within the context of
+      <LinkExternal target="https://en.wikipedia.org/wiki/Machine_learning">machine learning</LinkExternal>.
+    </Paragraph>
+    <Paragraph>
+      In particular, the application is geared towards the management of smaller datasets (in the range of thousands of
+      images) for use in techniques such as
+      <LinkExternal target="https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)#Low-rank_adaptation">
+        LORA
+      </LinkExternal>
+      training.
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Features">
+    <Paragraph>
+      The <Term type="package">laurel</Term> application provides the following features:
+    </Paragraph>
+    <FormalItem title="Features">
+      <ListUnordered>
+        <Item>
+          The application is comprehensively documented; you are currently reading this documentation!
+        </Item>
+      </ListUnordered>
+    </FormalItem>
+  </Subsection>
+
+</Section>

@@ -18,6 +18,7 @@
 package com.io7m.laurel.gui.internal;
 
 import com.io7m.laurel.filemodel.LValidationProblemType;
+import com.io7m.laurel.filemodel.LValidationProblemType.ImageMissingRequiredCaption;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -31,7 +32,6 @@ import java.util.ResourceBundle;
 
 public final class LValidationCellController implements LViewType
 {
-  @FXML private Button gotoButton;
   @FXML private TextArea errorText;
 
   /**
@@ -49,7 +49,7 @@ public final class LValidationCellController implements LViewType
 
   public void unsetItem()
   {
-
+    this.errorText.setText("");
   }
 
   /**
@@ -61,7 +61,17 @@ public final class LValidationCellController implements LViewType
   public void setItem(
     final LValidationProblemType item)
   {
+    switch (item) {
+      case final ImageMissingRequiredCaption missing -> {
+        this.onMissingRequiredCaption(missing);
+      }
+    }
+  }
 
+  private void onMissingRequiredCaption(
+    final ImageMissingRequiredCaption missing)
+  {
+    this.errorText.setText(missing.message());
   }
 
   @Override

@@ -20,6 +20,7 @@ package com.io7m.laurel.gui.internal;
 import com.io7m.laurel.filemodel.LValidationProblemType;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
@@ -61,6 +62,8 @@ public final class LValidationCell
       });
       this.root = loader.load();
       this.controller = loader.getController();
+
+      this.setPadding(Insets.EMPTY);
     } catch (final IOException e) {
       throw new IllegalStateException(e);
     }

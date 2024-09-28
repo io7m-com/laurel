@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="0a221b47-5395-4b75-857e-2f2ec3f22536"
+         title="Images">
+
+  <Subsection title="Overview">
+    <Paragraph>
+      The <Term type="tab">Images</Term> tab allows for loading
+      <Link target="405b6ebe-a489-4849-8b02-57129078ab7e">images</Link>
+      and assigning
+      <Link target="605e7b9d-a54f-4c3c-914c-c6978d2d50f7">captions</Link>
+      to images.
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Loading Images">
+    <Paragraph>
+      Click the <Term type="button">Add Image</Term> button to load an image from the filesystem.
+    </Paragraph>
+
+    <FormalItem title="Add Image"
+                id="ff64d620-1838-4b2c-a908-ae9d8d0ee3cb">
+      <Image source="2024-09-28-160339_1100x800_scrot.png"
+             type="screenImage">
+        The Add Image button.
+      </Image>
+    </FormalItem>
+
+    <FormalItem title="Open Image"
+                id="49404ebb-d95e-4638-8a13-fa91e5144ea3">
+      <Image source="2024-09-28-160443_1100x800_scrot.png"
+             type="screenImage">
+        Selecting an image.
+      </Image>
+    </FormalItem>
+
+    <Paragraph>
+      Once an image is loaded, it appears in the <Term type="term">image list</Term>.
+    </Paragraph>
+
+    <FormalItem title="Selected Image"
+                id="d4a05388-a890-4516-b503-a2f0758262d3">
+      <Image source="2024-09-28-160507_1100x800_scrot.png"
+             type="screenImage">
+        Selected image.
+      </Image>
+    </FormalItem>
+
+    <Paragraph>
+      Clicking the image opens an <Term type="term">image preview</Term> window that contains a larger copy of the
+      image. This window will constantly update to whatever is the currently selected image. The intended use case for
+      the <Term type="term">image preview</Term> window is to be left open on a separate screen so that a large version
+      of the image is always visible when manually captioning images.
+    </Paragraph>
+
+    <FormalItem title="Image Preview"
+                id="4ae97fbb-8a68-4168-baee-ca2e93ee20f9">
+      <Image source="2024-09-28-160527_1100x800_scrot.png"
+             type="screenImage">
+        Selected image.
+      </Image>
+    </FormalItem>
+  </Subsection>
+
+  <Subsection title="Captioning Images">
+    <Paragraph>
+      Click the <Term type="button">Create Caption</Term> button to create a new caption.
+    </Paragraph>
+
+    <FormalItem title="Create Caption"
+                id="0a706150-107c-4590-922a-b7215d59c562">
+      <Image source="2024-09-28-160544_1100x800_scrot.png"
+             type="screenImage">
+        The Create Caption button.
+      </Image>
+    </FormalItem>
+
+    <FormalItem title="Create Caption (Dialog)"
+                id="7890b338-af11-45a6-8158-7b4327562db1">
+      <Image source="2024-09-28-160558_1100x800_scrot.png"
+             type="screenImage">
+        The Create Caption dialog.
+      </Image>
+    </FormalItem>
+
+    <Paragraph id="5d4bbd82-8969-49fc-a310-1eb20ce9e998">
+      When a caption is first created, it is visible in the set of
+      <Term type="term">unassigned</Term>
+      captions for the selected image. Naturally, the set of <Term type="term">unassigned</Term> captions is different
+      for each image. The <Term type="button">Assign Caption</Term> button can be used to assign one or more selected
+      captions to the currently selected image.
+    </Paragraph>
+
+    <FormalItem title="Unassigned Captions"
+                id="ba9a2900-110b-407e-894d-0876d239c59c">
+      <Image source="2024-09-28-160619_1100x800_scrot.png"
+             type="screenImage">
+        The unassigned captions.
+      </Image>
+    </FormalItem>
+
+    <FormalItem title="Assigned Captions"
+                id="0863849f-17b4-4892-9171-e70ed27b05b5">
+      <Image source="2024-09-28-160628_1100x800_scrot.png"
+             type="screenImage">
+        The assigned captions.
+      </Image>
+    </FormalItem>
+  </Subsection>
+
+  <Subsection title="Global Prefix Captioning">
+    <Paragraph>
+      Typically, in fine-tuning methods such as
+      <LinkExternal target="https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)#Low-rank_adaptation">
+        LORAs</LinkExternal>, there will be one or more captions that should be globally applied to all images, and
+      should also, when the captions are exported, always appear at the beginning of the list of captions for each
+      image.
+    </Paragraph>
+
+    <Paragraph>
+      Click the <Term type="button">Configure Global Prefix Captions</Term> button to configure
+      <Term type="term">global prefix captions</Term>.
+    </Paragraph>
+
+    <FormalItem title="Configure Global Prefix Caption"
+                id="10bd9455-5db9-4d88-a5c1-ba5b41165181">
+      <Image source="2024-09-28-160643_1100x800_scrot.png"
+             type="screenImage">
+        The configure global prefix captions button.
+      </Image>
+    </FormalItem>
+
+    <Paragraph>
+      The <Term type="window">Configure Global Prefix Captions</Term> window allows for creating, deleting, modifying,
+      and reordering captions.
+    </Paragraph>
+
+    <FormalItem title="Configure Global Prefix Captions Window"
+                id="f4261c5c-58f7-4692-9cc1-ee88b6429997">
+      <Image source="2024-09-28-160655_1100x800_scrot.png"
+             type="screenImage">
+        The configure global prefix captions window.
+      </Image>
+    </FormalItem>
+
+    <FormalItem title="Configure Global Prefix Captions Window (Listing)"
+                id="f5610498-4bd6-4b29-82b9-a8a1e79d33e8">
+      <Image source="2024-09-28-160722_1100x800_scrot.png"
+             type="screenImage">
+        The configure global prefix captions window (with captions listed).
+      </Image>
+    </FormalItem>
+  </Subsection>
+
+</Section>

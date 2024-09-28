@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="969a2405-1173-437b-a22f-3cacf377a1f1"
+         title="Categories">
+
+  <Subsection title="Overview">
+    <Paragraph>
+      The <Term type="term">Categories</Term> tab allows for grouping
+      <Link target="605e7b9d-a54f-4c3c-914c-c6978d2d50f7">captions</Link>
+      into
+      <Link target="3d9f296a-0946-4bb3-81f1-c5185b23973e">categories</Link>.
+    </Paragraph>
+
+    <FormalItem title="Categories Tab"
+                id="2540bea8-e14e-439a-8112-dc1612e2b47c">
+      <Image source="2024-09-28-160735_1100x800_scrot.png"
+             type="screenImage">
+        The categories tab.
+      </Image>
+    </FormalItem>
+  </Subsection>
+
+  <Subsection title="Creating A Category">
+    <Paragraph>
+      Click the <Term type="button">Add Category</Term> button to create a new category.
+    </Paragraph>
+    <FormalItem title="Add Category">
+      <Image source="2024-09-28-185417_1100x800_scrot.png"
+             type="screenImage">
+        The Add Category button.
+      </Image>
+    </FormalItem>
+    <FormalItem title="Category Creation">
+      <Image source="2024-09-28-160753_1100x800_scrot.png"
+             type="screenImage">
+        The category creation field.
+      </Image>
+    </FormalItem>
+  </Subsection>
+
+  <Subsection title="Assigned Captions To Categories">
+    <Paragraph>
+      When a category is selected, the captions that are not assigned to that category will appear in the list of
+      unassigned captions. Conversely, the captions that <Term type="term">are</Term> assigned to the category will
+      appear in the list of assigned captions. In a similar manner as for
+      <Link target="5d4bbd82-8969-49fc-a310-1eb20ce9e998">image caption assignment</Link>, captions can be assigned and
+      unassigned to/from a category using the arrow buttons.
+    </Paragraph>
+    <FormalItem title="Category (Unassigned Captions)">
+      <Image source="2024-09-28-160808_1100x800_scrot.png"
+             type="screenImage">
+        The unassigned captions for the selected category.
+      </Image>
+    </FormalItem>
+    <FormalItem title="Category (Assigned Captions)">
+      <Image source="2024-09-28-160824_1100x800_scrot.png"
+             type="screenImage">
+        The assigned captions for the selected category.
+      </Image>
+    </FormalItem>
+  </Subsection>
+
+  <Subsection title="Category Requirement">
+    <Paragraph>
+      Categories can be marked as <Link target="dd94cd12-ab51-406d-96d5-c68404ca8cc7">required</Link> using
+      the buttons above the category list. When a category is <Term type="term">required</Term>, all images
+      must have at least one caption from that category assigned to pass
+      <Link target="250023d8-c66e-45f1-8342-3e0b9402cf4f">validation</Link> checks.
+    </Paragraph>
+    <FormalItem title="Category (Require)">
+      <Image source="2024-09-28-160835_1100x800_scrot.png"
+             type="screenImage">
+        Setting a category as required.
+      </Image>
+    </FormalItem>
+    <FormalItem title="Category (Required)">
+      <Image source="2024-09-28-160851_1100x800_scrot.png"
+             type="screenImage">
+        A required category.
+      </Image>
+    </FormalItem>
+  </Subsection>
+
+</Section>

@@ -21,6 +21,7 @@
   <url>https://www.io7m.com/software/laurel</url>
 
   <modules>
+    <module>com.io7m.laurel.documentation</module>
     <module>com.io7m.laurel.filemodel</module>
     <module>com.io7m.laurel.gui.main</module>
     <module>com.io7m.laurel.gui</module>
@@ -42,8 +43,9 @@
     <com.io7m.jwheatsheaf.version>4.0.0</com.io7m.jwheatsheaf.version>
     <com.io7m.jxtrand.version>2.1.0</com.io7m.jxtrand.version>
     <com.io7m.mime2045.version>1.1.0</com.io7m.mime2045.version>
+    <com.io7m.primogenitor.version>8.2.0</com.io7m.primogenitor.version>
     <com.io7m.trasco.version>1.1.0</com.io7m.trasco.version>
-    <com.io7m.xstructural.version>1.8.0</com.io7m.xstructural.version>
+    <com.io7m.xstructural.version>1.9.0</com.io7m.xstructural.version>
     <com.io7m.zelador.version>1.0.0</com.io7m.zelador.version>
 
     <!-- Third-party dependencies. -->
@@ -351,7 +353,7 @@
       <dependency>
         <groupId>com.io7m.primogenitor</groupId>
         <artifactId>com.io7m.primogenitor.support</artifactId>
-        <version>8.2.0</version>
+        <version>${com.io7m.primogenitor.version}</version>
       </dependency>
       <dependency>
         <groupId>net.jqwik</groupId>

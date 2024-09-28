@@ -24,9 +24,7 @@
             </columnConstraints>
             <rowConstraints>
               <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" vgrow="SOMETIMES" />
-              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" vgrow="SOMETIMES" />
-              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" vgrow="SOMETIMES" />
-              <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              <RowConstraints vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
               <HBox styleClass="gridMember" GridPane.valignment="CENTER">
@@ -54,7 +52,7 @@
                   </Button>
                 </children>
               </HBox>
-              <ListView fx:id="problemList" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" />
+              <ListView fx:id="problemList" styleClass="validationList" GridPane.rowIndex="1" GridPane.rowSpan="2147483647" />
             </children>
           </GridPane>
             <HBox fx:id="success" alignment="CENTER" fillHeight="false" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="32.0" StackPane.alignment="CENTER">

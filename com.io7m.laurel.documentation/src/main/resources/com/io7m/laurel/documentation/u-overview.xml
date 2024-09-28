@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="3af75dd8-455e-4ac0-b7b6-f2317c7173b6"
+         title="Overview">
+
+  <Subsection title="Intro">
+    <Paragraph>
+      This section of the documentation describes how to <Term type="term">use</Term> the application without spending
+      any time explaining the underlying model the application works with, and without describing how exactly the
+      application <Term type="term">works</Term>. The
+      <Link target="8bf85dd2-aa8c-4d81-8cd3-6cb25028bef7">theory of operation</Link>
+      section of the manual describes the inner workings of the application in a more formal manner.
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Undo">
+    <Paragraph>
+      The vast majority of operations in the application can be <Term type="term">undone</Term>. When an operation is
+      performed, it can typically be reverted by selecting
+      <Term type="term">Undo</Term>
+      from the <Term type="menu">Edit</Term> menu. Any operation that has been undone can be performed again by
+      selecting
+      <Term type="term">Redo</Term>
+      from the <Term type="menu">Edit</Term> menu.
+    </Paragraph>
+    <Paragraph>
+      The application is slightly atypical in that there is no "save" functionality. Instead, every operation performed
+      in the application that changes the state of the dataset is persisted into the dataset itself. This, effectively,
+      provides an unbounded undo stack that survives application restarts.
+    </Paragraph>
+    <Paragraph>
+      The current state of the undo/redo stack can be viewed in the
+      <Link target="17d59b60-4086-4e35-8b34-da87cdc58cfa">History</Link>
+      tab. Details of the undo implementation are described in the
+      <Link target="4c2388b3-da2f-46ba-b796-52028873ed4c">theory of operation</Link>.
+    </Paragraph>
+  </Subsection>
+
+</Section>

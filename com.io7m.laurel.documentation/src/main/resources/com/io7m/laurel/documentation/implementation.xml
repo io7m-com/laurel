@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
+         id="8bf85dd2-aa8c-4d81-8cd3-6cb25028bef7"
+         title="Theory Of Operation">
+  <xi:include href="i-captions.xml"/>
+  <xi:include href="i-categories.xml"/>
+  <xi:include href="i-images.xml"/>
+  <xi:include href="i-history.xml"/>
+  <xi:include href="i-filemodel.xml"/>
+</Section>

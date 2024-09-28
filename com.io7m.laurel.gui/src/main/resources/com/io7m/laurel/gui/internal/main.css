@@ -247,3 +247,23 @@
   -fx-pref-height: 32px;
   -fx-min-height: 32px;
 }
+
+.validationList
+{
+  -fx-background-color: #889c75ff;
+}
+.validationList .list-cell
+{
+  -fx-background-color: #889c75ff;
+}
+
+.text-input, .text-input.content
+{
+  -fx-text-fill: black;
+  -fx-background-color: #889c75ff;
+}
+
+.placeholder .label
+{
+  -fx-text-fill: black;
+}
