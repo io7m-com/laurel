@@ -3,7 +3,50 @@
 <Section xmlns="urn:com.io7m.structural:8:0"
          id="605e7b9d-a54f-4c3c-914c-c6978d2d50f7"
          title="Captions">
-  <Paragraph>
-    Captions...
-  </Paragraph>
+
+  <Subsection title="Overview">
+    <Paragraph>
+      A <Term type="term">caption</Term> is a string that can be applied to an image to describe some element of that
+      image.
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Format">
+    <Paragraph>
+      Captions must conform to the following format:
+    </Paragraph>
+    <FormalItem title="Caption Format">
+      <Verbatim><![CDATA[
+caption ::= [a-z0-9A-Z_-][a-z0-9A-Z_ \-']*
+]]></Verbatim>
+    </FormalItem>
+  </Subsection>
+
+  <Subsection title="Caption Files">
+    <Paragraph>
+      A <Term type="term">caption file</Term> is a file consisting of a comma-separated list of captions. More
+      formally, the file confirms to the following format:
+    </Paragraph>
+    <FormalItem title="Caption File Format">
+      <Verbatim><![CDATA[
+caption_file ::= caption ("," caption)+ [ "," ]
+]]></Verbatim>
+    </FormalItem>
+    <Paragraph>
+      An example caption file is as follows:
+    </Paragraph>
+    <FormalItem title="Caption File Format">
+      <Verbatim><![CDATA[
+red drapes,
+black and white zigzag floor,
+red chair,
+gold lamp,
+coffee cup,
+]]></Verbatim>
+    </FormalItem>
+    <Paragraph>
+      Note that the trailing comma on the last line is optional. All whitespace around commas is ignored.
+    </Paragraph>
+  </Subsection>
+
 </Section>
