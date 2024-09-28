@@ -518,4 +518,18 @@ public interface LFileModelType
 
   CompletableFuture<?> captionsPaste(
     Set<LImageID> images);
+
+  /**
+   * Execute a validation.
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> validate();
+
+  /**
+   * @return The list of validation problems
+   */
+
+  AttributeReadableType<List<LValidationProblemType>> validationProblems();
 }

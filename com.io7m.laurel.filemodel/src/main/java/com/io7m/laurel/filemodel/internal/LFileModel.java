@@ -33,6 +33,7 @@ import com.io7m.laurel.filemodel.LFileModelEventType;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
 import com.io7m.laurel.filemodel.LImageComparison;
+import com.io7m.laurel.filemodel.LValidationProblemType;
 import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LCaptionID;
 import com.io7m.laurel.model.LCaptionName;
@@ -127,6 +128,7 @@ public final class LFileModel implements LFileModelType
   private final LImageComparisonModel imageComparison;
   private final ReentrantLock commandLock;
   private final SubmissionPublisher<LFileModelEventType> events;
+  private final AttributeType<List<LValidationProblemType>> validationProblems;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -181,6 +183,8 @@ public final class LFileModel implements LFileModelType
       ATTRIBUTES.withValue(Optional.empty());
     this.redoText =
       this.redo.map(o -> o.map(LCommandType::describe));
+    this.validationProblems =
+      ATTRIBUTES.withValue(List.of());
     this.commandLock =
       new ReentrantLock();
     this.attributes =
@@ -1178,6 +1182,21 @@ public final class LFileModel implements LFileModelType
     );
   }
 
+  @Override
+  public CompletableFuture<?> validate()
+  {
+    return this.runCommand(
+      new LCommandValidate(),
+      DDatabaseUnit.UNIT
+    );
+  }
+
+  @Override
+  public AttributeReadableType<List<LValidationProblemType>> validationProblems()
+  {
+    return this.validationProblems;
+  }
+
   private Optional<InputStream> executeImageStream(
     final LImageID id)
     throws LException
@@ -1433,5 +1452,11 @@ public final class LFileModel implements LFileModelType
         LOG.debug("Error reading undo stack: ", e);
       }
     });
+  }
+
+  void setValidationProblems(
+    final List<LValidationProblemType> problems)
+  {
+    this.validationProblems.set(problems);
   }
 }

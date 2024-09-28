@@ -75,6 +75,9 @@
           <Tab text="%history">
             <fx:include source="history.fxml" VBox.vgrow="ALWAYS" />
           </Tab>
+          <Tab text="%validation">
+            <fx:include source="validation.fxml" VBox.vgrow="ALWAYS" />
+          </Tab>
         </tabs>
       </TabPane>
       <HBox alignment="CENTER" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" styleClass="borderedOutset">

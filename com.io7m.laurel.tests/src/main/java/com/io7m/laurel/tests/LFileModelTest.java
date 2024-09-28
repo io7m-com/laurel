@@ -21,6 +21,7 @@ import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LFileModels;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
+import com.io7m.laurel.filemodel.LValidationProblemType;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
 import com.io7m.laurel.model.LCaption;
 import com.io7m.laurel.model.LCaptionID;
@@ -1480,6 +1481,51 @@ public final class LFileModelTest
     });
 
     assertEquals("error-duplicate", ex.errorCode());
+  }
+
+  @Test
+  public void testValidationCaptionsRequired()
+    throws Exception
+  {
+    final var txn =
+      new LCaptionName("TX");
+    final var cn =
+      new LCategoryName("C");
+
+    this.model.captionAdd(txn)
+      .get(TIMEOUT, SECONDS);
+    this.model.categoryAdd(cn)
+      .get(TIMEOUT, SECONDS);
+    final var c = this.findCategoryID("C");
+    this.model.categorySetRequired(Set.of(c))
+      .get(TIMEOUT, SECONDS);
+
+    this.model.categoryCaptionsAssign(
+      List.of(
+        new LCategoryCaptionsAssignment(
+          c,
+          List.of(this.findCaption("TX").id())
+        )
+      )
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.imageAdd(
+      "image-a",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.validate()
+      .get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      new LValidationProblemType.ImageMissingRequiredCaption(
+        this.model.imageList().get().get(0).id(),
+        c,
+        "Image 'image-a' does not contain any captions from the required category 'C'."
+      ),
+      this.model.validationProblems().get().get(0)
+    );
   }
 
   @Test

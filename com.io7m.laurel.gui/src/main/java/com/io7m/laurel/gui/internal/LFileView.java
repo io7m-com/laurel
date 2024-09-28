@@ -170,6 +170,12 @@ public final class LFileView extends LAbstractViewWithModel
           () -> {
             return new LHistoryView(services, fileScope);
           }
+        ),
+        Map.entry(
+          LValidationView.class,
+          () -> {
+            return new LValidationView(services, fileScope);
+          }
         )
       );
 
