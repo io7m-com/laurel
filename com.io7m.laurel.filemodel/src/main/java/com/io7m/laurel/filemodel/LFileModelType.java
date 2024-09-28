@@ -554,4 +554,18 @@ public interface LFileModelType
    */
 
   void exportClear();
+
+  /**
+   * Change the source of an image.
+   *
+   * @param image  The image
+   * @param source The source
+   *
+   * @return The operation in progress
+   */
+
+  CompletableFuture<?> imageSourceSet(
+    LImageID image,
+    URI source
+  );
 }

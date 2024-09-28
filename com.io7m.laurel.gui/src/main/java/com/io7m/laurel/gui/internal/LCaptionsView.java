@@ -44,6 +44,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -59,6 +61,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.io7m.laurel.gui.internal.LStringConstants.IMAGES_SOURCE_SET;
 import static javafx.stage.Modality.APPLICATION_MODAL;
 
 /**
@@ -96,6 +99,8 @@ public final class LCaptionsView extends LAbstractViewWithModel
   @FXML private MenuItem assignedCaptionsContextMenuCopy;
   @FXML private MenuItem assignedCaptionsContextMenuPaste;
   @FXML private MenuItem imagesCompareCaptions;
+  @FXML private TextField imageSource;
+  @FXML private Button imageSourceButton;
 
   private Stage imageDisplayWindow;
   private LImageView imageDisplay;
@@ -145,6 +150,7 @@ public final class LCaptionsView extends LAbstractViewWithModel
     this.imageDelete.setDisable(true);
     this.imageCaptionAssign.setDisable(true);
     this.imageCaptionUnassign.setDisable(true);
+    this.imageSourceButton.setDisable(true);
     this.captionNew.setDisable(false);
     this.captionDelete.setDisable(true);
     this.captionModify.setDisable(true);
@@ -413,10 +419,19 @@ public final class LCaptionsView extends LAbstractViewWithModel
       fileModel.imageSelect(Optional.empty());
       this.imageView.setImage(null);
       this.imageDelete.setDisable(true);
+      this.imageSourceButton.setDisable(true);
+      this.imageSource.setText("");
       return;
     }
 
     this.imageDelete.setDisable(false);
+    this.imageSourceButton.setDisable(false);
+    this.imageSource.setText(
+      image.image()
+        .source()
+        .map(URI::toString)
+        .orElse("")
+    );
 
     fileModel.imageSelect(Optional.of(image.id()));
     fileModel.imageStream(image.id())
@@ -722,5 +737,25 @@ public final class LCaptionsView extends LAbstractViewWithModel
       );
 
     this.comparisons.open(this.services, this.fileModelScope());
+  }
+
+  @FXML
+  private void onImageSetSourceSelected()
+  {
+    final var dialog = new TextInputDialog();
+    LCSS.setCSS(dialog.getDialogPane());
+
+    dialog.getEditor().setText(this.imageSource.getText());
+    dialog.setHeaderText(this.strings.format(IMAGES_SOURCE_SET));
+
+    final var r = dialog.showAndWait();
+    if (r.isPresent()) {
+      final var text = URI.create(r.get());
+      final var fileModel = this.fileModelNow();
+      fileModel.imageSourceSet(
+        fileModel.imageSelected().get().orElseThrow().id(),
+        text
+      );
+    }
   }
 }

@@ -1225,6 +1225,20 @@ public final class LFileModel implements LFileModelType
     this.exportEvents.set(List.of());
   }
 
+  @Override
+  public CompletableFuture<?> imageSourceSet(
+    final LImageID image,
+    final URI source)
+  {
+    Objects.requireNonNull(image, "image");
+    Objects.requireNonNull(source, "source");
+
+    return this.runCommand(
+      new LCommandImageSourceSet(),
+      new LImageSourceSet(image, source)
+    );
+  }
+
   private Optional<InputStream> executeImageStream(
     final LImageID id)
     throws LException

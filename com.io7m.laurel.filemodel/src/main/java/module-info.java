@@ -31,6 +31,7 @@ import com.io7m.laurel.filemodel.internal.LCommandGlobalCaptionsRemove;
 import com.io7m.laurel.filemodel.internal.LCommandImageCaptionsAssign;
 import com.io7m.laurel.filemodel.internal.LCommandImageCaptionsUnassign;
 import com.io7m.laurel.filemodel.internal.LCommandImageSelect;
+import com.io7m.laurel.filemodel.internal.LCommandImageSourceSet;
 import com.io7m.laurel.filemodel.internal.LCommandImagesAdd;
 import com.io7m.laurel.filemodel.internal.LCommandImagesDelete;
 import com.io7m.laurel.filemodel.internal.LCommandMetadataPut;
@@ -85,6 +86,7 @@ module com.io7m.laurel.filemodel
     LCommandImageCaptionsAssign,
     LCommandImageCaptionsUnassign,
     LCommandImageSelect,
+    LCommandImageSourceSet,
     LCommandImagesAdd,
     LCommandImagesDelete,
     LCommandMetadataPut,

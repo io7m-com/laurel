@@ -44,6 +44,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Path;
@@ -1547,6 +1548,80 @@ public final class LFileModelTest
 
     final var tx1 = this.findGlobalCaption(txn);
     assertEquals(tx0, tx1);
+  }
+
+  @Test
+  public void testImageSourceSet()
+    throws Exception
+  {
+    this.model.imageAdd(
+      "image-a",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.imageAdd(
+      "image-b",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    this.model.imageAdd(
+      "image-c",
+      this.imageFile,
+      Optional.of(this.imageFile.toUri())
+    ).get(TIMEOUT, SECONDS);
+
+    final var imagesThen = this.model.imageList().get();
+    final var i0 = imagesThen.get(0).id();
+    final var i1 = imagesThen.get(1).id();
+    final var i2 = imagesThen.get(2).id();
+
+    this.model.imageSourceSet(i1, URI.create("urn:example"))
+      .get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      imagesThen.get(0),
+      this.model.imageList().get().get(0)
+    );
+    assertEquals(
+      URI.create("urn:example"),
+      this.model.imageList().get().get(1).image().source().get()
+    );
+    assertEquals(
+      imagesThen.get(2),
+      this.model.imageList().get().get(2)
+    );
+
+    this.model.undo().get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      imagesThen.get(0),
+      this.model.imageList().get().get(0)
+    );
+    assertEquals(
+      imagesThen.get(1),
+      this.model.imageList().get().get(1)
+    );
+    assertEquals(
+      imagesThen.get(2),
+      this.model.imageList().get().get(2)
+    );
+
+    this.model.redo().get(TIMEOUT, SECONDS);
+
+    assertEquals(
+      imagesThen.get(0),
+      this.model.imageList().get().get(0)
+    );
+    assertEquals(
+      URI.create("urn:example"),
+      this.model.imageList().get().get(1).image().source().get()
+    );
+    assertEquals(
+      imagesThen.get(2),
+      this.model.imageList().get().get(2)
+    );
   }
 
   private List<LCaptionID> globalCaptionsNow()

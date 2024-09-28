@@ -31,6 +31,7 @@
           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" vgrow="SOMETIMES" />
           <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" vgrow="SOMETIMES" />
             <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="32.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
         <StackPane styleClass="gridMember">
@@ -113,6 +114,23 @@
                   </ContextMenu>
                </contextMenu>
         </TableView>
+            <HBox prefHeight="100.0" prefWidth="200.0" styleClass="gridMember" GridPane.rowIndex="4">
+               <children>
+                  <TextField fx:id="imageSource" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" promptText="%captions.source" HBox.hgrow="ALWAYS" />
+                  <Button fx:id="imageSourceButton" disable="true" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#onImageSetSourceSelected" prefHeight="32.0" prefWidth="32.0">
+                     <tooltip>
+                        <Tooltip text="%captions.tooltip.source.set" />
+                     </tooltip>
+                     <graphic>
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@image-source-set.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
+               </children>
+            </HBox>
          </children>
       </GridPane>
       <GridPane styleClass="gridVisible" HBox.hgrow="ALWAYS">
