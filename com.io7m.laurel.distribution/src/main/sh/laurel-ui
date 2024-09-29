@@ -1,12 +1,23 @@
 #!/bin/sh
 
+fatal()
+{
+  echo "laurel-ui: fatal: $1" 1>&2
+  exit 1
+}
+
 if [ -z "${LAUREL_HOME}" ]
 then
-  echo "LAUREL_HOME is unset" 1>&2
-  exit 1
+  fatal "LAUREL_HOME is unset"
+fi
+
+if [ -z "${LAUREL_ARCHITECTURE}" ]
+then
+  LAUREL_ARCHITECTURE="$(uname -m)" ||
+    fatal "LAUREL_ARCHITECTURE is unset, and we could not guess the arch."
 fi
 
 exec /usr/bin/env java \
--p "${LAUREL_HOME}/lib" \
+-p "${LAUREL_HOME}/lib:${LAUREL_HOME}/lib/${LAUREL_ARCHITECTURE}/linux" \
 -m com.io7m.laurel.gui.main/com.io7m.laurel.gui.main.LGUIMain \
 "$@"

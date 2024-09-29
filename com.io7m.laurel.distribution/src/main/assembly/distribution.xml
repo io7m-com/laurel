@@ -16,7 +16,26 @@
 
   <dependencySets>
     <dependencySet>
+      <excludes>
+        <exclude>org.openjfx:*</exclude>
+      </excludes>
       <outputDirectory>lib</outputDirectory>
+      <useProjectArtifact>true</useProjectArtifact>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+    </dependencySet>
+    <dependencySet>
+      <includes>
+        <include>org.openjfx:*:jar:win:*</include>
+      </includes>
+      <outputDirectory>lib/x86_64/windows</outputDirectory>
+      <useProjectArtifact>true</useProjectArtifact>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+    </dependencySet>
+    <dependencySet>
+      <includes>
+        <include>org.openjfx:*:jar:linux:*</include>
+      </includes>
+      <outputDirectory>lib/x86_64/linux</outputDirectory>
       <useProjectArtifact>true</useProjectArtifact>
       <useTransitiveDependencies>true</useTransitiveDependencies>
     </dependencySet>
