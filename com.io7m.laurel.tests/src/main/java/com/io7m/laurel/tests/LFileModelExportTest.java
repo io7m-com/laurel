@@ -53,17 +53,8 @@ public final class LFileModelExportTest
   private static final Logger LOG =
     LoggerFactory.getLogger(LFileModelTest.class);
 
-  private static final long TIMEOUT = 10L;
-
-  private static final OpenOption[] OPEN_OPTIONS = {
-    StandardOpenOption.WRITE,
-    StandardOpenOption.CREATE,
-    StandardOpenOption.TRUNCATE_EXISTING
-  };
-
   private Path directory;
   private Path outputFile;
-  private CloseableResourcesType resources;
   private ConcurrentLinkedQueue<LFileModelEventType> events;
 
   @BeforeEach
@@ -73,7 +64,6 @@ public final class LFileModelExportTest
   {
     this.directory = directory;
     this.outputFile = directory.resolve("out.db");
-    this.resources = resources;
     this.events = new ConcurrentLinkedQueue<>();
   }
 
