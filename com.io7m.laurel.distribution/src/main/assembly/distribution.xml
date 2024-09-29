@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <assembly
   xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -19,5 +21,28 @@
       <useTransitiveDependencies>true</useTransitiveDependencies>
     </dependencySet>
   </dependencySets>
+
+  <files>
+    <file>
+      <source>src/main/sh/laurel</source>
+      <outputDirectory>/bin</outputDirectory>
+      <fileMode>0755</fileMode>
+    </file>
+    <file>
+      <source>src/main/sh/laurel-ui</source>
+      <outputDirectory>/bin</outputDirectory>
+      <fileMode>0755</fileMode>
+    </file>
+  </files>
+
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}</directory>
+      <includes>
+        <include>bom.xml</include>
+      </includes>
+      <outputDirectory>meta</outputDirectory>
+    </fileSet>
+  </fileSets>
 
 </assembly>
