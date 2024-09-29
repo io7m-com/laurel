@@ -23,6 +23,7 @@ import com.io7m.laurel.filemodel.LFileModels;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LImageWithID;
+import com.io7m.zelador.test_extension.CloseableResourcesType;
 import com.io7m.zelador.test_extension.ZeladorExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +81,8 @@ public final class LFileModelImportTest
   }
 
   @Test
-  public void testImportDatasetGood()
+  public void testImportDatasetGood(
+    final CloseableResourcesType resources)
     throws Exception
   {
     final var tags =
@@ -93,7 +95,10 @@ public final class LFileModelImportTest
       importer.execute().get(1L, TimeUnit.MINUTES);
     }
 
-    try (var model = LFileModels.open(this.outputFile, false)) {
+    try (var model =
+           resources.addPerTestResource(LFileModels.open(
+             this.outputFile,
+             false))) {
       Thread.sleep(1_000L);
 
       final var captions =
@@ -215,13 +220,17 @@ public final class LFileModelImportTest
   }
 
   @Test
-  public void testImportDatasetCorruptCaption()
+  public void testImportDatasetCorruptCaption(
+    final CloseableResourcesType resources)
     throws Exception
   {
     final var inputPath =
       this.unpack("dataset_corrupt_caption.zip", "x");
 
-    try (var importer = LFileModels.createImport(inputPath, this.outputFile)) {
+    try (var importer =
+           resources.addPerTestResource(LFileModels.createImport(
+             inputPath,
+             this.outputFile))) {
       importer.events().subscribe(new LPerpetualSubscriber<>(this::addEvent));
 
       final var ex = assertThrows(LException.class, () -> {

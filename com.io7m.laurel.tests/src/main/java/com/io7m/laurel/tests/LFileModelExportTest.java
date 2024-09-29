@@ -60,8 +60,7 @@ public final class LFileModelExportTest
 
   @BeforeEach
   public void setup(
-    final @TempDir Path directory,
-    final CloseableResourcesType resources)
+    final @TempDir Path directory)
   {
     this.directory = directory;
     this.outputFile = directory.resolve("out.db");
@@ -80,7 +79,8 @@ public final class LFileModelExportTest
   }
 
   @Test
-  public void testExportDatasetGood()
+  public void testExportDatasetGood(
+    final CloseableResourcesType resources)
     throws Exception
   {
     final var outputPath =
@@ -88,12 +88,18 @@ public final class LFileModelExportTest
     final var inputPath =
       this.unpack("dataset_good.zip", "x");
 
-    try (var importer = LFileModels.createImport(inputPath, this.outputFile)) {
+    try (var importer =
+           resources.addPerTestResource(LFileModels.createImport(
+             inputPath,
+             this.outputFile))) {
       importer.events().subscribe(new LPerpetualSubscriber<>(this::addEvent));
       importer.execute().get(1L, TimeUnit.MINUTES);
     }
 
-    try (var model = LFileModels.open(this.outputFile, false)) {
+    try (var model =
+           resources.addPerTestResource(LFileModels.open(
+             this.outputFile,
+             false))) {
       final var loadLatch = new CountDownLatch(1);
 
       model.status().subscribe((oldValue, newValue) -> {

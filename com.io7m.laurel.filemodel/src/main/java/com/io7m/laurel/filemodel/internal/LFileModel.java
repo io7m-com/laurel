@@ -80,7 +80,10 @@ import java.util.SortedMap;
 import java.util.TreeSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.SubmissionPublisher;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static com.io7m.laurel.filemodel.internal.Tables.IMAGES;
@@ -136,6 +139,7 @@ public final class LFileModel implements LFileModelType
   private final AttributeType<List<LValidationProblemType>> validationProblems;
   private final AttributeType<List<LFileModelEventType>> exportEvents;
   private final AttributeType<LFileModelStatusType> status;
+  private final ExecutorService executor;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -212,6 +216,9 @@ public final class LFileModel implements LFileModelType
           Optional.empty()
         );
       });
+
+    this.executor =
+      this.resources.add(Executors.newVirtualThreadPerTaskExecutor());
 
     this.resources.add(this.database);
     this.events = this.resources.add(new SubmissionPublisher<>());
@@ -710,23 +717,22 @@ public final class LFileModel implements LFileModelType
     Objects.requireNonNull(imageB, "imageB");
 
     final var future = new CompletableFuture<Void>();
-    Thread.ofVirtual()
-      .start(() -> {
+    this.executor.execute(() -> {
+      try {
+        this.commandLock.lock();
         try {
-          this.commandLock.lock();
-          try {
-            try (var t = this.database.openTransaction()) {
-              this.imageComparison.set(t.get(DSLContext.class), imageA, imageB);
-            }
-
-            future.complete(null);
-          } finally {
-            this.commandLock.unlock();
+          try (var t = this.database.openTransaction()) {
+            this.imageComparison.set(t.get(DSLContext.class), imageA, imageB);
           }
-        } catch (final Throwable e) {
-          future.completeExceptionally(e);
+
+          future.complete(null);
+        } finally {
+          this.commandLock.unlock();
         }
-      });
+      } catch (final Throwable e) {
+        future.completeExceptionally(e);
+      }
+    });
     return future;
   }
 
@@ -809,22 +815,21 @@ public final class LFileModel implements LFileModelType
     final P parameters)
   {
     final var future = new CompletableFuture<Void>();
-    Thread.ofVirtual()
-      .start(() -> {
-        try {
-          if (command.loading()) {
-            this.status.set(new LFileModelStatusLoading());
-          } else {
-            this.status.set(new LFileModelStatusRunningCommand());
-          }
-
-          this.executeCommandLocked(command, parameters);
-          this.status.set(new LFileModelStatusIdle());
-          future.complete(null);
-        } catch (final Throwable e) {
-          future.completeExceptionally(e);
+    this.executor.execute(() -> {
+      try {
+        if (command.loading()) {
+          this.status.set(new LFileModelStatusLoading());
+        } else {
+          this.status.set(new LFileModelStatusRunningCommand());
         }
-      });
+
+        this.executeCommandLocked(command, parameters);
+        this.status.set(new LFileModelStatusIdle());
+        future.complete(null);
+      } catch (final Throwable e) {
+        future.completeExceptionally(e);
+      }
+    });
     return future;
   }
 
@@ -927,6 +932,12 @@ public final class LFileModel implements LFileModelType
     throws LException
   {
     this.resources.close();
+
+    try {
+      this.executor.awaitTermination(10L, TimeUnit.SECONDS);
+    } catch (final InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
   }
 
   @Override
@@ -1037,15 +1048,14 @@ public final class LFileModel implements LFileModelType
   public CompletableFuture<?> undo()
   {
     final var future = new CompletableFuture<Void>();
-    Thread.ofVirtual()
-      .start(() -> {
-        try {
-          this.executeUndo();
-          future.complete(null);
-        } catch (final Throwable e) {
-          future.completeExceptionally(e);
-        }
-      });
+    this.executor.execute(() -> {
+      try {
+        this.executeUndo();
+        future.complete(null);
+      } catch (final Throwable e) {
+        future.completeExceptionally(e);
+      }
+    });
     return future;
   }
 
@@ -1094,15 +1104,14 @@ public final class LFileModel implements LFileModelType
   public CompletableFuture<?> redo()
   {
     final var future = new CompletableFuture<Void>();
-    Thread.ofVirtual()
-      .start(() -> {
-        try {
-          this.executeRedo();
-          future.complete(null);
-        } catch (final Throwable e) {
-          future.completeExceptionally(e);
-        }
-      });
+    this.executor.execute(() -> {
+      try {
+        this.executeRedo();
+        future.complete(null);
+      } catch (final Throwable e) {
+        future.completeExceptionally(e);
+      }
+    });
     return future;
   }
 
@@ -1138,14 +1147,13 @@ public final class LFileModel implements LFileModelType
     final LImageID id)
   {
     final var future = new CompletableFuture<Optional<InputStream>>();
-    Thread.ofVirtual()
-      .start(() -> {
-        try {
-          future.complete(this.executeImageStream(id));
-        } catch (final Throwable e) {
-          future.completeExceptionally(e);
-        }
-      });
+    this.executor.execute(() -> {
+      try {
+        future.complete(this.executeImageStream(id));
+      } catch (final Throwable e) {
+        future.completeExceptionally(e);
+      }
+    });
     return future;
   }
 
@@ -1165,7 +1173,6 @@ public final class LFileModel implements LFileModelType
   public AttributeReadableType<List<LCaption>> imageComparisonB()
   {
     return this.imageComparison.imageComparisonB();
-
   }
 
   @Override
@@ -1462,7 +1469,7 @@ public final class LFileModel implements LFileModelType
 
   private void onRedoStateChanged()
   {
-    Thread.ofVirtual().start(() -> {
+    this.executor.execute(() -> {
       try (var t = this.database.openTransaction()) {
         final var context = t.get(DSLContext.class);
 
@@ -1490,7 +1497,7 @@ public final class LFileModel implements LFileModelType
 
   private void onUndoStateChanged()
   {
-    Thread.ofVirtual().start(() -> {
+    this.executor.execute(() -> {
       try (var t = this.database.openTransaction()) {
         final var context = t.get(DSLContext.class);
 
