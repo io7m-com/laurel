@@ -2,8 +2,27 @@
 
 <div xmlns="http://www.w3.org/1999/xhtml">
   <ul>
+    <li>A user interface for managing images and captions for those images.</li>
+    <li>A caption categorization system for assisting with keeping captions consistent across large datasets.</li>
+    <li>The ability to import captions and images into a dataset from a directory hierarchy.</li>
+    <li>The ability to export captions and images into a directory for use in training scripts.</li>
+    <li>
+      A persistent undo/redo system that can store every change ever made to a dataset, including the ability to
+      effectively revert to an earlier version at any time.
+    </li>
+    <li>
+      A carefully-engineered Java API for manipulating datasets; the command-line tools and user interface are thin
+      shells over this API.
+    </li>
+    <li>
+      Datasets are backed by [SQLite](https://www.sqlite.org) for reliable, transactional updates, and a file format
+      that is designed to endure for decades to come.
+    </li>
+    <li>Command line tools for automating operations such as importing, exporting, and interrogating metadata.</li>
+    <li>Comprehensive documentation.</li>
     <li><a href="https://www.osgi.org/">OSGi</a>-ready</li>
-    <li><a href="https://en.wikipedia.org/wiki/Java_Platform_Module_System">JPMS</a>-ready</li>
+    <li><a href="https://en.wikipedia.org/wiki/Java_Platform_Module_System">JPMS</a>-ready
+    </li>
     <li>ISC license</li>
   </ul>
 </div>

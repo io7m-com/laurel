@@ -43,6 +43,10 @@
           to effectively revert to an earlier version at any time.
         </Item>
         <Item>
+          A carefully-engineered Java API for manipulating datasets; the command-line tools and user interface are thin
+          shells over this API.
+        </Item>
+        <Item>
           Datasets are backed by <LinkExternal target="https://www.sqlite.org">SQLite</LinkExternal> for reliable,
           transactional updates, and a file format that is designed to endure for decades to come.
         </Item>

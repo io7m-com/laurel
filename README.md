@@ -37,6 +37,8 @@ training.
 * A persistent undo/redo system that can store every change ever made to a
   dataset, including the ability to effectively revert to an earlier version
   at any time.
+* A carefully-engineered Java API for manipulating datasets; the command-line
+  tools and user interface are thin shells over this API.
 * Datasets are backed by [SQLite](https://www.sqlite.org) for reliable,
   transactional updates, and a file format that is designed to endure for
   decades to come.
