@@ -350,7 +350,8 @@ public final class LFileModelImport implements LFileModelImportType
     this.event("Listing files…");
     try (var stream = Files.walk(this.directory)) {
       this.imageFiles.addAll(
-        stream.filter(this::isImageFile)
+        stream.sorted()
+          .filter(this::isImageFile)
           .toList()
       );
 

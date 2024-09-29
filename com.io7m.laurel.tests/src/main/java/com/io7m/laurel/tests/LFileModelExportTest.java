@@ -92,107 +92,113 @@ public final class LFileModelExportTest
           new LExportRequest(outputPath, true))
         .get(1L, TimeUnit.MINUTES);
 
-      final var files = Files.list(outputPath).toList();
-      assertTrue(Files.isRegularFile(outputPath.resolve(
-        "00000000000000000001.png")));
-      assertTrue(Files.isRegularFile(outputPath.resolve(
-        "00000000000000000002.png")));
-      assertTrue(Files.isRegularFile(outputPath.resolve(
-        "00000000000000000003.png")));
-      assertTrue(Files.isRegularFile(outputPath.resolve(
-        "00000000000000000004.png")));
-      assertTrue(Files.isRegularFile(outputPath.resolve(
-        "00000000000000000005.png")));
+      for (final var image : model.imageList().get()) {
+        final var imageId =
+          image.id().value();
+        final var imageFile =
+          outputPath.resolve("0000000000000000000%d.png".formatted(imageId));
+        final var captionFile =
+          outputPath.resolve("0000000000000000000%d.caption".formatted(imageId));
 
-      final var cap1 = outputPath.resolve("00000000000000000001.caption");
-      final var cap2 = outputPath.resolve("00000000000000000002.caption");
-      final var cap3 = outputPath.resolve("00000000000000000003.caption");
-      final var cap4 = outputPath.resolve("00000000000000000004.caption");
-      final var cap5 = outputPath.resolve("00000000000000000005.caption");
-      assertTrue(Files.isRegularFile(cap1));
-      assertTrue(Files.isRegularFile(cap2));
-      assertTrue(Files.isRegularFile(cap3));
-      assertTrue(Files.isRegularFile(cap4));
-      assertTrue(Files.isRegularFile(cap5));
-      assertEquals(10, files.size());
+        assertTrue(Files.isRegularFile(imageFile));
+        assertTrue(Files.isRegularFile(captionFile));
 
-      final var m = new HashMap<String, Object>();
-      assertEquals(
-        List.of(
-          new LCaptionName("1boy"),
-          new LCaptionName("hat"),
-          new LCaptionName("horse"),
-          new LCaptionName("jewelry"),
-          new LCaptionName("male focus"),
-          new LCaptionName("outdoors"),
-          new LCaptionName("pants"),
-          new LCaptionName("photo background"),
-          new LCaptionName("shirt"),
-          new LCaptionName("solo"),
-          new LCaptionName("tree"),
-          new LCaptionName("white shirt")
-        ),
-        LCaptionFiles.parse(m, cap1),
-        () -> "File %s must have the expected content".formatted(cap1)
-      );
-      assertEquals(
-        List.of(
-          new LCaptionName("bicycle"),
-          new LCaptionName("cloud"),
-          new LCaptionName("day"),
-          new LCaptionName("grass"),
-          new LCaptionName("ground vehicle"),
-          new LCaptionName("motor vehicle"),
-          new LCaptionName("motorcycle"),
-          new LCaptionName("no humans"),
-          new LCaptionName("outdoors"),
-          new LCaptionName("sky"),
-          new LCaptionName("traditional media"),
-          new LCaptionName("tree")
-        ),
-        LCaptionFiles.parse(m, cap2),
-        () -> "File %s must have the expected content".formatted(cap2)
-      );
-      assertEquals(
-        List.of(
-          new LCaptionName("day"),
-          new LCaptionName("food"),
-          new LCaptionName("fruit"),
-          new LCaptionName("no humans"),
-          new LCaptionName("outdoors"),
-          new LCaptionName("sky"),
-          new LCaptionName("traditional media")
-        ),
-        LCaptionFiles.parse(m, cap3),
-        () -> "File %s must have the expected content".formatted(cap3)
-      );
-      assertEquals(
-        List.of(
-          new LCaptionName("building"),
-          new LCaptionName("car"),
-          new LCaptionName("greyscale"),
-          new LCaptionName("ground vehicle"),
-          new LCaptionName("monochrome"),
-          new LCaptionName("motor vehicle"),
-          new LCaptionName("no humans"),
-          new LCaptionName("real world location"),
-          new LCaptionName("scenery"),
-          new LCaptionName("window")
-        ),
-        LCaptionFiles.parse(m, cap4),
-        () -> "File %s must have the expected content".formatted(cap4)
-      );
-      assertEquals(
-        List.of(
-          new LCaptionName("animal"),
-          new LCaptionName("cat"),
-          new LCaptionName("grass"),
-          new LCaptionName("outdoors"),
-          new LCaptionName("oversized animal")
-        ),
-        LCaptionFiles.parse(m, cap5),
-        () -> "File %s must have the expected content".formatted(cap5)
-      );
+        final var m = new HashMap<String, Object>();
+
+        switch ((int) imageId) {
+          case 1 -> {
+            assertEquals(
+              List.of(
+                new LCaptionName("1boy"),
+                new LCaptionName("hat"),
+                new LCaptionName("horse"),
+                new LCaptionName("jewelry"),
+                new LCaptionName("male focus"),
+                new LCaptionName("outdoors"),
+                new LCaptionName("pants"),
+                new LCaptionName("photo background"),
+                new LCaptionName("shirt"),
+                new LCaptionName("solo"),
+                new LCaptionName("tree"),
+                new LCaptionName("white shirt")
+              ),
+              LCaptionFiles.parse(m, captionFile),
+              () -> "File %s must have the expected content"
+                .formatted(captionFile)
+            );
+          }
+          case 2 -> {
+            assertEquals(
+              List.of(
+                new LCaptionName("bicycle"),
+                new LCaptionName("cloud"),
+                new LCaptionName("day"),
+                new LCaptionName("grass"),
+                new LCaptionName("ground vehicle"),
+                new LCaptionName("motor vehicle"),
+                new LCaptionName("motorcycle"),
+                new LCaptionName("no humans"),
+                new LCaptionName("outdoors"),
+                new LCaptionName("sky"),
+                new LCaptionName("traditional media"),
+                new LCaptionName("tree")
+              ),
+              LCaptionFiles.parse(m, captionFile),
+              () -> "File %s must have the expected content"
+                .formatted(captionFile)
+            );
+          }
+          case 3 -> {
+            assertEquals(
+              List.of(
+                new LCaptionName("day"),
+                new LCaptionName("food"),
+                new LCaptionName("fruit"),
+                new LCaptionName("no humans"),
+                new LCaptionName("outdoors"),
+                new LCaptionName("sky"),
+                new LCaptionName("traditional media")
+              ),
+              LCaptionFiles.parse(m, captionFile),
+              () -> "File %s must have the expected content"
+                .formatted(captionFile)
+            );
+          }
+          case 4 -> {
+            assertEquals(
+              List.of(
+                new LCaptionName("building"),
+                new LCaptionName("car"),
+                new LCaptionName("greyscale"),
+                new LCaptionName("ground vehicle"),
+                new LCaptionName("monochrome"),
+                new LCaptionName("motor vehicle"),
+                new LCaptionName("no humans"),
+                new LCaptionName("real world location"),
+                new LCaptionName("scenery"),
+                new LCaptionName("window")
+              ),
+              LCaptionFiles.parse(m, captionFile),
+              () -> "File %s must have the expected content"
+                .formatted(captionFile)
+            );
+          }
+          case 5 -> {
+            assertEquals(
+              List.of(
+                new LCaptionName("animal"),
+                new LCaptionName("cat"),
+                new LCaptionName("grass"),
+                new LCaptionName("outdoors"),
+                new LCaptionName("oversized animal")
+              ),
+              LCaptionFiles.parse(m, captionFile),
+              () -> "File %s must have the expected content"
+                .formatted(captionFile)
+            );
+          }
+        }
+      }
     }
   }
 
