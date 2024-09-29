@@ -125,12 +125,10 @@ public final class LFileModelExportTest
       assertTrue(Files.isRegularFile(cap2));
       assertTrue(Files.isRegularFile(cap3));
       assertTrue(Files.isRegularFile(cap4));
-
       assertTrue(Files.isRegularFile(cap5));
       assertEquals(10, files.size());
 
       final var m = new HashMap<String, Object>();
-
       assertEquals(
         List.of(
           new LCaptionName("1boy"),
@@ -146,7 +144,8 @@ public final class LFileModelExportTest
           new LCaptionName("tree"),
           new LCaptionName("white shirt")
         ),
-        LCaptionFiles.parse(m, cap1)
+        LCaptionFiles.parse(m, cap1),
+        () -> "File %s must have the expected content".formatted(cap1)
       );
       assertEquals(
         List.of(
@@ -163,7 +162,8 @@ public final class LFileModelExportTest
           new LCaptionName("traditional media"),
           new LCaptionName("tree")
         ),
-        LCaptionFiles.parse(m, cap2)
+        LCaptionFiles.parse(m, cap2),
+        () -> "File %s must have the expected content".formatted(cap2)
       );
       assertEquals(
         List.of(
@@ -175,7 +175,8 @@ public final class LFileModelExportTest
           new LCaptionName("sky"),
           new LCaptionName("traditional media")
         ),
-        LCaptionFiles.parse(m, cap3)
+        LCaptionFiles.parse(m, cap3),
+        () -> "File %s must have the expected content".formatted(cap3)
       );
       assertEquals(
         List.of(
@@ -190,7 +191,8 @@ public final class LFileModelExportTest
           new LCaptionName("scenery"),
           new LCaptionName("window")
         ),
-        LCaptionFiles.parse(m, cap4)
+        LCaptionFiles.parse(m, cap4),
+        () -> "File %s must have the expected content".formatted(cap4)
       );
       assertEquals(
         List.of(
@@ -200,7 +202,8 @@ public final class LFileModelExportTest
           new LCaptionName("outdoors"),
           new LCaptionName("oversized animal")
         ),
-        LCaptionFiles.parse(m, cap5)
+        LCaptionFiles.parse(m, cap5),
+        () -> "File %s must have the expected content".formatted(cap5)
       );
     }
   }
