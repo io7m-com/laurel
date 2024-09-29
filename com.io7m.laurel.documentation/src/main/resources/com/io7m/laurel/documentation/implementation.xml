@@ -9,4 +9,5 @@
   <xi:include href="i-images.xml"/>
   <xi:include href="i-history.xml"/>
   <xi:include href="i-filemodel.xml"/>
+  <xi:include href="i-validation.xml"/>
 </Section>

@@ -3,15 +3,253 @@
 <Section xmlns="urn:com.io7m.structural:8:0"
          id="3d9f296a-0946-4bb3-81f1-c5185b23973e"
          title="Categories">
+
   <Subsection title="Overview">
     <Paragraph>
-      Categories...
+      <Term type="term">Categories</Term>
+      allow for grouping captions in a manner that allows the application to assist with keeping image
+      captioning <Term type="term">consistent</Term>.
     </Paragraph>
   </Subsection>
 
-  <Subsection title="Required Categories" id="dd94cd12-ab51-406d-96d5-c68404ca8cc7">
+  <Subsection title="Captioning Theory">
+    <Subsection title="Training Process"
+                id="be53ec17-935e-4f02-b585-d77f24af22f7">
+      <Paragraph>
+        When adding captions to images for use in training models such as
+        <LinkExternal target="https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)#Low-rank_adaptation">
+          LORAs</LinkExternal>, it is important to keep captions <Term type="term">consistent</Term>.
+        <Term type="term">Consistent</Term>
+        in this case means to avoid
+        <Link target="9fd3bb37-55e6-4528-a712-4eca47941b83">false positive</Link>
+        and
+        <Link target="9fd3bb37-55e6-4528-a712-4eca47941b83">false negative</Link>
+        captions. To understand what these terms mean and why this is important, it is necessary to understand how image
+        training processes typically work.
+      </Paragraph>
+      <Paragraph>
+        Let <Term type="variable">m</Term> be an existing text-to-image model that we're attempting to fine-tune. Let
+        <Term type="function">generate(k, p)</Term>
+        be a function that, given a model
+        <Term type="variable">k</Term>
+        and a text prompt <Term type="variable">p</Term>, generates an image. For example, if the model
+        <Term type="variable">m</Term>
+        knows about the concept of
+        <Term type="term">laurel trees</Term>, then we'd hope that
+        <Term type="expression">generate(m, "laurel tree")</Term>
+        would produce a picture of a laurel tree.
+      </Paragraph>
+      <Paragraph>
+        Let's assume that <Term type="variable">m</Term> has not been trained on pictures of rose bushes and doesn't
+        know what a rose bush is. If we evaluate <Term type="expression">generate(m, "rose bush")</Term>, then we'll
+        just get arbitrary images that likely don't contain rose bushes. We want to fine-tune
+        <Term type="variable">m</Term>
+        by producing a LORA that introduces the concept of rose bushes. We produce a large dataset of images of rose
+        bushes, and caption each image with (at the very least) the caption
+        <Term type="term">rose bush</Term>.
+      </Paragraph>
+      <Paragraph>
+        The training process then steps through each image <Term type="variable">i</Term> in the dataset and performs
+        the following steps:
+      </Paragraph>
+      <FormalItem title="Per-Image Training Steps"
+                  id="670905a0-9a41-46ca-80e2-3d15e80a75a7">
+        <ListOrdered>
+          <Item>
+            Take the set of captions provided for <Term type="variable">i</Term> and combine them into a prompt
+            <Term type="variable">p</Term>. The exact means by which the captions are combined into a prompt is
+            typically a configurable aspect of the training method. In practice, the most significant caption
+            (<Term type="constant">"rose bush"</Term>) would be the first caption in the prompt, and all other captions
+            would be randomly shuffled and concatenated onto the prompt.
+          </Item>
+          <Item>
+            Generate an image <Term type="expression">g</Term> with <Term type="expression">g = generate(m, p)</Term>.
+          </Item>
+          <Item>
+            Compare the images <Term type="expression">g</Term> and <Term type="variable">i</Term>. The
+            <Term type="term">differences</Term>
+            between the two images are what the fine-tuning of the model will <Term type="term">learn</Term>.
+          </Item>
+        </ListOrdered>
+      </FormalItem>
+      <Paragraph>
+        In our training process, assuming that we've properly captioned the images in our dataset, we would hope that
+        the only significant difference between <Term type="expression">g</Term> and
+        <Term type="expression">i</Term>
+        at each step would be that <Term type="expression">i</Term> would contain an image of a rose bush, and <Term type="expression">
+        g
+      </Term> would not. This would, slowly, cause the fine-tuning of the model to learn what constitutes a rose bush.
+      </Paragraph>
+      <Paragraph>
+        Stepping through the entire dataset once and performing the above steps for each image is known as a single
+        training <Term type="term">epoch</Term>. It will take most training processes multiple
+        <Term type="term">epochs</Term>
+        to actually learn anything significant. In practice, the model <Term type="expression">m</Term> can conceptually
+        be considered to be updated on each training step with the new information it has learned. For the sake of
+        simplicity of discussion, we ignore this aspect of training here.
+      </Paragraph>
+      <Paragraph>
+        Given the above process, we're now equipped to explain the concepts of
+        <Link target="9fd3bb37-55e6-4528-a712-4eca47941b83">false positive</Link>
+        and
+        <Link target="9fd3bb37-55e6-4528-a712-4eca47941b83">false negative</Link>
+        captions.
+      </Paragraph>
+    </Subsection>
+    <Subsection title="False Positive"
+                id="9fd3bb37-55e6-4528-a712-4eca47941b83">
+      <Paragraph>
+        A <Term type="term">false positive</Term> caption is a caption that's accidentally applied to an image when that
+        image <Term type="term">does not</Term> contain the object being captioned. For example, if an image does not
+        contain a red sofa, and a caption <Term type="expression">"red sofa"</Term> is provided, then the
+        <Term type="expression">"red sofa"</Term>
+        caption is a <Term type="term">false positive</Term>.
+      </Paragraph>
+      <Paragraph>
+        To understand why a <Term type="term">false positive</Term> caption is a problem, consider the
+        <Link target="670905a0-9a41-46ca-80e2-3d15e80a75a7">training process</Link>
+        described above. Assume that our original model <Term type="variable">m</Term> knows about the concept of "red
+        sofas".
+      </Paragraph>
+      <FormalItem title="False Positive Process">
+        <ListOrdered>
+          <Item>
+            The image
+            <Term type="variable">i</Term>
+            <Term type="term">does not</Term>
+            contain a red sofa. However, one of the captions provided for <Term type="variable">
+            i
+          </Term> is
+            <Term type="expression">"red sofa"</Term>, and so the prompt
+            <Term type="variable">p</Term>
+            contains the caption <Term type="expression">"red sofa"</Term>.
+          </Item>
+          <Item>
+            An image <Term type="expression">g</Term> is generated with
+            <Term type="expression">g = generate(m, p)</Term>. Because
+            <Term type="variable">p</Term>
+            contains the caption <Term type="expression">"red sofa"</Term>, the generated image
+            <Term type="expression">g</Term>
+            will likely contain a red sofa.
+          </Item>
+          <Item>
+            The process compares the images <Term type="expression">g</Term> and <Term type="variable">i</Term>. The
+            source image <Term type="variable">i</Term> doesn't contain a red sofa, but the generated image
+            <Term type="expression">g</Term>
+            almost certainly does. The system then, essentially, erroneously learns that it should be adding red sofas
+            to images!
+          </Item>
+        </ListOrdered>
+      </FormalItem>
+    </Subsection>
+    <Subsection title="False Negative"
+                id="ce5c17f2-193f-42ff-a5e8-21caba21f253">
+      <Paragraph>
+        Similarly, a <Term type="term">false negative</Term> caption is a caption that's accidentally
+        <Term type="term">not</Term>
+        applied to an image when it really
+        <Term type="term">should</Term>
+        have been. To understand how this might affect training, consider the training process once again:
+      </Paragraph>
+      <FormalItem title="False Negative Process">
+        <ListOrdered>
+          <Item>
+            The image <Term type="variable">i</Term> contains a red sofa. However, none of the captions provided for
+            <Term type="variable">i</Term>
+            are
+            <Term type="expression">"red sofa"</Term>, and so the prompt
+            <Term type="variable">p</Term>
+            does not contain the caption <Term type="expression">"red sofa"</Term>.
+          </Item>
+          <Item>
+            An image <Term type="expression">g</Term> is generated with
+            <Term type="expression">g = generate(m, p)</Term>. Because
+            <Term type="variable">p</Term>
+            does not contain the caption <Term type="expression">"red sofa"</Term>, the generated image
+            <Term type="expression">g</Term>
+            will probably not contain a red sofa.
+          </Item>
+          <Item>
+            The process compares the images <Term type="expression">g</Term> and <Term type="variable">i</Term>. The
+            source image <Term type="variable">i</Term> contains a red sofa, but the generated image
+            <Term type="expression">g</Term>
+            almost certainly does not. The system then, essentially, erroneously learns that it should be removing red
+            sofas from images!
+          </Item>
+        </ListOrdered>
+      </FormalItem>
+      <Paragraph>
+        In practice, <Term type="term">false negative</Term> captions happen much more frequently than
+        <Link target="9fd3bb37-55e6-4528-a712-4eca47941b83">false positive</Link>
+        captions. The reason for this is that it is impractical to know all of the concepts known to the model being
+        trained, and therefore it's impractical to know which concepts the model can tell are
+        <Term type="term">missing</Term>
+        from the images it inspects.
+      </Paragraph>
+    </Subsection>
+    <Subsection title="Best Practices">
+      <Paragraph>
+        Given the above understanding of
+        <Link target="9fd3bb37-55e6-4528-a712-4eca47941b83">false positive</Link>
+        and
+        <Link target="ce5c17f2-193f-42ff-a5e8-21caba21f253">false negative</Link>
+        captions, the following best practices can be inferred for captioning datasets:
+      </Paragraph>
+      <FormalItem title="Best Practices">
+        <ListUnordered>
+          <Item>
+            Include a single <Term type="term">primary caption</Term> at the start of the prompt of every image in the
+            dataset. This <Term type="term">primary caption</Term> is effectively the name of the concept that you are
+            trying to teach to the model. The reason for this follows from an understanding of the training process: By
+            making the <Term type="term">primary caption</Term> prominent and ubiquitous, the system should learn to
+            primarily associate the image differences with this caption.
+          </Item>
+          <Item>
+            Caption all elements of an image that you <Term type="term">do not</Term> want the model to associate with
+            your <Term type="term">primary caption</Term>. This will help ensure that the captioned objects do not show
+            up as <Term type="term">differences</Term> in the images that the training process will, as a result, learn.
+          </Item>
+          <Item>
+            Be consistent in your captioning between images with respect to which aspects of the image you caption. For
+            example, if in one of your images, you caption the <Term type="term">lighting</Term> or the
+            <Term type="term">background colour</Term>, then you should caption the
+            <Term type="term">lighting</Term>
+            and
+            <Term type="term">background colour</Term>
+            in <Term type="term">all</Term> of the images. This assumes, of course, that you are not trying to teach the
+            model about lighting or background colours! This practice is, ultimately, about reducing
+            <Link target="ce5c17f2-193f-42ff-a5e8-21caba21f253">false negatives</Link>.
+          </Item>
+        </ListUnordered>
+      </FormalItem>
+      <Paragraph>
+        In our example <Link target="be53ec17-935e-4f02-b585-d77f24af22f7">training process</Link> above, we should use
+        <Term type="expression">"rose bush"</Term>
+        as the primary caption for each of our images, and we should caption the objects in each image that are not rose
+        bushes (for example,
+        <Term type="expression">"grass"</Term>, <Term type="expression">"soil"</Term>,
+        <Term type="expression">"sky"</Term>, <Term type="expression">"afternoon lighting"</Term>,
+        <Term type="expression">"outdoors"</Term>, etc.)
+      </Paragraph>
+    </Subsection>
+  </Subsection>
+
+  <Subsection title="Required Categories"
+              id="dd94cd12-ab51-406d-96d5-c68404ca8cc7">
     <Paragraph>
-      Required...
+      When a category is marked as <Term type="term">required</Term>, then each image in the dataset
+      <Term type="term">must</Term>
+      contain one or more captions from that category.
+    </Paragraph>
+    <Paragraph>
+      Unlike <Term type="term">captions</Term> which can share their meanings across different datasets, categories are
+      a tool used to help ensure consistent captioning within a single dataset. It is up to users to pick suitable
+      categories for their captions in order to ensure that they caption their images in a consistent manner. A useful
+      category for most datasets, for example, is <Term type="expression">"lighting"</Term>. Assign captions such as
+      <Term type="expression">"dramatic lighting"</Term>, <Term type="expression">"outdoor lighting"</Term>, and so on,
+      to a required <Term type="expression">"lighting"</Term> category. The
+      <Link target="b5ef5558-345f-4734-ac33-1aa6e60dcbcf">validation</Link>
+      process will then fail if a user has forgotten to caption lighting in one or more images.
     </Paragraph>
   </Subsection>
 

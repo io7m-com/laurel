@@ -32,10 +32,12 @@
 .element,
 .expression,
 .file,
+.function,
 .menu,
 .package,
 .parameter,
 .tab,
+.variable,
 .window
 {
   font-family: monospace;
