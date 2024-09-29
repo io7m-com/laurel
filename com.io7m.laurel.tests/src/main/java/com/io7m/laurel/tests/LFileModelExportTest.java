@@ -19,6 +19,8 @@ package com.io7m.laurel.tests;
 
 import com.io7m.laurel.filemodel.LExportRequest;
 import com.io7m.laurel.filemodel.LFileModelEventType;
+import com.io7m.laurel.filemodel.LFileModelStatusIdle;
+import com.io7m.laurel.filemodel.LFileModelStatusLoading;
 import com.io7m.laurel.filemodel.LFileModels;
 import com.io7m.laurel.filemodel.internal.LCaptionFiles;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
@@ -38,7 +40,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipInputStream;
 
@@ -86,7 +90,16 @@ public final class LFileModelExportTest
     }
 
     try (var model = LFileModels.open(this.outputFile, false)) {
-      Thread.sleep(1_000L);
+      final var loadLatch = new CountDownLatch(1);
+
+      model.status().subscribe((oldValue, newValue) -> {
+        if (oldValue instanceof LFileModelStatusLoading && newValue instanceof LFileModelStatusIdle) {
+          loadLatch.countDown();
+        }
+      });
+
+      loadLatch.await();
+      assertEquals(new LFileModelStatusIdle(), model.status().get());
 
       model.export(
           new LExportRequest(outputPath, true))
