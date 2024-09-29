@@ -42,6 +42,7 @@ public final class LFileChoosers implements LFileChoosersType
     new JWOxygenIconSet();
 
   private final JWFileChoosersType choosers;
+  private final LPreferencesType preferences;
   private Path mostRecentDirectory;
 
   /**
@@ -58,6 +59,8 @@ public final class LFileChoosers implements LFileChoosersType
         Executors.newVirtualThreadPerTaskExecutor(),
         Locale.getDefault()
       );
+    this.preferences =
+      services.requireService(LPreferencesType.class);
   }
 
   @Override
@@ -67,6 +70,11 @@ public final class LFileChoosers implements LFileChoosersType
     final var builder =
       JWFileChooserConfiguration.builder()
         .from(configuration)
+        .addAllRecentFiles(
+          this.preferences.recentFiles()
+            .stream()
+            .sorted()
+            .toList())
         .setFileImageSet(OXYGEN_ICON_SET);
 
     if (this.mostRecentDirectory != null) {
