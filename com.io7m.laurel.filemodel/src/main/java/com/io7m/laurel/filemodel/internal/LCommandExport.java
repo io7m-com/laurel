@@ -106,6 +106,8 @@ public final class LCommandExport
     }
 
     try {
+      model.setImagesAll(LCommandModelUpdates.listImages(context));
+
       final var images = model.imageList().get();
       this.imageCount = images.size();
       this.imageIndex = 0;
