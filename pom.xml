@@ -45,11 +45,12 @@
     <com.io7m.jwheatsheaf.version>4.0.0</com.io7m.jwheatsheaf.version>
     <com.io7m.jxtrand.version>2.1.0</com.io7m.jxtrand.version>
     <com.io7m.mime2045.version>1.1.0</com.io7m.mime2045.version>
+    <com.io7m.miscue.version>0.0.3</com.io7m.miscue.version>
     <com.io7m.primogenitor.version>8.2.0</com.io7m.primogenitor.version>
+    <com.io7m.quarrel.version>1.6.1</com.io7m.quarrel.version>
     <com.io7m.trasco.version>1.1.0</com.io7m.trasco.version>
     <com.io7m.xstructural.version>1.9.0</com.io7m.xstructural.version>
     <com.io7m.zelador.version>1.0.0</com.io7m.zelador.version>
-    <com.io7m.miscue.version>0.0.3</com.io7m.miscue.version>
 
     <!-- Third-party dependencies. -->
     <io.opentelemetry.version>1.42.1</io.opentelemetry.version>
@@ -57,7 +58,6 @@
     <org.jooq.version>3.19.13</org.jooq.version>
     <org.junit.version>5.11.1</org.junit.version>
     <org.xerial.sqlite.version>3.46.0.1</org.xerial.sqlite.version>
-    <com.io7m.quarrel.version>1.6.1</com.io7m.quarrel.version>
   </properties>
 
   <licenses>
