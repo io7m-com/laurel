@@ -67,17 +67,6 @@ public final class LFileModelExportTest
     this.events = new ConcurrentLinkedQueue<>();
   }
 
-  @AfterEach
-  public void tearDown()
-    throws InterruptedException
-  {
-    /*
-     * A delay to give Windows time to cope with the SQLite database being closed.
-     */
-
-    Thread.sleep(1_000L);
-  }
-
   @Test
   public void testExportDatasetGood(
     final CloseableResourcesType resources)
@@ -100,16 +89,7 @@ public final class LFileModelExportTest
            resources.addPerTestResource(LFileModels.open(
              this.outputFile,
              false))) {
-      final var loadLatch = new CountDownLatch(1);
-
-      model.status().subscribe((oldValue, newValue) -> {
-        if (oldValue instanceof LFileModelStatusLoading && newValue instanceof LFileModelStatusIdle) {
-          loadLatch.countDown();
-        }
-      });
-
-      loadLatch.await();
-      assertEquals(new LFileModelStatusIdle(), model.status().get());
+      model.loading().get(1L, TimeUnit.MINUTES);
 
       model.export(
           new LExportRequest(outputPath, true))

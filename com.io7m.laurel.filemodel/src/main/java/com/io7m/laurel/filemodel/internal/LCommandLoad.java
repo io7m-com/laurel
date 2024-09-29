@@ -60,6 +60,12 @@ public final class LCommandLoad
   }
 
   @Override
+  public boolean loading()
+  {
+    return true;
+  }
+
+  @Override
   protected LCommandUndoable onExecute(
     final LFileModel model,
     final LDatabaseTransactionType transaction,

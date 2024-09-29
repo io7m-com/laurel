@@ -124,12 +124,6 @@ public final class LFileModelTest
     throws Exception
   {
     this.model.close();
-
-    /*
-     * A delay to give Windows time to cope with the SQLite database being closed.
-     */
-
-    Thread.sleep(1_000L);
   }
 
   @Test

@@ -574,4 +574,10 @@ public interface LFileModelType
     LImageID image,
     URI source
   );
+
+  /**
+   * @return A future that represents the file model's loading process
+   */
+
+  CompletableFuture<?> loading();
 }

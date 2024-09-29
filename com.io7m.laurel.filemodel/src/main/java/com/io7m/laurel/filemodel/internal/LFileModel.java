@@ -140,6 +140,7 @@ public final class LFileModel implements LFileModelType
   private final AttributeType<List<LFileModelEventType>> exportEvents;
   private final AttributeType<LFileModelStatusType> status;
   private final ExecutorService executor;
+  private final CompletableFuture<Object> loadingLatch;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -206,6 +207,8 @@ public final class LFileModel implements LFileModelType
       new ConcurrentHashMap<>();
     this.imageComparison =
       new LImageComparisonModel(ATTRIBUTES, this.imagesAll);
+    this.loadingLatch =
+      new CompletableFuture<>();
 
     this.resources =
       CloseableCollection.create(() -> {
@@ -216,6 +219,8 @@ public final class LFileModel implements LFileModelType
           Optional.empty()
         );
       });
+
+    this.resources.add(this::finishLoading);
 
     this.executor =
       this.resources.add(Executors.newVirtualThreadPerTaskExecutor());
@@ -824,13 +829,27 @@ public final class LFileModel implements LFileModelType
         }
 
         this.executeCommandLocked(command, parameters);
+
+        if (command.loading()) {
+          this.finishLoading();
+        }
+
         this.status.set(new LFileModelStatusIdle());
         future.complete(null);
       } catch (final Throwable e) {
+        if (command.loading()) {
+          this.loadingLatch.completeExceptionally(e);
+        }
         future.completeExceptionally(e);
       }
     });
     return future;
+  }
+
+  private void finishLoading()
+  {
+    LOG.debug("Signalling load completion.");
+    this.loadingLatch.complete(new Object());
   }
 
   private <P, C extends LCommandType<P>>
@@ -1264,6 +1283,12 @@ public final class LFileModel implements LFileModelType
       new LCommandImageSourceSet(),
       new LImageSourceSet(image, source)
     );
+  }
+
+  @Override
+  public CompletableFuture<?> loading()
+  {
+    return this.loadingLatch;
   }
 
   private Optional<InputStream> executeImageStream(

@@ -69,17 +69,6 @@ public final class LFileModelImportTest
     this.events = new ConcurrentLinkedQueue<>();
   }
 
-  @AfterEach
-  public void tearDown()
-    throws InterruptedException
-  {
-    /*
-     * A delay to give Windows time to cope with the SQLite database being closed.
-     */
-
-    Thread.sleep(1_000L);
-  }
-
   @Test
   public void testImportDatasetGood(
     final CloseableResourcesType resources)
@@ -99,7 +88,7 @@ public final class LFileModelImportTest
            resources.addPerTestResource(LFileModels.open(
              this.outputFile,
              false))) {
-      Thread.sleep(1_000L);
+      model.loading().get(1L, TimeUnit.MINUTES);
 
       final var captions =
         model.captionList()
