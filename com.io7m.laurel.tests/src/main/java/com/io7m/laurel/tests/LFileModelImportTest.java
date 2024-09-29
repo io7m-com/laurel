@@ -23,7 +23,6 @@ import com.io7m.laurel.filemodel.LFileModels;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LImageWithID;
-import com.io7m.zelador.test_extension.CloseableResourcesType;
 import com.io7m.zelador.test_extension.ZeladorExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,8 +61,7 @@ public final class LFileModelImportTest
 
   @BeforeEach
   public void setup(
-    final @TempDir Path directory,
-    final CloseableResourcesType resources)
+    final @TempDir Path directory)
   {
     this.directory = directory;
     this.outputFile = directory.resolve("out.db");
@@ -72,8 +70,13 @@ public final class LFileModelImportTest
 
   @AfterEach
   public void tearDown()
+    throws InterruptedException
   {
+    /*
+     * A delay to give Windows time to cope with the SQLite database being closed.
+     */
 
+    Thread.sleep(1_000L);
   }
 
   @Test

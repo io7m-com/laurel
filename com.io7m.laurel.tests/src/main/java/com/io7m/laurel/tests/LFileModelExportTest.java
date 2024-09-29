@@ -40,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -71,8 +70,13 @@ public final class LFileModelExportTest
 
   @AfterEach
   public void tearDown()
+    throws InterruptedException
   {
+    /*
+     * A delay to give Windows time to cope with the SQLite database being closed.
+     */
 
+    Thread.sleep(1_000L);
   }
 
   @Test
