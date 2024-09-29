@@ -16,7 +16,7 @@
   <logger name="com.io7m.blackthorne"
           level="INFO"/>
 
-  <root level="DEBUG">
+  <root level="TRACE">
     <appender-ref ref="STDERR"/>
   </root>
 

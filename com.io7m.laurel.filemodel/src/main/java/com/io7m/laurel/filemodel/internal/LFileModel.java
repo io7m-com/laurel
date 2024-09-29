@@ -881,6 +881,7 @@ public final class LFileModel implements LFileModelType
           }
         }
 
+        LOG.trace("{}: Commit", command);
         t.commit();
 
         if (command.requiresCompaction()) {

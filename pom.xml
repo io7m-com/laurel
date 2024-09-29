@@ -22,6 +22,7 @@
 
   <modules>
     <module>com.io7m.laurel.cmdline</module>
+    <module>com.io7m.laurel.distribution</module>
     <module>com.io7m.laurel.documentation</module>
     <module>com.io7m.laurel.filemodel</module>
     <module>com.io7m.laurel.gui.main</module>

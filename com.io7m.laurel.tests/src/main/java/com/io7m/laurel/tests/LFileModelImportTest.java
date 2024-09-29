@@ -27,6 +27,7 @@ import com.io7m.zelador.test_extension.CloseableResourcesType;
 import com.io7m.zelador.test_extension.ZeladorExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -69,7 +70,7 @@ public final class LFileModelImportTest
     this.events = new ConcurrentLinkedQueue<>();
   }
 
-  @Test
+  @RepeatedTest(value = 100, failureThreshold = 1)
   public void testImportDatasetGood(
     final CloseableResourcesType resources)
     throws Exception

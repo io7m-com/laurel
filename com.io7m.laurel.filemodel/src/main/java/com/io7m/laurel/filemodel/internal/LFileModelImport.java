@@ -233,6 +233,7 @@ public final class LFileModelImport implements LFileModelImportType
 
     final var images =
       this.model.imageList().get();
+
     final var captionIds =
       new HashMap<LCaptionName, LCaptionID>();
     final var assignments =
@@ -242,17 +243,34 @@ public final class LFileModelImport implements LFileModelImportType
       captionIds.put(caption.name(), caption.id());
     }
 
-    for (final var image : images) {
+    final int max = images.size();
+    for (int index = 0; index < max; ++index) {
+      final var image = images.get(index);
+
       final var captionIdList =
         this.captions.get(image.image().file().orElseThrow())
           .stream()
           .map(captionIds::get)
           .collect(Collectors.toSet());
 
+      this.eventProgress(
+        index,
+        max,
+        "Assigning %d captions to image %s",
+        captionIdList.size(),
+        image.id()
+      );
+
       assignments.add(new LImageCaptionsAssignment(image.id(), captionIdList));
     }
 
-    this.model.imageCaptionsAssign(assignments);
+    try {
+      this.model.imageCaptionsAssign(assignments)
+        .get(1L, TimeUnit.MINUTES);
+    } catch (final Throwable e) {
+      this.failed.set(true);
+      this.handleException(e);
+    }
 
     if (this.failed.get()) {
       throw this.errorImport();
