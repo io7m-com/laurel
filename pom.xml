@@ -21,6 +21,7 @@
   <url>https://www.io7m.com/software/laurel</url>
 
   <modules>
+    <module>com.io7m.laurel.cmdline</module>
     <module>com.io7m.laurel.documentation</module>
     <module>com.io7m.laurel.filemodel</module>
     <module>com.io7m.laurel.gui.main</module>
@@ -55,6 +56,7 @@
     <org.jooq.version>3.19.13</org.jooq.version>
     <org.junit.version>5.11.1</org.junit.version>
     <org.xerial.sqlite.version>3.46.0.1</org.xerial.sqlite.version>
+    <com.io7m.quarrel.version>1.6.1</com.io7m.quarrel.version>
   </properties>
 
   <licenses>
@@ -132,6 +134,21 @@
         <version>${javafx.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>com.io7m.quarrel</groupId>
+        <artifactId>com.io7m.quarrel.core</artifactId>
+        <version>${com.io7m.quarrel.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.quarrel</groupId>
+        <artifactId>com.io7m.quarrel.ext.logback</artifactId>
+        <version>${com.io7m.quarrel.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.quarrel</groupId>
+        <artifactId>com.io7m.quarrel.ext.xstructural</artifactId>
+        <version>${com.io7m.quarrel.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.io7m.jdeferthrow</groupId>
         <artifactId>com.io7m.jdeferthrow.core</artifactId>
@@ -412,6 +429,12 @@
           <configuration>
             <suppressionsLocation>checkstyle-filter.xml</suppressionsLocation>
           </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>com.io7m.stmp</groupId>
+          <artifactId>string-template-maven-plugin</artifactId>
+          <version>2.0.0</version>
         </plugin>
 
         <plugin>

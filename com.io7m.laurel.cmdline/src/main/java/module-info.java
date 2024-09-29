@@ -14,37 +14,20 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/**
+ * Image caption management (Command-line tools)
+ */
 
-import net.jqwik.api.providers.ArbitraryProvider;
-
-open module com.io7m.laurel.tests
+module com.io7m.laurel.cmdline
 {
   requires static org.osgi.annotation.bundle;
   requires static org.osgi.annotation.versioning;
 
-  requires com.io7m.laurel.model;
-  requires com.io7m.laurel.gui;
-  requires com.io7m.laurel.filemodel;
-  requires com.io7m.laurel.cmdline;
-
-  requires com.io7m.anethum.api;
   requires com.io7m.jattribute.core;
-  requires com.io7m.jmulticlose.core;
-  requires com.io7m.zelador.test_extension;
-  requires javafx.base;
-  requires javafx.controls;
-  requires net.jqwik.api;
-  requires org.apache.commons.io;
-  requires org.slf4j;
+  requires com.io7m.laurel.filemodel;
+  requires com.io7m.laurel.model;
+  requires com.io7m.quarrel.core;
+  requires com.io7m.quarrel.ext.logback;
 
-  requires org.junit.jupiter.api;
-  requires org.junit.jupiter.engine;
-  requires org.junit.platform.commons;
-  requires org.junit.platform.engine;
-  requires org.junit.platform.launcher;
-
-  uses ArbitraryProvider;
-
-  exports com.io7m.laurel.tests.arbitraries;
-  exports com.io7m.laurel.tests;
+  exports com.io7m.laurel.cmdline;
 }
