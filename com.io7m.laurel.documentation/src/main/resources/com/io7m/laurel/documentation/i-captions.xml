@@ -25,7 +25,7 @@ caption ::= [a-z0-9A-Z_-][a-z0-9A-Z_ \-']*
   <Subsection title="Caption Files">
     <Paragraph>
       A <Term type="term">caption file</Term> is a file consisting of a comma-separated list of captions. More
-      formally, the file confirms to the following format:
+      formally, the file conforms to the following format:
     </Paragraph>
     <FormalItem title="Caption File Format">
       <Verbatim><![CDATA[
