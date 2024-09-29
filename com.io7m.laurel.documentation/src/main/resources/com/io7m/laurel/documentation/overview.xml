@@ -27,6 +27,29 @@
     <FormalItem title="Features">
       <ListUnordered>
         <Item>
+          A user interface for managing images and captions for those images.
+        </Item>
+        <Item>
+          A caption categorization system for assisting with keeping captions consistent across large datasets.
+        </Item>
+        <Item>
+          The ability to import captions and images into a dataset from a directory hierarchy.
+        </Item>
+        <Item>
+          The ability to export captions and images into a directory for use in training scripts.
+        </Item>
+        <Item>
+          A persistent undo/redo system that can store every change ever made to a dataset, including the ability
+          to effectively revert to an earlier version at any time.
+        </Item>
+        <Item>
+          Datasets are backed by <LinkExternal target="https://www.sqlite.org">SQLite</LinkExternal> for reliable,
+          transactional updates, and a file format that is designed to endure for decades to come.
+        </Item>
+        <Item>
+          Command line tools for automating operations such as importing, exporting, and interrogating metadata.
+        </Item>
+        <Item>
           The application is comprehensively documented; you are currently reading this documentation!
         </Item>
       </ListUnordered>
