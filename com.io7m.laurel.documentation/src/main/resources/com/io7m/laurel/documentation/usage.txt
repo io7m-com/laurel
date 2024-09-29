@@ -1,0 +1,23 @@
+laurel: usage: laurel [command] [arguments ...]
+
+  The laurel command-line application.
+
+  Use the "help" command to examine specific commands:
+
+    $ laurel help help.
+
+  Command-line arguments can be placed one per line into a file, and
+  the file can be referenced using the @ symbol:
+
+    $ echo help > file.txt
+    $ echo help >> file.txt
+    $ laurel @file.txt
+
+  Commands:
+    export     Export a dataset into a directory.
+    help       Show usage information for a command.
+    import     Import a directory into a dataset.
+    version    Show the application version.
+
+  Documentation:
+    https://www.io7m.com/software/laurel/

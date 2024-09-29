@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<i:ImageSet xmlns:i="urn:com.io7m.laurel:image-set:1">
+  <i:Captions>
+    <i:Caption ID="7754345c-e9b8-4b3f-906e-a1140c828d63"
+               Text="A"/>
+  </i:Captions>
+  <i:Images>
+    <i:Image ID="10d016d3-8066-4408-a726-0a64eab30c41"
+             FileName="a.png">
+      <i:CaptionReference Caption="7754345c-e9b8-4b3f-906e-a1140c828d63"/>
+    </i:Image>
+    <i:Image ID="10d016d3-8066-4408-a726-0a64eab30c41"
+             FileName="a.png">
+      <i:CaptionReference Caption="7754345c-e9b8-4b3f-906e-a1140c828d63"/>
+    </i:Image>
+  </i:Images>
+</i:ImageSet>

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Schemas xmlns="urn:com.io7m.trasco.database.statements:1:0">
+
+  <Schema versionCurrent="0">
+    <Comment>
+      The schema version table stores the current version of the database schema. Implementations are expected to query
+      this table on connecting to the database in order to ensure that the calling code is compatible with the tables in
+      the database.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE schema_version (
+  version_lock            INTEGER NOT NULL DEFAULT 1,
+  version_application_id  TEXT    NOT NULL,
+  version_number          INTEGER NOT NULL,
+
+  CONSTRAINT check_lock_primary
+    PRIMARY KEY (version_lock),
+
+  CONSTRAINT check_lock_locked
+    CHECK (version_lock = 1)
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+  </Schema>
+
+  <Schema versionCurrent="1">
+    <Comment>
+      The metadata table stores metadata about the image set. This is purely descriptive data intended for human
+      consumption.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE metadata (
+  meta_name  TEXT NOT NULL,
+  meta_value TEXT NOT NULL
+
+-- [jooq ignore start]
+  ,
+  CONSTRAINT metadata_primary_key
+    PRIMARY KEY (meta_name)
+-- [jooq ignore stop]
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The image_blobs table stores the image blobs.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE image_blobs (
+  image_blob_id      INTEGER PRIMARY KEY NOT NULL,
+  image_blob_data    BLOB                NOT NULL,
+  image_blob_sha256  TEXT                NOT NULL,
+  image_blob_type    TEXT                NOT NULL
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The images table stores the complete set of images.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE images (
+  image_id      INTEGER PRIMARY KEY NOT NULL,
+  image_name    TEXT                NOT NULL,
+  image_file    TEXT,
+  image_source  TEXT,
+  image_blob    INTEGER             NOT NULL,
+
+-- [jooq ignore start]
+  CONSTRAINT images_name_unique
+    UNIQUE (image_name),
+-- [jooq ignore stop]
+
+  CONSTRAINT images_blob_exists
+    FOREIGN KEY (image_blob) REFERENCES image_blobs (image_blob_id)
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The captions table stores the complete set of available captions.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE captions (
+  caption_id    INTEGER PRIMARY KEY NOT NULL,
+  caption_text  TEXT                NOT NULL
+
+-- [jooq ignore start]
+  ,
+  CONSTRAINT captions_text_unique
+    UNIQUE (caption_text)
+-- [jooq ignore stop]
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The global_captions table stores the complete set of available global captions.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE global_captions (
+  global_caption_id     INTEGER PRIMARY KEY NOT NULL,
+  global_caption_text   TEXT                NOT NULL,
+  global_caption_order  INTEGER             NOT NULL
+
+-- [jooq ignore start]
+  ,
+  CONSTRAINT global_captions_text_unique
+    UNIQUE (global_caption_text)
+-- [jooq ignore stop]
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The categories table stores the categories for captions.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE categories (
+  category_id        INTEGER PRIMARY KEY NOT NULL,
+  category_text      TEXT                NOT NULL,
+  category_required  INTEGER             NOT NULL
+
+-- [jooq ignore start]
+  ,
+  CONSTRAINT categories_text_unique
+    UNIQUE (category_text)
+-- [jooq ignore stop]
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The caption_categories table associates captions with categories.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE caption_categories (
+  caption_caption_id       INTEGER NOT NULL,
+  caption_category_id  INTEGER NOT NULL,
+
+  CONSTRAINT caption_categories_caption_exists
+    FOREIGN KEY (caption_caption_id)
+      REFERENCES captions (caption_id)
+        ON DELETE CASCADE,
+
+  CONSTRAINT caption_categories_category_exists
+    FOREIGN KEY (caption_category_id)
+      REFERENCES categories (category_id)
+        ON DELETE CASCADE,
+
+  CONSTRAINT caption_categories_primary_key
+    PRIMARY KEY (caption_caption_id, caption_category_id)
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The image_captions table stores the associations between images and captions.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE image_captions (
+  image_caption_image    INTEGER NOT NULL,
+  image_caption_caption  INTEGER NOT NULL,
+
+  CONSTRAINT image_captions_image_exists
+    FOREIGN KEY (image_caption_image)
+      REFERENCES images (image_id)
+        ON DELETE CASCADE,
+
+  CONSTRAINT image_captions_caption_exists
+    FOREIGN KEY (image_caption_caption)
+      REFERENCES captions (caption_id)
+        ON DELETE CASCADE,
+
+  CONSTRAINT image_captions_primary_key
+    PRIMARY KEY (image_caption_image, image_caption_caption)
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The image_captions_counts view stores the number of images to which each caption is assigned.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE VIEW image_captions_counts AS
+  SELECT
+    image_captions.image_caption_caption         AS count_caption_id,
+    count (image_captions.image_caption_caption) AS count_caption_count
+  FROM
+    image_captions
+  GROUP BY image_captions.image_caption_caption
+]]></Statement>
+
+    <Comment>
+      The undo table stores the undo history.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE undo (
+  undo_id           INTEGER PRIMARY KEY NOT NULL,
+  undo_data         BLOB                NOT NULL,
+  undo_description  TEXT                NOT NULL,
+  undo_time         INTEGER             NOT NULL
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+
+    <Comment>
+      The redo table stores the redo history.
+    </Comment>
+
+    <Statement><![CDATA[
+CREATE TABLE redo (
+  redo_id           INTEGER PRIMARY KEY NOT NULL,
+  redo_data         BLOB                NOT NULL,
+  redo_description  TEXT                NOT NULL,
+  redo_time         INTEGER             NOT NULL
+)
+-- [jooq ignore start]
+STRICT
+-- [jooq ignore stop]
+]]></Statement>
+  </Schema>
+
+</Schemas>

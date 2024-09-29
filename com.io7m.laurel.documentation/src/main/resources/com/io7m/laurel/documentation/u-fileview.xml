@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="d7144d51-2cd7-4537-b24c-ae2999a80cf1"
+         title="File View">
+
+  <Paragraph>
+    The application opens to an empty <Term type="term">file view</Term>.
+  </Paragraph>
+
+  <FormalItem title="File View" id="fa75224c-b1c5-4b22-bbb4-4a7368463299">
+    <Image source="2024-09-28-160045_1100x800_scrot.png" type="screenImage">
+      The empty file view.
+    </Image>
+  </FormalItem>
+
+  <Paragraph>
+    Via the <Term type="menu">File</Term> menu, it's possible to create a new dataset, or open an existing one.
+  </Paragraph>
+
+  <FormalItem title="File View (Create)" id="63c5e11c-e8fd-423c-96f9-544d99002777">
+    <Image source="2024-09-28-160235_1100x800_scrot.png" type="screenImage">
+      Creating a new dataset.
+    </Image>
+  </FormalItem>
+
+  <Paragraph>
+    With a dataset loaded, the <Term type="term">file view</Term> shows a series of tabs.
+  </Paragraph>
+
+  <FormalItem title="File View (Tabs)" id="6711b127-b381-46b2-b73b-a046d61653b6">
+    <Image source="2024-09-28-160243_1100x800_scrot.png" type="screenImage">
+      File view tabs.
+    </Image>
+  </FormalItem>
+
+</Section>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="f96c87eb-84a3-4437-bcf7-f1cc338eed00"
+         title="Export">
+
+  <Subsection title="Overview">
+    <Paragraph>
+      The application supports <Term type="term">exporting</Term> datasets to directories.
+    </Paragraph>
+
+    <Paragraph>
+      Exporting can be accessed from the <Term type="menu">File</Term> menu. If the
+      <Term type="button">Export Images</Term>
+      checkbox is checked, image files will be written to the output directory. For very large datasets where captions
+      are being repeatedly exported during development, it can be useful to switch off image exports in order to save
+      time.
+    </Paragraph>
+
+    <FormalItem title="Export">
+      <Image source="2024-09-28-161422_1100x800_scrot.png"
+             type="screenImage">
+        The export dialog.
+      </Image>
+    </FormalItem>
+
+    <FormalItem title="Export (Progress)">
+      <Image source="2024-09-28-161405_1100x800_scrot.png"
+             type="screenImage">
+        The export in progress.
+      </Image>
+    </FormalItem>
+
+    <Paragraph>
+      Any errors encountered during the export process are shown in the dialog.
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Format">
+    <Paragraph>
+      Caption files will be exported to the documented
+      <Link target="d2969342-a3a7-4f8b-88aa-529b09291d61">caption file format</Link>.
+    </Paragraph>
+  </Subsection>
+
+</Section>

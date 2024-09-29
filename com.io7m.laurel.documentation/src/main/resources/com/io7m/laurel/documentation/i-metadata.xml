@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="9e2689f2-e0b3-42bb-a3c4-a01741d1a0cd"
+         title="Metadata">
+
+  <Subsection title="Overview">
+    <Paragraph>
+      Metadata in the application is a simple string key/value store. Keys are unique.
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Dublin Core">
+    <Paragraph>
+      It is recommended that creators annotate datasets with the standard
+      <LinkExternal target="https://www.dublincore.org/specifications/dublin-core/dcmi-terms/">
+        Dublin Core
+      </LinkExternal>
+      metadata terms, summarized in the following table:
+    </Paragraph>
+    <FormalItem title="Recommended Metadata">
+      <Table type="genericTable">
+        <Columns>
+          <Column>Name</Column>
+          <Column>Description</Column>
+        </Columns>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:title</Term>
+          </Cell>
+          <Cell>
+            The dataset title.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:creator</Term>
+          </Cell>
+          <Cell>
+            The dataset creator.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:subject</Term>
+          </Cell>
+          <Cell>
+            The dataset subject.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:description</Term>
+          </Cell>
+          <Cell>
+            A human-readable description of the dataset.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:publisher</Term>
+          </Cell>
+          <Cell>
+            A organization publishing the dataset.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:contributor</Term>
+          </Cell>
+          <Cell>
+            The contributors to the dataset.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:date</Term>
+          </Cell>
+          <Cell>
+            The dataset publication or creation date.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:type</Term>
+          </Cell>
+          <Cell>
+            The type (recommended: "dataset").
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:format</Term>
+          </Cell>
+          <Cell>
+            The format (recommended: "com.io7m.laurel").
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:identifier</Term>
+          </Cell>
+          <Cell>
+            The dataset identifier.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:source</Term>
+          </Cell>
+          <Cell>
+            The dataset source URI.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:language</Term>
+          </Cell>
+          <Cell>
+            The dataset language.
+          </Cell>
+        </Row>
+        <Row>
+          <Cell>
+            <Term type="constant">dc:rights</Term>
+          </Cell>
+          <Cell>
+            The dataset rights/license.
+          </Cell>
+        </Row>
+      </Table>
+    </FormalItem>
+  </Subsection>
+
+</Section>

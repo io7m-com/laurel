@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="72ae1883-064b-4aa8-b94c-2f7dc7321af8"
+         title="Metadata">
+
+  <Paragraph>
+    The <Term type="tab">Metadata</Term> tab allows for embedding textual metadata into the dataset. This can be
+    used to hold author information, license information, and etc.
+  </Paragraph>
+
+  <FormalItem title="Metadata">
+    <Image source="2024-09-28-161016_1100x800_scrot.png"
+           type="screenImage">
+      Metadata section.
+    </Image>
+  </FormalItem>
+
+  <Paragraph>
+    Metadata values can be added using the <Term type="button">Add Metadata</Term> button. Existing metadata values can
+    be modified with the <Term type="button">Modify Metadata</Term> button, and removed with the
+    <Term type="button">Remove Metadata</Term>
+    button.
+  </Paragraph>
+
+  <FormalItem title="Metadata (Add)">
+    <Image source="2024-09-28-161041_1100x800_scrot.png"
+           type="screenImage">
+      Metadata creation.
+    </Image>
+  </FormalItem>
+
+  <FormalItem title="Metadata Created">
+    <Image source="2024-09-28-161054_1100x800_scrot.png"
+           type="screenImage">
+      Metadata listing.
+    </Image>
+  </FormalItem>
+
+</Section>

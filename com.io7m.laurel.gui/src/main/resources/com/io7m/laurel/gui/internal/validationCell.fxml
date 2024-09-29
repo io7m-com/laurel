@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.HBox?>
+
+<HBox maxWidth="1.7976931348623157E308" prefHeight="32.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.io7m.laurel.gui.internal.LValidationCellController">
+   <children>
+      <TextArea fx:id="errorText" editable="false" wrapText="true" HBox.hgrow="ALWAYS">
+         <styleClass>
+            <String fx:value="dataTable" />
+            <String fx:value="borderedOutset" />
+         </styleClass>
+      </TextArea>
+   </children>
+</HBox>

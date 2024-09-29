@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="405b6ebe-a489-4849-8b02-57129078ab7e"
+         title="Images">
+  <Paragraph>
+    An <Term type="term">image</Term> is a rectangular array of pixels. The application does not do any special
+    processing of images beyond storing them in the dataset. Images are, in practice, expected to be in one of the
+    various popular image formats such as
+    <LinkExternal target="https://www.w3.org/TR/png-3/">PNG</LinkExternal>.
+  </Paragraph>
+  <Paragraph>
+    Each image in the dataset may have zero or more
+    <Link target="605e7b9d-a54f-4c3c-914c-c6978d2d50f7">captions</Link>
+    assigned.
+  </Paragraph>
+</Section>

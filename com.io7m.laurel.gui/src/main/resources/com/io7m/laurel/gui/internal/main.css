@@ -1,0 +1,269 @@
+.root
+{
+  -fx-font-size: 10pt;
+
+  -fx-base:              #314222;
+  -fx-accent:            #A9FA62;
+  -fx-default-button:    #A9FA62;
+  -fx-focus-color:       #A9FA62;
+  -fx-faint-focus-color: #A9FA6222;
+}
+
+.progress-bar
+{
+  -fx-indeterminate-bar-length: 16;
+}
+
+.progress-bar > .track
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color:             #303030;
+  -fx-control-inner-background: #000000;
+}
+
+.progress-bar > .bar
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-background-color: #ffffff;
+}
+
+.scroll-bar > .thumb
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color:     #606060;
+  -fx-background-color: #303030;
+}
+
+.scroll-bar:hover > .thumb,
+.scroll-bar:pressed > .thumb
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color:     #606060;
+  -fx-background-color: #505050;
+}
+
+.scroll-bar > .track
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color:     #606060;
+  -fx-background-color: #202020;
+}
+
+.scroll-bar > .decrement-button
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color: #606060;
+}
+
+.scroll-bar > .increment-button
+{
+  -fx-background-insets: 0 0 0 0;
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-insets: 0 0 0 0;
+  -fx-padding: 0 0 0 0;
+
+  -fx-border-color: #606060;
+}
+
+.scroll-bar > .increment-button > .increment-arrow,
+.scroll-bar > .decrement-button > .decrement-arrow
+{
+  -fx-background-color: #A9FA62;
+}
+
+.menu-bar
+{
+  -fx-background-color: #314222;
+  -fx-border-color:     #303030;
+}
+
+.button,
+.check-box,
+.choice-box,
+.color-picker,
+.color-picker.split-button,
+.combo-box-base,
+.container,
+.control-buttons-tab,
+.menu-button,
+.progress-bar,
+.radio-button,
+.text-field,
+.text-area,
+.tab,
+.tab-down-button,
+.tab-header-area,
+.tab-pane,
+.toggle-button
+{
+  -fx-background-radius: 0 0 0 0;
+  -fx-border-radius: 0 0 0 0;
+}
+
+.tab .tab-label
+{
+  -fx-pref-width: 160;
+  -fx-alignment: center;
+}
+
+.tab:selected .tab-label
+{
+  -fx-alignment: center;
+}
+
+.tab-pane
+{
+  -fx-tab-min-height: 32;
+  -fx-tab-max-height: 32;
+}
+
+.tabButton {
+  -fx-font-size: 8pt;
+}
+
+.errorHighlight
+{
+  -fx-background-color: #ffbbbb;
+}
+
+.noHeader .column-header-background
+{
+  -fx-max-height: 0;
+  -fx-pref-height: 0;
+  -fx-min-height: 0;
+}
+
+.statusBar
+{
+  -fx-background-color: #202020;
+  -fx-border-color:     #303030;
+}
+
+#statusConnectionText
+{
+  -fx-font-size:   8pt;
+  -fx-font-family: "Monospaced";
+}
+
+.presetHeaderText
+{
+  -fx-font-size:   10pt;
+  -fx-font-weight: bold;
+  -fx-font-family: "Monospaced";
+}
+
+.preferencesHeaderText
+{
+  -fx-font-size:   12pt;
+  -fx-font-weight: bold;
+  -fx-font-family: "Monospaced";
+}
+
+.dataTable
+{
+  -fx-font-size:   9pt;
+  -fx-font-family: "Monospaced";
+}
+
+.headerlessTable .column-header-background
+{
+  -fx-max-height: 0;
+  -fx-pref-height: 0;
+  -fx-min-height: 0;
+}
+
+.textShadow
+{
+  -fx-text-fill: #000000;
+}
+
+.dial
+{
+  dial-radial-gauge-color: #00f9c9;
+  dial-radial-gauge-size:  8;
+}
+
+.dialTextField
+{
+  -fx-font-size:   9pt;
+  -fx-font-family: "Monospaced";
+}
+
+.text-field,
+.text-area
+{
+  -fx-background-color: #243119;
+  -fx-text-fill:        #FFFFFF;
+  -fx-border-color:     #202020;
+}
+
+.borderedOutset
+{
+  -fx-border-color: #000000aa;
+  -fx-border-insets: 0;
+  -fx-border-width:  2.0;
+}
+
+.gridVisible
+{
+  -fx-background-color: #000000aa;
+  -fx-vgap: 1;
+  -fx-hgap: 1;
+  -fx-padding: 1;
+}
+
+.gridMember
+{
+  -fx-background-color: #4b5f38;
+}
+
+.table-view .column-header
+{
+  -fx-max-height: 32px;
+  -fx-pref-height: 32px;
+  -fx-min-height: 32px;
+}
+
+.validationList
+{
+  -fx-background-color: #889c75ff;
+}
+.validationList .list-cell
+{
+  -fx-background-color: #889c75ff;
+}
+
+.text-input, .text-input.content
+{
+  -fx-text-fill: black;
+  -fx-background-color: #889c75ff;
+}
+
+.placeholder .label
+{
+  -fx-text-fill: black;
+}
