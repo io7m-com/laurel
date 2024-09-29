@@ -27,6 +27,7 @@ open module com.io7m.laurel.tests
   requires com.io7m.laurel.filemodel;
   requires com.io7m.laurel.cmdline;
 
+  requires com.io7m.quarrel.ext.xstructural;
   requires com.io7m.anethum.api;
   requires com.io7m.jattribute.core;
   requires com.io7m.jmulticlose.core;

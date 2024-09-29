@@ -39,10 +39,6 @@
       <artifactId>com.io7m.quarrel.ext.logback</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.io7m.quarrel</groupId>
-      <artifactId>com.io7m.quarrel.ext.xstructural</artifactId>
-    </dependency>
-    <dependency>
       <groupId>com.io7m.seltzer</groupId>
       <artifactId>com.io7m.seltzer.api</artifactId>
     </dependency>
@@ -81,7 +77,6 @@
         <configuration>
           <failOnWarning>true</failOnWarning>
           <ignoredUnusedDeclaredDependencies>
-            <ignoredUnusedDeclaredDependency> com.io7m.quarrel:com.io7m.quarrel.ext.xstructural::*</ignoredUnusedDeclaredDependency>
             <ignoredUnusedDeclaredDependency>ch.qos.logback:logback-classic::*</ignoredUnusedDeclaredDependency>
           </ignoredUnusedDeclaredDependencies>
         </configuration>

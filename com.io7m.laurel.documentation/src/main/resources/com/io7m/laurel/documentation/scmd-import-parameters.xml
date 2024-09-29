@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Subsection title="Parameters" xmlns="urn:com.io7m.structural:8:0">
+  <FormalItem id="9354e6bb-341c-3c32-8268-940eb250d76e" title="--input-directory">
+    <Table type="genericTable">
+      <Columns>
+        <Column>Attribute</Column>
+        <Column>Value</Column>
+      </Columns>
+      <Row>
+        <Cell>Name</Cell>
+        <Cell>
+          <Term type="parameter">--input-directory</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Type</Cell>
+        <Cell>
+          <Term type="class">java.nio.file.Path</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Default Value</Cell>
+        <Cell>
+          <Term type="constant"/>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Cardinality</Cell>
+        <Cell>
+          <Term type="expression">[1, 1]</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Description</Cell>
+        <Cell>The input directory.</Cell>
+      </Row>
+    </Table>
+  </FormalItem>
+  <FormalItem id="19d5909e-1417-3e23-ab99-a966d3b7d706" title="--output-file">
+    <Table type="genericTable">
+      <Columns>
+        <Column>Attribute</Column>
+        <Column>Value</Column>
+      </Columns>
+      <Row>
+        <Cell>Name</Cell>
+        <Cell>
+          <Term type="parameter">--output-file</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Type</Cell>
+        <Cell>
+          <Term type="class">java.nio.file.Path</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Default Value</Cell>
+        <Cell>
+          <Term type="constant"/>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Cardinality</Cell>
+        <Cell>
+          <Term type="expression">[1, 1]</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Description</Cell>
+        <Cell>The output file.</Cell>
+      </Row>
+    </Table>
+  </FormalItem>
+  <FormalItem id="3c74b023-80a2-360b-bdf7-5cb808a68883" title="--verbose">
+    <Table type="genericTable">
+      <Columns>
+        <Column>Attribute</Column>
+        <Column>Value</Column>
+      </Columns>
+      <Row>
+        <Cell>Name</Cell>
+        <Cell>
+          <Term type="parameter">--verbose</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Type</Cell>
+        <Cell>
+          <Term type="class">com.io7m.quarrel.ext.logback.QLogLevel</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Default Value</Cell>
+        <Cell>
+          <Term type="constant">info</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Cardinality</Cell>
+        <Cell>
+          <Term type="expression">[1, 1]</Term>
+        </Cell>
+      </Row>
+      <Row>
+        <Cell>Description</Cell>
+        <Cell>Set the logging level of the application.</Cell>
+      </Row>
+    </Table>
+  </FormalItem>
+</Subsection>
+

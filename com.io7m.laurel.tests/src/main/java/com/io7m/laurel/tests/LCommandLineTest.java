@@ -47,6 +47,12 @@ public final class LCommandLineTest
   }
 
   @Test
+  public void testUsage()
+  {
+    LCMain.mainExitless(new String[]{});
+  }
+
+  @Test
   public void testHelp()
   {
     LCMain.mainExitless(new String[]{
@@ -79,7 +85,6 @@ public final class LCommandLineTest
       () -> "Output file %s must be a regular file".formatted(outputFile)
     );
   }
-
 
   @Test
   public void testExport()

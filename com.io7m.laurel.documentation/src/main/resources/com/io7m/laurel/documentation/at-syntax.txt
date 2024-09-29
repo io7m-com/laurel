@@ -1,0 +1,12 @@
+$ laurel import --input-directory /tmp/data --output-file output.ldb
+
+$ (cat <<EOF
+import
+--input-directory
+/tmp/data
+--output-file
+output.ldb
+EOF
+) > args.txt
+
+$ laurel @args.txt

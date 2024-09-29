@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Section xmlns="urn:com.io7m.structural:8:0"
+         id="bd176847-ba13-4d59-b134-f59b85b4ae8c"
+         title="Import">
+
+  <Subsection title="Overview">
+    <Paragraph>
+      The application supports <Term type="term">importing</Term> directories filled with captioned images.
+    </Paragraph>
+
+    <Paragraph>
+      Importing can be accessed from the <Term type="menu">File</Term> menu.
+    </Paragraph>
+
+    <FormalItem title="Import">
+      <Image source="2024-09-28-161116_1100x800_scrot.png" type="screenImage">
+        The import dialog.
+      </Image>
+    </FormalItem>
+
+    <FormalItem title="Import (Progress)">
+      <Image source="2024-09-28-161219_1100x800_scrot.png" type="screenImage">
+        The import in progress.
+      </Image>
+    </FormalItem>
+
+    <Paragraph>
+      Any errors encountered during the import process are shown in the dialog.
+    </Paragraph>
+
+    <FormalItem title="Import (Errors)">
+      <Image source="2024-09-28-161257_1100x800_scrot.png" type="screenImage">
+        The import dialog displaying errors.
+      </Image>
+    </FormalItem>
+  </Subsection>
+
+  <Subsection title="Directory Layout">
+    <Paragraph>
+      The import process will recursively walk through a given directory hierarchy searching for image files.
+      When an image file is discovered, the process will look for a caption file associated with the image.
+      A caption file must have the file extension <Term type="expression">caption</Term>. For example, if the
+      process discovers an image file named <Term type="file">example.png</Term>, the caption file associated
+      with it must be called <Term type="file">example.caption</Term>.
+    </Paragraph>
+    <Paragraph>
+      Caption files must be provided in the documented
+      <Link target="d2969342-a3a7-4f8b-88aa-529b09291d61">caption file format</Link>.
+    </Paragraph>
+  </Subsection>
+
+</Section>

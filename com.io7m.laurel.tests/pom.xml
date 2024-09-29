@@ -61,6 +61,10 @@
       <groupId>com.io7m.jmulticlose</groupId>
       <artifactId>com.io7m.jmulticlose.core</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.io7m.quarrel</groupId>
+      <artifactId>com.io7m.quarrel.ext.xstructural</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>net.jqwik</groupId>

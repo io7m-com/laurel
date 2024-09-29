@@ -22,6 +22,7 @@
   <xi:include href="overview.xml"/>
   <xi:include href="install.xml"/>
   <xi:include href="usage.xml"/>
+  <xi:include href="cmdline.xml"/>
   <xi:include href="implementation.xml"/>
   <xi:include href="license.xml"/>
   <xi:include href="colophon.xml"/>

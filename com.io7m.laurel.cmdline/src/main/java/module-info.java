@@ -30,4 +30,7 @@ module com.io7m.laurel.cmdline
   requires com.io7m.quarrel.ext.logback;
 
   exports com.io7m.laurel.cmdline;
+
+  exports com.io7m.laurel.cmdline.internal
+    to com.io7m.laurel.tests;
 }

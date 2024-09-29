@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Section xmlns:xi="http://www.w3.org/2001/XInclude"
+         id="07563d3d-2dbf-35c2-9ff6-0ad39c0a8318"
+         title="import"
+         xmlns="urn:com.io7m.structural:8:0">
+  <Subsection title="Name">
+    <Paragraph>
+      <Term type="command">import</Term>
+      - Import a directory into a dataset.
+    </Paragraph>
+  </Subsection>
+  <Subsection title="Description">
+    <Paragraph>
+      The
+      <Term type="command">import</Term>
+      command
+      <Link target="bd176847-ba13-4d59-b134-f59b85b4ae8c">imports</Link>
+      a dataset.
+    </Paragraph>
+  </Subsection>
+  <xi:include href="scmd-import-parameters.xml"/>
+  <Subsection title="Examples">
+    <FormalItem title="Example"
+                type="example">
+      <Verbatim><![CDATA[
+$ quarrel import --input-directory /tmp/data --output-file output.ldb
+]]></Verbatim>
+    </FormalItem>
+  </Subsection>
+</Section>
+

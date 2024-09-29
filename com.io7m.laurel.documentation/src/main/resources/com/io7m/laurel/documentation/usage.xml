@@ -10,4 +10,6 @@
   <xi:include href="u-metadata.xml"/>
   <xi:include href="u-history.xml"/>
   <xi:include href="u-validation.xml"/>
+  <xi:include href="u-import.xml"/>
+  <xi:include href="u-export.xml"/>
 </Section>

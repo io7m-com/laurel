@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Section xmlns:xi="http://www.w3.org/2001/XInclude" id="bbb8a295-eafb-34e4-b07f-9c7559dd3f95" title="export" xmlns="urn:com.io7m.structural:8:0">
+  <Subsection title="Name">
+    <Paragraph>
+      <Term type="command">export</Term>
+       - Export a dataset into a directory.
+    </Paragraph>
+  </Subsection>
+  <Subsection title="Description">
+    <Paragraph>
+      The 
+      <Term type="command">export</Term>
+       command
+      <Link target="f96c87eb-84a3-4437-bcf7-f1cc338eed00">exports</Link>
+      a dataset.
+    </Paragraph>
+  </Subsection>
+  <xi:include href="scmd-export-parameters.xml"/>
+  <Subsection title="Examples">
+    <FormalItem title="Example" type="example">
+      <Verbatim><![CDATA[
+$ quarrel export --input-file example.ldb --output-directory /tmp/dataset
+]]></Verbatim>
+    </FormalItem>
+  </Subsection>
+</Section>
+
