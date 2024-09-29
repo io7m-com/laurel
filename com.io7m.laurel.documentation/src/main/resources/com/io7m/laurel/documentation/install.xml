@@ -5,8 +5,81 @@
 
   <Subsection title="Overview">
     <Paragraph>
-      Installation…
+      There are several ways to install the <Term type="package">Laurel</Term> application.
     </Paragraph>
   </Subsection>
+
+  <Subsection title="Portable Application Distribution">
+    <Paragraph>
+      The portable application distribution is simply a zip archive consisting of a couple of frontend shell scripts and
+      the Java jar files that comprise the application. This distribution is mostly platform-independent
+      <LinkFootnote target="54c5ab96-2792-4286-9fff-856835b83310"/>, but requires some (fairly straightforward)
+      manual setup.
+    </Paragraph>
+    <Paragraph>
+      The distribution uses your locally installed Java VM. First, check that you have a JDK 21 or higher JVM installed:
+    </Paragraph>
+    <FormalItem title="Java Version">
+      <Verbatim><![CDATA[
+$ java -version
+openjdk version "21.0.4" 2024-07-16
+OpenJDK Runtime Environment (build 21.0.4+7)
+OpenJDK 64-Bit Server VM (build 21.0.4+7, mixed mode, sharing)
+]]></Verbatim>
+    </FormalItem>
+    <Paragraph>
+      The application distribution is a zip file with a <Term type="directory">laurel</Term> directory in the root of
+      the zip archive.
+    </Paragraph>
+    <FormalItem title="Unzip">
+      <Verbatim><![CDATA[
+$ unzip com.io7m.laurel.distribution-${project.version}-distribution.zip
+   creating: laurel/
+   creating: laurel/bin/
+  inflating: laurel/bin/laurel
+  inflating: laurel/bin/laurel-ui
+   creating: laurel/lib/
+  inflating: laurel/lib/com.io7m.anethum.api-1.1.1.jar
+  inflating: laurel/lib/com.io7m.blackthorne.core-2.0.2.jar
+  inflating: laurel/lib/com.io7m.blackthorne.jxe-2.0.2.jar
+  inflating: laurel/lib/com.io7m.darco.api-1.0.0.jar
+  inflating: laurel/lib/com.io7m.darco.sqlite-1.0.0.jar
+...
+]]></Verbatim>
+    </FormalItem>
+    <Paragraph>
+      On UNIX-like platforms, ensure the included frontend scripts are executable:
+    </Paragraph>
+    <FormalItem title="chmod">
+      <Verbatim><![CDATA[
+$ chmod +x laurel/bin/*
+]]></Verbatim>
+    </FormalItem>
+    <Paragraph>
+      Set the <Term type="variable">LAUREL_HOME</Term> environment variable to the directory:
+    </Paragraph>
+    <FormalItem title="LAUREL_HOME">
+      <Verbatim><![CDATA[
+$ export LAUREL_HOME=$(realpath laurel)
+]]></Verbatim>
+    </FormalItem>
+    <Paragraph>
+      Now run either <Term type="file">laurel/bin/laurel</Term> for the command-line tool, or
+      <Term type="file">laurel/bin/laurel-ui</Term>
+      for the graphical user interface.
+    </Paragraph>
+    <FormalItem title="laurel">
+      <Verbatim><![CDATA[
+$ laurel/bin/laurel version
+com.io7m.laurel 1.0.0-SNAPSHOT 7e810b7cda6e7d8db2032fdb936f9260aaf906f2
+]]></Verbatim>
+    </FormalItem>
+  </Subsection>
+
+  <Footnote id="54c5ab96-2792-4286-9fff-856835b83310">
+    Unfortunately, JavaFX does not allow for platform-independence due to including rather incompetently-packaged
+    platform-specific artifacts. The command-line tools are usable on the fairly huge range of underlying platforms
+    that the <LinkExternal target="https://github.com/xerial/sqlite-jdbc">sqlite-jdbc</LinkExternal> library supports.
+  </Footnote>
 
 </Section>

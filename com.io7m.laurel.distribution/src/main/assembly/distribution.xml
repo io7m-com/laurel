@@ -7,7 +7,7 @@
 
   <id>distribution</id>
 
-  <baseDirectory>${project.name}-${project.version}</baseDirectory>
+  <baseDirectory>laurel</baseDirectory>
 
   <formats>
     <format>zip</format>
