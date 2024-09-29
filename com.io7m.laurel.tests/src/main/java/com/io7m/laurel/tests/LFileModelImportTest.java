@@ -20,8 +20,6 @@ package com.io7m.laurel.tests;
 import com.io7m.laurel.filemodel.LFileModelEventType;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LFileModels;
-import com.io7m.laurel.filemodel.internal.LFileModel;
-import com.io7m.laurel.filemodel.internal.LFileModelImport;
 import com.io7m.laurel.gui.internal.LPerpetualSubscriber;
 import com.io7m.laurel.model.LException;
 import com.io7m.laurel.model.LImageWithID;
@@ -40,10 +38,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -61,17 +56,8 @@ public final class LFileModelImportTest
   private static final Logger LOG =
     LoggerFactory.getLogger(LFileModelTest.class);
 
-  private static final long TIMEOUT = 10L;
-
-  private static final OpenOption[] OPEN_OPTIONS = {
-    StandardOpenOption.WRITE,
-    StandardOpenOption.CREATE,
-    StandardOpenOption.TRUNCATE_EXISTING
-  };
-
   private Path directory;
   private Path outputFile;
-  private CloseableResourcesType resources;
   private ConcurrentLinkedQueue<LFileModelEventType> events;
 
   @BeforeEach
@@ -81,7 +67,6 @@ public final class LFileModelImportTest
   {
     this.directory = directory;
     this.outputFile = directory.resolve("out.db");
-    this.resources = resources;
     this.events = new ConcurrentLinkedQueue<>();
   }
 
