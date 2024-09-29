@@ -22,8 +22,14 @@ import com.io7m.jmulticlose.core.CloseableCollectionType;
 import com.io7m.jwheatsheaf.api.JWFileChooserAction;
 import com.io7m.jwheatsheaf.api.JWFileChooserConfiguration;
 import com.io7m.laurel.filemodel.LFileModelEventType;
+import com.io7m.laurel.filemodel.LFileModelStatusError;
+import com.io7m.laurel.filemodel.LFileModelStatusIdle;
+import com.io7m.laurel.filemodel.LFileModelStatusLoading;
+import com.io7m.laurel.filemodel.LFileModelStatusRunningCommand;
+import com.io7m.laurel.filemodel.LFileModelStatusType;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.model.LException;
+import com.io7m.miscue.fx.seltzer.MSErrorDialogs;
 import com.io7m.repetoir.core.RPServiceDirectoryType;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -34,10 +40,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -115,22 +123,23 @@ public final class LFileView extends LAbstractViewWithModel
    *
    * @return A view and stage
    *
-   * @throws Exception On errors
+   * @throws LException On errors
    */
 
   public static LViewAndStage<LFileView> openForStage(
     final RPServiceDirectoryType services,
     final LFileModelScope fileScope,
     final Stage stage)
-    throws Exception
+    throws LException
   {
     final var strings =
       services.requireService(LStrings.class);
 
+    final var resourceName =
+      "/com/io7m/laurel/gui/internal/main.fxml";
     final var xml =
-      LFileView.class.getResource(
-        "/com/io7m/laurel/gui/internal/main.fxml"
-      );
+      LFileView.class.getResource(resourceName);
+
     final var resources =
       strings.resources();
     final var loader =
@@ -180,7 +189,18 @@ public final class LFileView extends LAbstractViewWithModel
       return controllers.call((Class<? extends LViewType>) param);
     });
 
-    final var pane = loader.<Pane>load();
+    final Pane pane;
+    try {
+      pane = loader.load();
+    } catch (final IOException e) {
+      throw new LException(
+        Objects.requireNonNullElse(e.getMessage(), e.getClass().getName()),
+        e,
+        "error-io",
+        Map.of("Resource", resourceName)
+      );
+    }
+
     LCSS.setCSS(pane);
     stage.setScene(new Scene(pane));
     stage.setTitle(strings.format(TITLE));
@@ -219,6 +239,12 @@ public final class LFileView extends LAbstractViewWithModel
     final CloseableCollectionType<?> subscriptions,
     final LFileModelType fileModel)
   {
+    Platform.runLater(() -> {
+      this.mainContent.setVisible(true);
+      this.menuItemClose.setDisable(false);
+      this.menuItemExport.setDisable(false);
+    });
+
     final var eventSubscriber =
       subscriptions.add(
         new LPerpetualSubscriber<LFileModelEventType>(event -> {
@@ -244,12 +270,31 @@ public final class LFileView extends LAbstractViewWithModel
         })
     );
 
-    Platform.runLater(() -> {
-      this.mainContent.setDisable(false);
-      this.mainContent.setVisible(true);
-      this.menuItemClose.setDisable(false);
-      this.menuItemExport.setDisable(false);
-    });
+    subscriptions.add(
+      fileModel.status()
+        .subscribe((oldValue, newValue) -> {
+          Platform.runLater(() -> this.onStatusChanged(newValue));
+        })
+    );
+  }
+
+  private void onStatusChanged(
+    final LFileModelStatusType newValue)
+  {
+    switch (newValue) {
+      case final LFileModelStatusError error -> {
+        this.mainContent.setDisable(false);
+      }
+      case final LFileModelStatusIdle idle -> {
+        this.mainContent.setDisable(false);
+      }
+      case final LFileModelStatusLoading loading -> {
+        this.mainContent.setDisable(true);
+      }
+      case final LFileModelStatusRunningCommand command -> {
+        this.mainContent.setDisable(false);
+      }
+    }
   }
 
   private void onFileModelEvent(
@@ -307,19 +352,24 @@ public final class LFileView extends LAbstractViewWithModel
 
   /**
    * The user tried to create a new image set.
-   *
-   * @throws Exception On errors
    */
 
   @FXML
   public void onNewSelected()
-    throws Exception
   {
-    this.tryNew();
+    try {
+      this.tryNew();
+    } catch (final LException e) {
+      MSErrorDialogs.builder(e)
+        .setCSS(LCSS.defaultCSS())
+        .setModality(Modality.APPLICATION_MODAL)
+        .build()
+        .showAndWait();
+    }
   }
 
   private DDatabaseUnit tryNew()
-    throws Exception
+    throws LException
   {
     final var chooser =
       this.choosers.create(
@@ -359,20 +409,25 @@ public final class LFileView extends LAbstractViewWithModel
   }
 
   /**
-   * The user tried to open an image set.
-   *
-   * @throws Exception On errors
+   * The user tried to open a dataset.
    */
 
   @FXML
   public void onOpenSelected()
-    throws Exception
   {
-    this.tryOpen();
+    try {
+      this.tryOpen();
+    } catch (final LException e) {
+      MSErrorDialogs.builder(e)
+        .setCSS(LCSS.defaultCSS())
+        .setModality(Modality.APPLICATION_MODAL)
+        .build()
+        .showAndWait();
+    }
   }
 
   private DDatabaseUnit tryOpen()
-    throws Exception
+    throws LException
   {
     final var chooser =
       this.choosers.create(

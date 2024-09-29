@@ -47,6 +47,7 @@
     <com.io7m.trasco.version>1.1.0</com.io7m.trasco.version>
     <com.io7m.xstructural.version>1.9.0</com.io7m.xstructural.version>
     <com.io7m.zelador.version>1.0.0</com.io7m.zelador.version>
+    <com.io7m.miscue.version>0.0.3</com.io7m.miscue.version>
 
     <!-- Third-party dependencies. -->
     <io.opentelemetry.version>1.42.1</io.opentelemetry.version>
@@ -174,7 +175,12 @@
       <dependency>
         <groupId>com.io7m.miscue</groupId>
         <artifactId>com.io7m.miscue.core</artifactId>
-        <version>0.0.3</version>
+        <version>${com.io7m.miscue.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.io7m.miscue</groupId>
+        <artifactId>com.io7m.miscue.fx.seltzer</artifactId>
+        <version>${com.io7m.miscue.version}</version>
       </dependency>
       <dependency>
         <groupId>com.io7m.jade</groupId>

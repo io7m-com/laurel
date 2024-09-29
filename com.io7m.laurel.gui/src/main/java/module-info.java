@@ -37,8 +37,10 @@ open module com.io7m.laurel.gui
   requires com.io7m.jwheatsheaf.oxygen;
   requires com.io7m.jwheatsheaf.ui;
   requires com.io7m.jxtrand.api;
+  requires com.io7m.miscue.fx.seltzer;
   requires com.io7m.repetoir.core;
   requires com.io7m.seltzer.api;
+
   requires java.desktop;
   requires javafx.base;
   requires javafx.controls;

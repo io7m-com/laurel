@@ -55,6 +55,12 @@ public interface LFileModelType
   Flow.Publisher<LFileModelEventType> events();
 
   /**
+   * @return An observable status value for the file model
+   */
+
+  AttributeReadableType<LFileModelStatusType> status();
+
+  /**
    * Add a global caption.
    *
    * @param text The caption

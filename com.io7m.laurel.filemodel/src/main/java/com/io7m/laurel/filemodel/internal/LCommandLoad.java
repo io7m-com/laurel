@@ -18,6 +18,7 @@
 package com.io7m.laurel.filemodel.internal;
 
 import com.io7m.darco.api.DDatabaseUnit;
+import com.io7m.laurel.filemodel.LFileModelStatusLoading;
 import org.jooq.DSLContext;
 
 import java.util.Properties;
@@ -64,6 +65,8 @@ public final class LCommandLoad
     final LDatabaseTransactionType transaction,
     final DDatabaseUnit request)
   {
+    model.setStatus(new LFileModelStatusLoading());
+
     final var context = transaction.get(DSLContext.class);
 
     model.eventWithProgress(0.0, "Loading images…");

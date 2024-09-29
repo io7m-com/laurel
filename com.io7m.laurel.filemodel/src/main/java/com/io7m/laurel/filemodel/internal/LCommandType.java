@@ -35,6 +35,15 @@ import java.util.Properties;
 public interface LCommandType<P>
 {
   /**
+   * @return {@code true} if this command indicates the file model is loading
+   */
+
+  default boolean loading()
+  {
+    return false;
+  }
+
+  /**
    * @return {@code true} if the database should be compacted after this command
    */
 

@@ -31,6 +31,10 @@ import com.io7m.laurel.filemodel.LCategoryCaptionsAssignment;
 import com.io7m.laurel.filemodel.LExportRequest;
 import com.io7m.laurel.filemodel.LFileModelEvent;
 import com.io7m.laurel.filemodel.LFileModelEventType;
+import com.io7m.laurel.filemodel.LFileModelStatusIdle;
+import com.io7m.laurel.filemodel.LFileModelStatusLoading;
+import com.io7m.laurel.filemodel.LFileModelStatusRunningCommand;
+import com.io7m.laurel.filemodel.LFileModelStatusType;
 import com.io7m.laurel.filemodel.LFileModelType;
 import com.io7m.laurel.filemodel.LImageCaptionsAssignment;
 import com.io7m.laurel.filemodel.LImageComparison;
@@ -131,6 +135,7 @@ public final class LFileModel implements LFileModelType
   private final SubmissionPublisher<LFileModelEventType> events;
   private final AttributeType<List<LValidationProblemType>> validationProblems;
   private final AttributeType<List<LFileModelEventType>> exportEvents;
+  private final AttributeType<LFileModelStatusType> status;
 
   private LFileModel(
     final LDatabaseType inDatabase)
@@ -189,6 +194,8 @@ public final class LFileModel implements LFileModelType
       ATTRIBUTES.withValue(List.of());
     this.validationProblems =
       ATTRIBUTES.withValue(List.of());
+    this.status =
+      ATTRIBUTES.withValue(new LFileModelStatusLoading());
     this.commandLock =
       new ReentrantLock();
     this.attributes =
@@ -524,6 +531,12 @@ public final class LFileModel implements LFileModelType
   }
 
   @Override
+  public AttributeReadableType<LFileModelStatusType> status()
+  {
+    return this.status;
+  }
+
+  @Override
   public CompletableFuture<?> globalCaptionAdd(
     final LCaptionName text)
   {
@@ -799,7 +812,14 @@ public final class LFileModel implements LFileModelType
     Thread.ofVirtual()
       .start(() -> {
         try {
+          if (command.loading()) {
+            this.status.set(new LFileModelStatusLoading());
+          } else {
+            this.status.set(new LFileModelStatusRunningCommand());
+          }
+
           this.executeCommandLocked(command, parameters);
+          this.status.set(new LFileModelStatusIdle());
           future.complete(null);
         } catch (final Throwable e) {
           future.completeExceptionally(e);
@@ -1506,5 +1526,11 @@ public final class LFileModel implements LFileModelType
     final List<LFileModelEventType> newEvents)
   {
     this.exportEvents.set(newEvents);
+  }
+
+  void setStatus(
+    final LFileModelStatusType newStatus)
+  {
+    this.status.set(newStatus);
   }
 }

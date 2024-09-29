@@ -54,6 +54,14 @@
       <groupId>com.io7m.jwheatsheaf</groupId>
       <artifactId>com.io7m.jwheatsheaf.ui</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.io7m.miscue</groupId>
+      <artifactId>com.io7m.miscue.fx.seltzer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.io7m.seltzer</groupId>
+      <artifactId>com.io7m.seltzer.api</artifactId>
+    </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
