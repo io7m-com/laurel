@@ -15,7 +15,16 @@
   </p>
 
   <p>
-    The <tt>laurel</tt> package provides image caption management.
+    The <tt>laurel</tt> application attempts to provide tools to assist with
+    <tt>image captioning</tt>
+    within the context of
+    <a href="https://en.wikipedia.org/wiki/Machine_learning">machine learning</a>.
+  </p>
+  <p>
+    In particular, the application is geared towards the management of smaller datasets (in the range of thousands of
+    images) for use in techniques such as
+    <a href="https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)#Low-rank_adaptation">LORA</a>
+    training.
   </p>
 
 </div>
