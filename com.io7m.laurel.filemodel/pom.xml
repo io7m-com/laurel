@@ -140,7 +140,7 @@
               <includeProjectDependencies>false</includeProjectDependencies>
               <arguments>
                 <argument>${project.basedir}/src/main/resources/com/io7m/laurel/filemodel/internal/database.xml</argument>
-                <argument>${project.build.directory}/database.sql</argument>
+                <argument>${project.build.directory}/generated-resources/jooq/com/io7m/laurel/filemodel/internal/database.sql</argument>
                 <argument>ROLES</argument>
                 <argument>GRANTS</argument>
                 <argument>FUNCTIONS</argument>
@@ -195,6 +195,21 @@
               <sources>
                 <source>${project.build.directory}/generated-sources/jooq</source>
               </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-jooq-resources</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-resource</goal>
+            </goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>${project.build.directory}/generated-resources/jooq</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>

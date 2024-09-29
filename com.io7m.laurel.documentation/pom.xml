@@ -135,6 +135,36 @@
           </execution>
 
           <execution>
+            <id>unpack-sources-schema</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includes>**/database.sql</includes>
+              <includeGroupIds>${project.groupId}</includeGroupIds>
+              <classifier>sources</classifier>
+              <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+              <outputDirectory>${project.build.directory}/documentation/</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
+            <id>unpack-sources-schema-epub</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includes>**/database.sql</includes>
+              <includeGroupIds>${project.groupId}</includeGroupIds>
+              <classifier>sources</classifier>
+              <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+              <outputDirectory>${project.build.directory}/epub/</outputDirectory>
+            </configuration>
+          </execution>
+
+          <execution>
             <id>make-classpath</id>
             <phase>package</phase>
             <goals>

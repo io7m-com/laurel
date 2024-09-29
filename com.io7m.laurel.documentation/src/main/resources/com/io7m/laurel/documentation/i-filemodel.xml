@@ -2,8 +2,71 @@
 
 <Section xmlns="urn:com.io7m.structural:8:0"
          id="a3b1b8a8-bbe1-4ed1-905d-969ef333c92e"
+         xmlns:xi="http://www.w3.org/2001/XInclude"
          title="File Model">
-  <Paragraph>
-    File model...
-  </Paragraph>
+
+  <Subsection title="Overview">
+    <Paragraph>
+      The applications stores the dataset in a structure known as the <Term type="term">file model</Term>.
+    </Paragraph>
+  </Subsection>
+  
+  <Subsection title="Format">
+    <Subsection title="Overview">
+      <Paragraph>
+        The <Term type="term">file model</Term>'s underlying representation is an
+        <LinkExternal target="https://www.sqlite.org">SQLite</LinkExternal> database. The database contains
+        all of the
+        <Link target="405b6ebe-a489-4849-8b02-57129078ab7e">images</Link>,
+        <Link target="605e7b9d-a54f-4c3c-914c-c6978d2d50f7">captions</Link>,
+        <Link target="3d9f296a-0946-4bb3-81f1-c5185b23973e">categories</Link>,
+        <Link target="9e2689f2-e0b3-42bb-a3c4-a01741d1a0cd">metadata</Link>,
+        and the
+        <Link target="4c2388b3-da2f-46ba-b796-52028873ed4c">undo history</Link>.
+      </Paragraph>
+    </Subsection>
+    <Subsection title="Schema">
+      <Paragraph>
+        The database uses the following schema:
+      </Paragraph>
+      <FormalItem title="Schema">
+        <Verbatim><xi:include href="com/io7m/laurel/filemodel/internal/database.sql" parse="text"/></Verbatim>
+      </FormalItem>
+      <Paragraph>
+        The <Term type="expression">schema_version</Term> table's single row <Term type="term">MUST</Term>
+        contain <Term type="constant">com.io7m.laurel</Term> in the
+        <Term type="expression">version_application_id</Term> column.
+      </Paragraph>
+      <Paragraph>
+        Limitations in SQLite mean that it is, unfortunately, impractical to enforce invariants such as
+        <Link target="8996e713-1146-49ac-a5b3-1d426ff7628e">category</Link> and
+        <Link target="370548e2-5213-41c6-8976-13dc0d3e4356">caption</Link> formats at the database level.
+      </Paragraph>
+    </Subsection>
+  </Subsection>
+
+  <Subsection title="Undo" id="f9c3839f-9ec0-45e1-b5dd-dfb7a08b92af">
+    <Paragraph>
+      When an <Term type="term">undoable</Term> command is successfully executed on the file model, the
+      parameters of the original command, and the data that was modified, is stored in the
+      <Term type="table">undo</Term> table. When a command is <Term type="term">undone</Term>, that same
+      data is moved to the <Term type="table">redo</Term> table.
+    </Paragraph>
+    <Paragraph>
+      The data and parameters are serialized to
+      <LinkExternal target="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Properties.html">
+        Java Properties
+      </LinkExternal>
+      format, but the precise names and types of the keys is currently unspecified. This means that, although
+      applications other than <Term type="package">Laurel</Term> can open and manipulate datasets, they will currently
+      need to do some mild reverse engineering to manipulate the history.
+    </Paragraph>
+  </Subsection>
+
+  <Footnote id="0cf245a9-1562-4f6a-a22f-d5b20fd3aaec">
+    Tables are required to be <LinkExternal target="https://sqlite.org/stricttables.html">STRICT</LinkExternal>.
+    Flexible typing is a bug and not a feature, regardless of how many times the SQLite documentation extols the
+    virtues of being able to accidentally insert malformed data into database tables.
+  </Footnote>
+
 </Section>

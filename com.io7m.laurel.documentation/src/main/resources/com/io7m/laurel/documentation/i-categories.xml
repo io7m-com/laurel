@@ -253,4 +253,15 @@
     </Paragraph>
   </Subsection>
 
+  <Subsection title="Format" id="8996e713-1146-49ac-a5b3-1d426ff7628e">
+    <Paragraph>
+      Categories must conform to the following format:
+    </Paragraph>
+    <FormalItem title="Category Format">
+      <Verbatim><![CDATA[
+category ::= [a-z0-9A-Z_-][a-z0-9A-Z_ \-']*
+]]></Verbatim>
+    </FormalItem>
+  </Subsection>
+
 </Section>

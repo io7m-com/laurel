@@ -3,7 +3,23 @@
 <Section xmlns="urn:com.io7m.structural:8:0"
          id="4c2388b3-da2f-46ba-b796-52028873ed4c"
          title="History">
-  <Paragraph>
-    History...
-  </Paragraph>
+
+  <Subsection title="Overview">
+    <Paragraph>
+      The application stores the complete, persistent history of every change ever made to the dataset.
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Implementation">
+    <Paragraph>
+      The undo and redo stacks are stored in the <Link target="f9c3839f-9ec0-45e1-b5dd-dfb7a08b92af">file model</Link>.
+    </Paragraph>
+    <Paragraph>
+      Each command that is executed on the file model is <Term type="term">invertible</Term>. That is, each command
+      knows how to perform an action, and how to revert that action. By storing the complete sequence of executed
+      commands, it is effectively possible to take a dataset and repeatedly undo operations until the dataset is back at
+      the blank starting state.
+    </Paragraph>
+  </Subsection>
+
 </Section>
