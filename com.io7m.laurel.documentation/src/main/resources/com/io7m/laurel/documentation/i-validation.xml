@@ -3,7 +3,44 @@
 <Section xmlns="urn:com.io7m.structural:8:0"
          id="b5ef5558-345f-4734-ac33-1aa6e60dcbcf"
          title="Validation">
-  <Paragraph>
-    Validation...
-  </Paragraph>
+
+  <Subsection title="Overview">
+    <Paragraph>
+      The validation process checks a number of properties of the underlying
+      <Link target="a3b1b8a8-bbe1-4ed1-905d-969ef333c92e">file model</Link>.
+    </Paragraph>
+  </Subsection>
+
+  <Subsection title="Required Categories"
+              id="67f8f86e-632f-4097-9680-1fc0ebe74d5d">
+    <Paragraph>
+      The validation process checks to see if the category requirements are satisfied for all images in the dataset. In
+      pseudocode, the process is:
+    </Paragraph>
+
+    <FormalItem title="Required Categories (Pseudocode)">
+      <Verbatim><![CDATA[
+let Images             = { All images in the dataset }
+let CategoriesRequired = { All categories in the dataset that are marked as "required" }
+
+for Image in Images do
+  let CaptionsPresent = CaptionsAssigned(Image);
+  for Category in CategoriesRequired do
+    let CaptionsRequired = CaptionsInCategory(Category);
+    if IsEmpty (CaptionsRequired ∩ CaptionsPresent) then
+      Fail("At least one caption is required from the category")
+    end if;
+  done;
+done;
+]]></Verbatim>
+    </FormalItem>
+
+    <Paragraph>
+      Informally, for each image <Term type="variable">i</Term>, for each required category
+      <Term type="variable">c</Term>, validation succeeds if at least one caption in
+      <Term type="variable">c</Term>
+      is assigned to <Term type="variable">i</Term>.
+    </Paragraph>
+  </Subsection>
+
 </Section>
