@@ -53,7 +53,7 @@
     <com.io7m.zelador.version>1.0.0</com.io7m.zelador.version>
 
     <!-- Third-party dependencies. -->
-    <io.opentelemetry.version>1.42.1</io.opentelemetry.version>
+    <io.opentelemetry.version>1.43.0</io.opentelemetry.version>
     <javafx.version>23</javafx.version>
     <org.jooq.version>3.19.13</org.jooq.version>
     <org.junit.version>5.11.2</org.junit.version>
