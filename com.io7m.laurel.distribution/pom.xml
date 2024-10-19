@@ -132,38 +132,178 @@
       </plugin>
 
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
+        <groupId>com.io7m.montarre</groupId>
+        <artifactId>com.io7m.montarre.maven_plugin</artifactId>
         <executions>
           <execution>
-            <id>distribution</id>
+            <id>make-distribution</id>
             <goals>
-              <goal>single</goal>
+              <goal>package</goal>
             </goals>
             <phase>package</phase>
             <configuration>
-              <descriptors>
-                <descriptor>src/main/assembly/distribution.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+              <validationWarningsAreErrors>true</validationWarningsAreErrors>
 
-      <plugin>
-        <groupId>io.github.zlika</groupId>
-        <artifactId>reproducible-build-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>strip-distribution</id>
-            <phase>package</phase>
-            <goals>
-              <goal>strip-jar</goal>
-            </goals>
-            <configuration>
-              <includes>
-                <include>${project.artifactId}-${project.version}-distribution.zip</include>
-              </includes>
+              <applicationKind>CONSOLE</applicationKind>
+
+              <categories>
+                <category>Development</category>
+                <category>Building</category>
+              </categories>
+
+              <copyright>Copyright © 2024 Mark Raynsford &lt;code@io7m.com> https://www.io7m.com</copyright>
+
+              <humanName>Laurel</humanName>
+              <packageName>com.io7m.laurel</packageName>
+              <shortName>laurel</shortName>
+
+              <description>Image caption management</description>
+
+              <version>
+                <number>${project.version}</number>
+                <date>2024-10-19</date>
+              </version>
+
+              <vendor>
+                <id>com.io7m</id>
+                <name>io7m</name>
+              </vendor>
+
+              <longDescriptions>
+                <longDescription>${project.basedir}/src/main/meta/description-en.xml</longDescription>
+              </longDescriptions>
+
+              <mainModule>com.io7m.laurel.gui.main/com.io7m.laurel.gui.main.LGUIMain</mainModule>
+
+              <requiredJDKVersion>${io7m.java.targetJavaVersion}</requiredJDKVersion>
+
+              <flatpak>
+                <runtimes>
+                  <runtime>
+                    <name>org.freedesktop.Sdk</name>
+                    <version>24.08</version>
+                    <role>SDK</role>
+                  </runtime>
+                  <runtime>
+                    <name>org.freedesktop.Platform</name>
+                    <version>24.08</version>
+                    <role>PLATFORM</role>
+                  </runtime>
+                </runtimes>
+                <permissions>
+                  <permission>--filesystem=home:rw</permission>
+                </permissions>
+              </flatpak>
+
+              <libraries>
+                <excludes>
+                  <exclude>com\.io7m\.montarre\.distribution-.*</exclude>
+                  <exclude>javafx-base-.*-linux\.jar</exclude>
+                  <exclude>javafx-base-.*-linux-aarch64\.jar</exclude>
+                  <exclude>javafx-base-.*-win\.jar</exclude>
+                  <exclude>javafx-controls-.*-linux\.jar</exclude>
+                  <exclude>javafx-controls-.*-linux-aarch64\.jar</exclude>
+                  <exclude>javafx-controls-.*-win\.jar</exclude>
+                  <exclude>javafx-fxml-.*-linux\.jar</exclude>
+                  <exclude>javafx-fxml-.*-linux-aarch64\.jar</exclude>
+                  <exclude>javafx-fxml-.*-win\.jar</exclude>
+                  <exclude>javafx-graphics-.*-linux\.jar</exclude>
+                  <exclude>javafx-graphics-.*-linux-aarch64\.jar</exclude>
+                  <exclude>javafx-graphics-.*-win\.jar</exclude>
+                </excludes>
+              </libraries>
+
+              <platformLibraries>
+                <platformLibrary>
+                  <architecture>x86_64</architecture>
+                  <operatingSystem>linux</operatingSystem>
+                  <includes>
+                    <include>javafx-base-.*-linux\.jar</include>
+                    <include>javafx-controls-.*-linux\.jar</include>
+                    <include>javafx-fxml-.*-linux\.jar</include>
+                    <include>javafx-graphics-.*-linux\.jar</include>
+                  </includes>
+                </platformLibrary>
+                <platformLibrary>
+                  <architecture>aarch_64</architecture>
+                  <operatingSystem>linux</operatingSystem>
+                  <includes>
+                    <include>javafx-base-.*-linux-aarch64\.jar</include>
+                    <include>javafx-controls-.*-linux-aarch64\.jar</include>
+                    <include>javafx-fxml-.*-linux-aarch64\.jar</include>
+                    <include>javafx-graphics-.*-linux-aarch64\.jar</include>
+                  </includes>
+                </platformLibrary>
+                <platformLibrary>
+                  <architecture>x86_64</architecture>
+                  <operatingSystem>windows</operatingSystem>
+                  <includes>
+                    <include>javafx-base-.*-win\.jar</include>
+                    <include>javafx-controls-.*-win\.jar</include>
+                    <include>javafx-fxml-.*-win\.jar</include>
+                    <include>javafx-graphics-.*-win\.jar</include>
+                  </includes>
+                </platformLibrary>
+              </platformLibraries>
+
+              <resources>
+                <resource>
+                  <role>BOM</role>
+                  <file>${project.build.directory}/bom.xml</file>
+                  <entryName>bom.xml</entryName>
+                </resource>
+                <resource>
+                  <role>ICON_16</role>
+                  <file>${project.basedir}/src/main/meta/icon16.png</file>
+                  <entryName>icon16.png</entryName>
+                </resource>
+                <resource>
+                  <role>ICON_24</role>
+                  <file>${project.basedir}/src/main/meta/icon24.png</file>
+                  <entryName>icon24.png</entryName>
+                </resource>
+                <resource>
+                  <role>ICON_32</role>
+                  <file>${project.basedir}/src/main/meta/icon32.png</file>
+                  <entryName>icon32.png</entryName>
+                </resource>
+                <resource>
+                  <role>ICON_48</role>
+                  <file>${project.basedir}/src/main/meta/icon48.png</file>
+                  <entryName>icon48.png</entryName>
+                </resource>
+                <resource>
+                  <role>ICON_64</role>
+                  <file>${project.basedir}/src/main/meta/icon64.png</file>
+                  <entryName>icon64.png</entryName>
+                </resource>
+                <resource>
+                  <role>ICON_128</role>
+                  <file>${project.basedir}/src/main/meta/icon128.png</file>
+                  <entryName>icon128.png</entryName>
+                </resource>
+                <resource>
+                  <role>SCREENSHOT</role>
+                  <file>${project.basedir}/src/main/meta/screenshot.png</file>
+                  <entryName>screenshot.png</entryName>
+                  <captions>
+                    <caption>
+                      <language>en</language>
+                      <text>The main captions screen.</text>
+                    </caption>
+                  </captions>
+                </resource>
+                <resource>
+                  <role>ICO_WINDOWS</role>
+                  <file>${project.basedir}/src/main/meta/icon.ico</file>
+                  <entryName>icon.ico</entryName>
+                </resource>
+                <resource>
+                  <role>LICENSE</role>
+                  <file>${project.basedir}/../README-LICENSE.txt</file>
+                  <entryName>license.txt</entryName>
+                </resource>
+              </resources>
             </configuration>
           </execution>
         </executions>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<LongDescription xmlns="urn:com.io7m.montarre.package:1"
+                 Language="en">
+
+  <Paragraph>
+    The Laurel application attempts to provide tools to assist with image captioning within the context of machine
+    learning.
+  </Paragraph>
+
+  <Paragraph>
+    In particular, the application is geared towards the management of smaller datasets (in the range of thousands of
+    images) for use in techniques such as LORA training.
+  </Paragraph>
+
+  <Feature>
+    A user interface for managing images and captions for those images.
+  </Feature>
+
+  <Feature>
+    A caption categorization system for assisting with keeping captions consistent across large datasets.
+  </Feature>
+
+  <Feature>
+    The ability to import captions and images into a dataset from a directory hierarchy.
+  </Feature>
+
+  <Feature>
+    The ability to export captions and images into a directory for use in training scripts.
+  </Feature>
+
+  <Feature>
+    A persistent undo/redo system that can store every change ever made to a dataset, including the ability to
+    effectively revert to an earlier version at any time.
+  </Feature>
+
+  <Feature>
+    A carefully-engineered Java API for manipulating datasets; the command-line tools and user interface are thin shells
+    over this API.
+  </Feature>
+
+  <Feature>
+    Datasets are backed by SQLite for reliable, transactional updates, and a file format that is designed to endure for
+    decades to come.
+  </Feature>
+
+  <Feature>
+    Command line tools for automating operations such as importing, exporting, and interrogating metadata.
+  </Feature>
+
+</LongDescription>

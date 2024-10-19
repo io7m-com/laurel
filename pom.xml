@@ -46,6 +46,7 @@
     <com.io7m.jxtrand.version>2.1.0</com.io7m.jxtrand.version>
     <com.io7m.mime2045.version>1.1.0</com.io7m.mime2045.version>
     <com.io7m.miscue.version>0.0.3</com.io7m.miscue.version>
+    <com.io7m.montarre.version>0.0.1</com.io7m.montarre.version>
     <com.io7m.primogenitor.version>8.3.0</com.io7m.primogenitor.version>
     <com.io7m.quarrel.version>1.6.1</com.io7m.quarrel.version>
     <com.io7m.trasco.version>1.1.0</com.io7m.trasco.version>
@@ -518,6 +519,12 @@
           <groupId>com.io7m.jxtrand</groupId>
           <artifactId>com.io7m.jxtrand.maven_plugin</artifactId>
           <version>${com.io7m.jxtrand.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>com.io7m.montarre</groupId>
+          <artifactId>com.io7m.montarre.maven_plugin</artifactId>
+          <version>${com.io7m.montarre.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
