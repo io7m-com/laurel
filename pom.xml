@@ -464,7 +464,7 @@
       <dependency>
         <groupId>net.jqwik</groupId>
         <artifactId>jqwik-engine</artifactId>
-        <version>1.9.1</version>
+        <version>1.9.2</version>
       </dependency>
       <dependency>
         <groupId>com.io7m.darco</groupId>
