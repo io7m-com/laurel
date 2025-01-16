@@ -58,7 +58,7 @@
     <javafx.version>23.0.1</javafx.version>
     <org.jooq.version>3.19.17</org.jooq.version>
     <org.junit.version>5.11.4</org.junit.version>
-    <org.xerial.sqlite.version>3.47.2.0</org.xerial.sqlite.version>
+    <org.xerial.sqlite.version>3.48.0.0</org.xerial.sqlite.version>
   </properties>
 
   <licenses>
