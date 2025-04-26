@@ -49,6 +49,10 @@ public sealed interface LValidationProblemType
   {
     /**
      * An image is missing a caption from a required category.
+     *
+     * @param image    The image
+     * @param category The category
+     * @param message  The message
      */
 
     public ImageMissingRequiredCaption
