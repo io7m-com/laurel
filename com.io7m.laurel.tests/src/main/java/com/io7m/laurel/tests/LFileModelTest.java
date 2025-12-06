@@ -39,6 +39,7 @@ import com.io7m.zelador.test_extension.ZeladorExtension;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
@@ -61,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Timeout(value = 5_000L)
 @ExtendWith({ZeladorExtension.class})
 public final class LFileModelTest
 {
@@ -127,6 +129,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageSelectNonexistent()
     throws Exception
   {
@@ -138,6 +141,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageSelect()
     throws Exception
   {
@@ -166,6 +170,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageAdd()
     throws Exception
   {
@@ -270,19 +275,21 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageAddImageNonexistent()
     throws Exception
   {
     assertEquals(Optional.empty(), this.model.undoText().get());
 
     final var ex =
-      assertThrows(ExecutionException.class, () -> {
-        this.model.imageAdd(
-          "image-a",
-          this.file.getParent().resolve("nonexistent.txt"),
-          Optional.of(this.imageFile.toUri())
-        ).get(TIMEOUT, SECONDS);
-      });
+      assertThrows(
+        ExecutionException.class, () -> {
+          this.model.imageAdd(
+            "image-a",
+            this.file.getParent().resolve("nonexistent.txt"),
+            Optional.of(this.imageFile.toUri())
+          ).get(TIMEOUT, SECONDS);
+        });
 
     final var ee = assertInstanceOf(LException.class, ex.getCause());
     assertEquals("error-io", ee.errorCode());
@@ -292,19 +299,21 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageAddImageCorrupt()
     throws Exception
   {
     assertEquals(Optional.empty(), this.model.undoText().get());
 
     final var ex =
-      assertThrows(ExecutionException.class, () -> {
-        this.model.imageAdd(
-          "image-a",
-          this.textFile,
-          Optional.of(this.textFile.toUri())
-        ).get(TIMEOUT, SECONDS);
-      });
+      assertThrows(
+        ExecutionException.class, () -> {
+          this.model.imageAdd(
+            "image-a",
+            this.textFile,
+            Optional.of(this.textFile.toUri())
+          ).get(TIMEOUT, SECONDS);
+        });
 
     final var ee = assertInstanceOf(LException.class, ex.getCause());
     assertEquals("error-image-format", ee.errorCode());
@@ -314,6 +323,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCaptionAdd()
     throws Exception
   {
@@ -385,6 +395,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCaptionModify()
     throws Exception
   {
@@ -405,6 +416,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCaptionModifyNonexistent()
     throws Exception
   {
@@ -415,6 +427,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCaptionModifyConflict()
     throws Exception
   {
@@ -428,19 +441,21 @@ public final class LFileModelTest
     final var tb = this.findCaption("B");
 
     final var ex =
-      assertThrows(LException.class, () -> {
-        try {
-          this.model.captionModify(ta.id(), new LCaptionName("B"))
-            .get(TIMEOUT, SECONDS);
-        } catch (final ExecutionException e) {
-          throw e.getCause();
-        }
-      });
+      assertThrows(
+        LException.class, () -> {
+          try {
+            this.model.captionModify(ta.id(), new LCaptionName("B"))
+              .get(TIMEOUT, SECONDS);
+          } catch (final ExecutionException e) {
+            throw e.getCause();
+          }
+        });
 
     assertEquals("error-duplicate", ex.errorCode());
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCaptionCopyPaste()
     throws Exception
   {
@@ -512,6 +527,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCaptionFilter()
     throws Exception
   {
@@ -574,6 +590,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageFilter()
     throws Exception
   {
@@ -650,6 +667,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCategoryAdd()
     throws Exception
   {
@@ -737,6 +755,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCategorySetRequired()
     throws Exception
   {
@@ -799,6 +818,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testCategoryTagAssign()
     throws Exception
   {
@@ -894,6 +914,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageCaptionsAssignUnassign()
     throws Exception
   {
@@ -944,6 +965,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageCaptionsDeletion()
     throws Exception
   {
@@ -1054,6 +1076,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageDelete()
     throws Exception
   {
@@ -1119,6 +1142,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageComparison()
     throws Exception
   {
@@ -1241,6 +1265,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageCaptionsAssignUnassignNotSelected()
     throws Exception
   {
@@ -1282,6 +1307,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testMetadata()
     throws Exception
   {
@@ -1324,6 +1350,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testGlobalCaptions()
     throws Exception
   {
@@ -1362,6 +1389,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testGlobalCaptionsOrderLower()
     throws Exception
   {
@@ -1393,6 +1421,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testGlobalCaptionsOrderUpper()
     throws Exception
   {
@@ -1424,6 +1453,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testGlobalCaptionsModify()
     throws Exception
   {
@@ -1456,6 +1486,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testGlobalCaptionsModifyCollision()
     throws Exception
   {
@@ -1470,19 +1501,21 @@ public final class LFileModelTest
     final var tx = this.findGlobalCaption(txn);
     final var ty = this.findGlobalCaption(tyn);
 
-    final var ex = assertThrows(LException.class, () -> {
-      try {
-        this.model.globalCaptionModify(tx.id(), new LCaptionName("TY"))
-          .get(TIMEOUT, SECONDS);
-      } catch (final ExecutionException e) {
-        throw e.getCause();
-      }
-    });
+    final var ex = assertThrows(
+      LException.class, () -> {
+        try {
+          this.model.globalCaptionModify(tx.id(), new LCaptionName("TY"))
+            .get(TIMEOUT, SECONDS);
+        } catch (final ExecutionException e) {
+          throw e.getCause();
+        }
+      });
 
     assertEquals("error-duplicate", ex.errorCode());
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testValidationCaptionsRequired()
     throws Exception
   {
@@ -1528,6 +1561,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testGlobalCaptionsModifyNonexistent()
     throws Exception
   {
@@ -1549,6 +1583,7 @@ public final class LFileModelTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImageSourceSet()
     throws Exception
   {

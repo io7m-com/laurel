@@ -20,6 +20,7 @@ package com.io7m.laurel.tests;
 import com.io7m.laurel.cmdline.LCMain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,12 +48,14 @@ public final class LCommandLineTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testUsage()
   {
     LCMain.mainExitless(new String[]{});
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testHelp()
   {
     LCMain.mainExitless(new String[]{
@@ -62,6 +65,7 @@ public final class LCommandLineTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testImport()
     throws IOException
   {
@@ -87,6 +91,7 @@ public final class LCommandLineTest
   }
 
   @Test
+  @Timeout(value = 5_000L)
   public void testExport()
     throws IOException
   {

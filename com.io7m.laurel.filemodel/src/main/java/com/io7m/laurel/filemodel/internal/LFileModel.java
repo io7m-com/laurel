@@ -223,7 +223,11 @@ public final class LFileModel implements LFileModelType
     this.resources.add(this::finishLoading);
 
     this.executor =
-      this.resources.add(Executors.newVirtualThreadPerTaskExecutor());
+      this.resources.add(
+        Executors.newSingleThreadExecutor(
+          Thread.ofVirtual().factory()
+        )
+      );
 
     this.resources.add(this.database);
     this.events = this.resources.add(new SubmissionPublisher<>());
